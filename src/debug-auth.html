@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Debugger - Leema</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #6366f1; }
+        h2 { color: #4f46e5; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.warning { background: #fef3c7; color: #92400e; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover { background: #4f46e5; }
+        .clear-btn { background: #ef4444; }
+        .clear-btn:hover { background: #dc2626; }
+        pre {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background: #f9fafb;
+            font-weight: 600;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge.admin { background: #fef3c7; color: #92400e; }
+        .badge.shop { background: #dbeafe; color: #1e40af; }
+        .badge.user { background: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Leema Auth Debugger</h1>
+    <p>Диагностика авторизации Google OAuth</p>
+
+    <!-- Current Status -->
+    <div class="section">
+        <h2>📊 Текущий статус</h2>
+        <div id="currentStatus"></div>
+    </div>
+
+    <!-- Storage Inspector -->
+    <div class="section">
+        <h2>💾 Хранилище данных</h2>
+        <h3>Session Storage</h3>
+        <div id="sessionStorage"></div>
+        <h3>Local Storage</h3>
+        <div id="localStorage"></div>
+        <h3>Zustand Store (auth-storage)</h3>
+        <div id="zustandStore"></div>
+        <button onclick="refreshStorage()">🔄 Обновить</button>
+        <button class="clear-btn" onclick="clearAllStorage()">🗑️ Очистить всё</button>
+    </div>
+
+    <!-- API Test -->
+    <div class="section">
+        <h2>🌐 Тест API подключения</h2>
+        <div id="apiTest"></div>
+        <button onclick="testAPI()">🧪 Тест Backend API</button>
+        <button onclick="testAuthMe()">👤 Тест /auth/me</button>
+        <button onclick="testShopAnalytics()">📊 Тест /shops/me/analytics</button>
+    </div>
+
+    <!-- Logs -->
+    <div class="section">
+        <h2>📝 Console Logs</h2>
+        <div id="logs"></div>
+        <button onclick="clearLogs()">🗑️ Очистить логи</button>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.leema.kz';
+        const logs = [];
+
+        // Override console methods to capture logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        console.log = function(...args) {
+            logs.push({ type: 'log', time: new Date().toISOString(), message: args });
+            originalLog.apply(console, args);
+            displayLogs();
+        };
+
+        console.error = function(...args) {
+            logs.push({ type: 'error', time: new Date().toISOString(), message: args });
+            originalError.apply(console, args);
+            displayLogs();
+        };
+
+        console.warn = function(...args) {
+            logs.push({ type: 'warn', time: new Date().toISOString(), message: args });
+            originalWarn.apply(console, args);
+            displayLogs();
+        };
+
+        function displayLogs() {
+            const logsDiv = document.getElementById('logs');
+            logsDiv.innerHTML = logs.slice(-20).reverse().map(log => {
+                const className = log.type === 'error' ? 'error' : log.type === 'warn' ? 'warning' : 'info';
+                return `<div class="status ${className}">
+                    [${new Date(log.time).toLocaleTimeString()}] ${log.message.map(m =>
+                        typeof m === 'object' ? JSON.stringify(m, null, 2) : m
+                    ).join(' ')}
+                </div>`;
+            }).join('');
+        }
+
+        function clearLogs() {
+            logs.length = 0;
+            displayLogs();
+        }
+
+        function checkAuthStatus() {
+            const accessToken = sessionStorage.getItem('access_token');
+            const zustandData = localStorage.getItem('auth-storage');
+            let authStore = null;
+
+            try {
+                authStore = zustandData ? JSON.parse(zustandData) : null;
+            } catch (e) {
+                console.error('Failed to parse auth-storage:', e);
+            }
+
+            const isAuthenticated = authStore?.state?.isAuthenticated || false;
+            const user = authStore?.state?.user || null;
+            const shop = authStore?.state?.shop || null;
+
+            let status = '';
+            let statusClass = '';
+
+            if (isAuthenticated && user && accessToken) {
+                status = `✅ Авторизован как ${user.role}`;
+                statusClass = 'success';
+            } else if (isAuthenticated && !accessToken) {
+                status = '⚠️ Авторизован в store, но нет access_token';
+                statusClass = 'warning';
+            } else if (!isAuthenticated && accessToken) {
+                status = '⚠️ Есть access_token, но не авторизован в store';
+                statusClass = 'warning';
+            } else {
+                status = '❌ Не авторизован';
+                statusClass = 'error';
+            }
+
+            const html = `
+                <div class="status ${statusClass}">${status}</div>
+                ${user ? `
+                    <table>
+                        <tr><th>ID</th><td>${user.id}</td></tr>
+                        <tr><th>Email</th><td>${user.email}</td></tr>
+                        <tr><th>Имя</th><td>${user.name}</td></tr>
+                        <tr><th>Роль</th><td><span class="badge ${user.role}">${user.role}</span></td></tr>
+                        <tr><th>Account Type</th><td>${user.accountType || 'N/A'}</td></tr>
+                    </table>
+                ` : ''}
+                ${shop ? `
+                    <h3>🏪 Данные магазина</h3>
+                    <table>
+                        <tr><th>ID</th><td>${shop.id}</td></tr>
+                        <tr><th>Название</th><td>${shop.shop_name || shop.name}</td></tr>
+                        <tr><th>Баланс</th><td>${shop.balance || 0} ₸</td></tr>
+                    </table>
+                ` : ''}
+            `;
+
+            document.getElementById('currentStatus').innerHTML = html;
+        }
+
+        function displayStorage(storageObj, elementId) {
+            const div = document.getElementById(elementId);
+            const items = [];
+
+            for (let key in storageObj) {
+                if (storageObj.hasOwnProperty(key)) {
+                    let value = storageObj[key];
+                    try {
+                        const parsed = JSON.parse(value);
+                        value = JSON.stringify(parsed, null, 2);
+                    } catch (e) {
+                        // Keep as string
+                    }
+                    items.push(`<strong>${key}:</strong><pre>${value}</pre>`);
+                }
+            }
+
+            div.innerHTML = items.length > 0 ? items.join('') : '<div class="status info">Пусто</div>';
+        }
+
+        function refreshStorage() {
+            checkAuthStatus();
+            displayStorage(sessionStorage, 'sessionStorage');
+            displayStorage(localStorage, 'localStorage');
+
+            // Display Zustand store separately
+            const zustandData = localStorage.getItem('auth-storage');
+            document.getElementById('zustandStore').innerHTML = zustandData
+                ? `<pre>${JSON.stringify(JSON.parse(zustandData), null, 2)}</pre>`
+                : '<div class="status info">Нет данных</div>';
+        }
+
+        function clearAllStorage() {
+            if (confirm('⚠️ Очистить все данные авторизации?')) {
+                sessionStorage.clear();
+                localStorage.clear();
+                console.log('✅ Все данные очищены');
+                refreshStorage();
+            }
+        }
+
+        async function testAPI() {
+            const div = document.getElementById('apiTest');
+            div.innerHTML = '<div class="status info">⏳ Тестирование подключения...</div>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/auth/google/url`);
+                const data = await response.json();
+
+                div.innerHTML = `
+                    <div class="status success">✅ API доступен (${response.status})</div>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                console.log('API Test:', data);
+            } catch (error) {
+                div.innerHTML = `<div class="status error">❌ Ошибка: ${error.message}</div>`;
+                console.error('API Test Error:', error);
+            }
+        }
+
+        async function testAuthMe() {
+            const div = document.getElementById('apiTest');
+            const token = sessionStorage.getItem('access_token');
+
+            if (!token) {
+                div.innerHTML = '<div class="status error">❌ Нет access_token</div>';
+                return;
+            }
+
+            div.innerHTML = '<div class="status info">⏳ Запрос /auth/me...</div>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    div.innerHTML = `
+                        <div class="status success">✅ Успешно (${response.status})</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div class="status error">❌ Ошибка ${response.status}</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+                console.log('/auth/me response:', data);
+            } catch (error) {
+                div.innerHTML = `<div class="status error">❌ Ошибка: ${error.message}</div>`;
+                console.error('/auth/me error:', error);
+            }
+        }
+
+        async function testShopAnalytics() {
+            const div = document.getElementById('apiTest');
+            const token = sessionStorage.getItem('access_token');
+
+            if (!token) {
+                div.innerHTML = '<div class="status error">❌ Нет access_token</div>';
+                return;
+            }
+
+            div.innerHTML = '<div class="status info">⏳ Запрос /shops/me/analytics...</div>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/shops/me/analytics`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    div.innerHTML = `
+                        <div class="status success">✅ Успешно (${response.status})</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div class="status error">❌ Ошибка ${response.status}</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+                console.log('/shops/me/analytics response:', data);
+            } catch (error) {
+                div.innerHTML = `<div class="status error">❌ Ошибка: ${error.message}</div>`;
+                console.error('/shops/me/analytics error:', error);
+            }
+        }
+
+        // Initial load
+        window.addEventListener('load', () => {
+            refreshStorage();
+            console.log('🔍 Auth Debugger loaded');
+        });
+
+        // Auto-refresh every 2 seconds
+        setInterval(checkAuthStatus, 2000);
+    </script>
+</body>
+</html>

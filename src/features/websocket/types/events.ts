@@ -1,0 +1,385 @@
+/**
+ * WebSocket Event Types with Discriminated Unions
+ * Type-safe WebSocket event handling system
+ *
+ * @created 2025-11-03
+ * @task IMPROVEMENT_CHECKLIST.md - Task 6: Add types for WebSocket events
+ */
+
+import { z } from 'zod';
+
+// ==================== BASE EVENT TYPES ====================
+
+export type WebSocketEventType =
+  // Product Events
+  | 'product.created'
+  | 'product.updated'
+  | 'product.deleted'
+  | 'product.approved'
+  | 'product.rejected'
+  // Order Events
+  | 'order.created'
+  | 'order.updated'
+  | 'order.completed'
+  | 'order.cancelled'
+  // Balance Events
+  | 'balance.updated'
+  | 'transaction.completed'
+  | 'transaction.failed'
+  // Review Events
+  | 'review.created'
+  | 'review.replied'
+  // Shop Events
+  | 'shop.created'
+  | 'shop.updated'
+  | 'shop.deleted'
+  | 'shop.approved'
+  | 'shop.rejected'
+  | 'shop.activated'
+  | 'shop.deactivated'
+  // System Events
+  | 'settings.updated'
+  | 'whatsapp_status_changed'
+  | 'notification.new'
+  // Moderation Events
+  | 'moderation_queue.added'
+  | 'moderation_queue.removed'
+  // Connection Events
+  | 'ping'
+  | 'pong';
+
+// ==================== ZOD SCHEMAS FOR RUNTIME VALIDATION ====================
+
+// Product Event Schema
+export const productEventSchema = z.object({
+  event: z.enum([
+    'product.created',
+    'product.updated',
+    'product.deleted',
+    'product.approved',
+    'product.rejected',
+  ]),
+  data: z.object({
+    product_id: z.number(),
+    product_name: z.string(),
+    shop_id: z.number(),
+    shop_name: z.string().optional(),
+    action: z.string(),
+    moderation_status: z.string().optional(),
+    rejection_reason: z.string().optional(),
+    is_active: z.boolean(),
+    product: z.record(z.unknown()).optional(),
+    timestamp: z.string(),
+  }),
+});
+
+// Order Event Schema
+export const orderEventSchema = z.object({
+  event: z.enum(['order.created', 'order.updated', 'order.completed', 'order.cancelled']),
+  data: z.object({
+    order_id: z.number(),
+    order_number: z.string(),
+    user_id: z.number().optional(),
+    shop_id: z.number(),
+    total_amount: z.number(),
+    status: z.string(),
+    action: z.string(),
+    order: z.record(z.unknown()).optional(),
+    timestamp: z.string(),
+  }),
+});
+
+// Balance Event Schema
+export const balanceEventSchema = z.object({
+  event: z.literal('balance.updated'),
+  data: z.object({
+    user_id: z.number().optional(),
+    shop_id: z.number().optional(),
+    old_balance: z.number(),
+    new_balance: z.number(),
+    amount: z.number(),
+    transaction_id: z.number().optional(),
+    transaction_type: z.string().optional(),
+    timestamp: z.string(),
+  }),
+});
+
+// Transaction Event Schema
+export const transactionEventSchema = z.object({
+  event: z.enum(['transaction.completed', 'transaction.failed']),
+  data: z.object({
+    transaction_id: z.number(),
+    user_id: z.number().optional(),
+    shop_id: z.number().optional(),
+    amount: z.number(),
+    type: z.string(),
+    status: z.string(),
+    description: z.string().optional(),
+    timestamp: z.string(),
+  }),
+});
+
+// Review Event Schema
+export const reviewEventSchema = z.object({
+  event: z.enum(['review.created', 'review.replied']),
+  data: z.object({
+    review_id: z.number(),
+    product_id: z.number(),
+    user_id: z.number(),
+    shop_id: z.number(),
+    rating: z.number().min(1).max(5),
+    comment: z.string().optional(),
+    action: z.string(),
+    timestamp: z.string(),
+  }),
+});
+
+// Shop Event Schema
+export const shopEventSchema = z.object({
+  event: z.enum([
+    'shop.created',
+    'shop.updated',
+    'shop.deleted',
+    'shop.approved',
+    'shop.rejected',
+    'shop.activated',
+    'shop.deactivated',
+  ]),
+  data: z.object({
+    shop_id: z.number(),
+    shop_name: z.string(),
+    owner_name: z.string(),
+    action: z.string(),
+    is_approved: z.boolean(),
+    is_active: z.boolean(),
+    rejection_reason: z.string().optional(),
+    deactivation_reason: z.string().optional(),
+    shop: z.record(z.unknown()).optional(),
+    timestamp: z.string(),
+  }),
+});
+
+// Notification Event Schema
+export const notificationEventSchema = z.object({
+  event: z.literal('notification.new'),
+  data: z.object({
+    notification_id: z.number(),
+    user_id: z.number().optional(),
+    shop_id: z.number().optional(),
+    type: z.string(),
+    title: z.string(),
+    message: z.string(),
+    data: z.record(z.unknown()).optional(),
+    timestamp: z.string(),
+  }),
+});
+
+// WhatsApp Status Event Schema
+export const whatsappStatusEventSchema = z.object({
+  event: z.literal('whatsapp_status_changed'),
+  data: z.object({
+    shop_id: z.number(),
+    status: z.enum(['connected', 'disconnected', 'connecting', 'error']),
+    phone_number: z.string().optional(),
+    qr_code: z.string().optional(),
+    timestamp: z.string(),
+  }),
+});
+
+// Moderation Queue Event Schema
+export const moderationQueueEventSchema = z.object({
+  event: z.enum(['moderation_queue.added', 'moderation_queue.removed']),
+  data: z.object({
+    action: z.enum(['added', 'removed']),
+    pending_count: z.number(),
+    product_id: z.number().optional(),
+    shop_id: z.number().optional(),
+    timestamp: z.string(),
+  }),
+});
+
+// Settings Event Schema
+export const settingsEventSchema = z.object({
+  event: z.literal('settings.updated'),
+  data: z.object({
+    setting_key: z.string(),
+    old_value: z.unknown().optional(),
+    new_value: z.unknown(),
+    changed_by: z.number(),
+    timestamp: z.string(),
+  }),
+});
+
+// Connection Event Schema (ping/pong)
+export const connectionEventSchema = z.object({
+  event: z.enum(['ping', 'pong']),
+  data: z.unknown().optional(),
+});
+
+// ==================== TYPESCRIPT TYPES (INFERRED FROM SCHEMAS) ====================
+
+export type ProductEvent = z.infer<typeof productEventSchema>;
+export type OrderEvent = z.infer<typeof orderEventSchema>;
+export type BalanceEvent = z.infer<typeof balanceEventSchema>;
+export type TransactionEvent = z.infer<typeof transactionEventSchema>;
+export type ReviewEvent = z.infer<typeof reviewEventSchema>;
+export type ShopEvent = z.infer<typeof shopEventSchema>;
+export type NotificationEvent = z.infer<typeof notificationEventSchema>;
+export type WhatsAppStatusEvent = z.infer<typeof whatsappStatusEventSchema>;
+export type ModerationQueueEvent = z.infer<typeof moderationQueueEventSchema>;
+export type SettingsEvent = z.infer<typeof settingsEventSchema>;
+export type ConnectionEvent = z.infer<typeof connectionEventSchema>;
+
+// ==================== DISCRIMINATED UNION ====================
+
+/**
+ * Discriminated union of all WebSocket events
+ * Use this for type-safe event handling
+ */
+export type WebSocketEvent =
+  | ProductEvent
+  | OrderEvent
+  | BalanceEvent
+  | TransactionEvent
+  | ReviewEvent
+  | ShopEvent
+  | NotificationEvent
+  | WhatsAppStatusEvent
+  | ModerationQueueEvent
+  | SettingsEvent
+  | ConnectionEvent;
+
+// ==================== TYPE GUARDS ====================
+
+export const isProductEvent = (event: WebSocketEvent): event is ProductEvent => {
+  return event.event.startsWith('product.');
+};
+
+export const isOrderEvent = (event: WebSocketEvent): event is OrderEvent => {
+  return event.event.startsWith('order.');
+};
+
+export const isBalanceEvent = (event: WebSocketEvent): event is BalanceEvent => {
+  return event.event === 'balance.updated';
+};
+
+export const isTransactionEvent = (event: WebSocketEvent): event is TransactionEvent => {
+  return event.event.startsWith('transaction.');
+};
+
+export const isReviewEvent = (event: WebSocketEvent): event is ReviewEvent => {
+  return event.event.startsWith('review.');
+};
+
+export const isShopEvent = (event: WebSocketEvent): event is ShopEvent => {
+  return event.event.startsWith('shop.');
+};
+
+export const isNotificationEvent = (event: WebSocketEvent): event is NotificationEvent => {
+  return event.event === 'notification.new';
+};
+
+export const isWhatsAppStatusEvent = (event: WebSocketEvent): event is WhatsAppStatusEvent => {
+  return event.event === 'whatsapp_status_changed';
+};
+
+export const isModerationQueueEvent = (event: WebSocketEvent): event is ModerationQueueEvent => {
+  return event.event.startsWith('moderation_queue.');
+};
+
+export const isSettingsEvent = (event: WebSocketEvent): event is SettingsEvent => {
+  return event.event === 'settings.updated';
+};
+
+export const isConnectionEvent = (event: WebSocketEvent): event is ConnectionEvent => {
+  return event.event === 'ping' || event.event === 'pong';
+};
+
+// ==================== VALIDATION HELPERS ====================
+
+/**
+ * Validate and parse a WebSocket message
+ * @returns Validated event or null if invalid
+ */
+export const validateWebSocketEvent = (rawMessage: unknown): WebSocketEvent | null => {
+  if (!rawMessage || typeof rawMessage !== 'object') {
+    return null;
+  }
+
+  const message = rawMessage as { event?: string };
+  if (!message.event) {
+    return null;
+  }
+
+  try {
+    // Match event type and validate with appropriate schema
+    if (message.event.startsWith('product.')) {
+      return productEventSchema.parse(rawMessage);
+    } else if (message.event.startsWith('order.')) {
+      return orderEventSchema.parse(rawMessage);
+    } else if (message.event === 'balance.updated') {
+      return balanceEventSchema.parse(rawMessage);
+    } else if (message.event.startsWith('transaction.')) {
+      return transactionEventSchema.parse(rawMessage);
+    } else if (message.event.startsWith('review.')) {
+      return reviewEventSchema.parse(rawMessage);
+    } else if (message.event.startsWith('shop.')) {
+      return shopEventSchema.parse(rawMessage);
+    } else if (message.event === 'notification.new') {
+      return notificationEventSchema.parse(rawMessage);
+    } else if (message.event === 'whatsapp_status_changed') {
+      return whatsappStatusEventSchema.parse(rawMessage);
+    } else if (message.event.startsWith('moderation_queue.')) {
+      return moderationQueueEventSchema.parse(rawMessage);
+    } else if (message.event === 'settings.updated') {
+      return settingsEventSchema.parse(rawMessage);
+    } else if (message.event === 'ping' || message.event === 'pong') {
+      return connectionEventSchema.parse(rawMessage);
+    }
+
+    return null;
+  } catch {
+    // Validation failed
+    return null;
+  }
+};
+
+// ==================== EVENT HANDLER TYPES ====================
+
+/**
+ * Type-safe event handler map
+ */
+export type WebSocketEventHandlers = {
+  [K in WebSocketEventType]?: (event: Extract<WebSocketEvent, { event: K }>) => void | Promise<void>;
+};
+
+/**
+ * Generic event handler function
+ */
+export type EventHandler<T extends WebSocketEvent = WebSocketEvent> = (event: T) => void | Promise<void>;
+
+// ==================== UTILITY TYPES ====================
+
+/**
+ * Extract data type from event type
+ */
+export type ExtractEventData<T extends WebSocketEventType> = Extract<
+  WebSocketEvent,
+  { event: T }
+>['data'];
+
+/**
+ * Helper to get event category (prefix before the dot)
+ */
+export const getEventCategory = (eventType: WebSocketEventType): string => {
+  const [category] = eventType.split('.');
+  return category;
+};
+
+/**
+ * Helper to get event action (suffix after the dot)
+ */
+export const getEventAction = (eventType: WebSocketEventType): string => {
+  const parts = eventType.split('.');
+  return parts[parts.length - 1];
+};

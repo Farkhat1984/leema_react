@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация...</title>
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .container {
+            text-align: center;
+            color: #374151;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #9333ea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <p style="font-size: 18px;">Завершаем авторизацию...</p>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.leema.kz';
+
+        async function handleCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+            if (!code) {
+                showError('Отсутствует код авторизации');
+                return;
+            }
+
+            try {
+                // Получаем запрошенный тип аккаунта
+                const requestedType = localStorage.getItem('requestedAccountType') || 'user';
+                const accountType = requestedType === 'admin' ? 'user' : requestedType;
+
+                // Авторизуемся в бэкенде
+                const authEndpoint = `${API_URL}/api/v1/auth/google/login`;
+                const response = await fetch(authEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        account_type: accountType,
+                        platform: 'web'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: 'Ошибка авторизации' }));
+                    throw new Error(errorData.detail || errorData.error?.message || 'Ошибка авторизации');
+                }
+
+                const data = await response.json();
+
+                // Сохраняем токены в sessionStorage
+                sessionStorage.setItem('access_token', data.access_token);
+                if (data.refresh_token) {
+                    localStorage.setItem('refresh_token', data.refresh_token);
+                }
+
+                // Сохраняем данные пользователя/магазина в localStorage для Zustand
+                const authData = {
+                    user: data.user || null,
+                    shop: data.shop || null,
+                    isAuthenticated: true
+                };
+                localStorage.setItem('auth-storage', JSON.stringify({ state: authData, version: 0 }));
+
+                // Очистка временных данных
+                localStorage.removeItem('requestedAccountType');
+                localStorage.removeItem('oauth_state');
+
+                // Определяем redirect path
+                let redirectPath = '/user/dashboard';
+
+                if (data.shop) {
+                    redirectPath = '/shop/dashboard';
+                } else if (data.user) {
+                    if (data.user.role === 'admin') {
+                        redirectPath = '/admin/dashboard';
+                    } else if (data.user.role === 'shop_owner') {
+                        redirectPath = '/shop/dashboard';
+                    } else {
+                        redirectPath = '/user/dashboard';
+                    }
+                }
+
+                // Проверка прав доступа
+                const finalAccountType = data.shop ? 'shop' : (data.user?.role === 'admin' ? 'admin' : data.user?.role === 'shop_owner' ? 'shop' : 'user');
+
+                if (requestedType === 'admin' && finalAccountType !== 'admin') {
+                    sessionStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    showError('У вас нет прав администратора. Попробуйте войти как пользователь или владелец магазина.');
+                    return;
+                }
+
+                if (requestedType === 'shop' && finalAccountType !== 'shop') {
+                    sessionStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    showError('Не удалось войти как владелец магазина. Попробуйте войти как пользователь.');
+                    return;
+                }
+
+                // Redirect на dashboard
+                window.location.href = redirectPath;
+            } catch (error) {
+                console.error('Auth callback error:', error);
+                showError(error.message);
+            }
+        }
+
+        function showError(message) {
+            document.body.innerHTML = `
+                <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);">
+                    <div style="background: white; padding: 32px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); max-width: 500px; border: 1px solid #fca5a5;">
+                        <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 16px; color: #dc2626;">Ошибка авторизации</h2>
+                        <p style="color: #374151; margin-bottom: 24px;">${message}</p>
+                        <button onclick="window.location.href='/login'" style="width: 100%; padding: 10px 20px; background: #111827; color: white; border-radius: 8px; border: none; font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.2s;">
+                            Вернуться к входу
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Start authentication
+        handleCallback();
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+export { default as AdminDashboard } from './pages/Dashboard';
+export { default as AdminShopsPage } from './pages/AdminShopsPage';
+export { default as AdminAnalyticsPage } from './pages/analytics/AdminAnalyticsPage';
+export { default as AdminCategoriesPage } from './pages/categories/AdminCategoriesPage';
+export { default as AdminLogsPage } from './pages/logs/AdminLogsPage';
+export { default as AdminNotificationsPage } from './pages/notifications/AdminNotificationsPage';
+export { default as AdminRefundsPage } from './pages/refunds/AdminRefundsPage';
+export { default as AdminReportsPage } from './pages/reports/AdminReportsPage';
+export { default as AdminReviewsPage } from './pages/reviews/AdminReviewsPage';
+export { default as AdminSettingsPage } from './pages/settings/AdminSettingsPage';
+export { default as AdminShopProfilePage } from './pages/shop-profile/AdminShopProfilePage';
+export { default as AdminShopsPendingPage } from './pages/shops-pending/AdminShopsPendingPage';
+export { default as AdminUsersPage } from './pages/users/AdminUsersPage';
+export { default as AdminUserProfilePage } from './pages/users/AdminUserProfilePage';
+export { default as AdminWardrobesPage } from './pages/wardrobes/AdminWardrobesPage';
