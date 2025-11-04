@@ -112,9 +112,5 @@ export const ROUTES = {
     NOTIFICATIONS: '/admin/notifications',
     WARDROBES: '/admin/wardrobes',
   },
-  USER: {
-    DASHBOARD: '/user',
-    PROFILE: '/user/profile',
-    NOTIFICATIONS: '/user/notifications',
-  },
+  // USER routes removed - users use mobile app only (www.app.leema.kz)
 } as const;

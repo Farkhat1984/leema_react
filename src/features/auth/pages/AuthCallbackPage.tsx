@@ -60,7 +60,7 @@ function AuthCallbackPage() {
 
       // Determine final account type and redirect path
       let finalAccountType: 'user' | 'shop' | 'admin' = 'user';
-      let redirectPath: string = ROUTES.USER.DASHBOARD;
+      let redirectPath: string = 'https://www.app.leema.kz'; // Default to mobile app
 
       if (response.shop) {
         // User logged in as shop owner
@@ -70,20 +70,15 @@ function AuthCallbackPage() {
         // Create minimal user object for shop (shop acts as user)
         const shopData: any = response.shop;
         const shopAsUser: any = {
-          id: shopData.id,
+          id: String(shopData.id),
           email: shopData.email || '',
           name: shopData.shop_name || shopData.name || 'Shop Owner',
+          phone: shopData.phone || shopData.whatsapp_phone || undefined,
           role: 'shop_owner' as const,
           accountType: 'shop' as const,
-          avatar: shopData.avatar_url || shopData.logo,
-          avatar_url: shopData.avatar_url || shopData.logo,
-          balance: shopData.balance || 0,
-          free_generations_left: 0,
-          free_try_ons_left: 0,
-          createdAt: shopData.created_at || shopData.createdAt,
-          created_at: shopData.created_at || shopData.createdAt,
-          updatedAt: shopData.updated_at || shopData.updatedAt,
-          updated_at: shopData.updated_at || shopData.updatedAt,
+          avatar: shopData.avatar_url || shopData.logo || undefined,
+          createdAt: shopData.created_at || shopData.createdAt || new Date().toISOString(),
+          updatedAt: shopData.updated_at || shopData.updatedAt || undefined,
         };
 
         // Store shop data as user
@@ -106,17 +101,20 @@ function AuthCallbackPage() {
           finalAccountType = 'shop';
           redirectPath = ROUTES.SHOP.DASHBOARD;
         } else {
+          // Regular users should use mobile app
           finalAccountType = 'user';
-          redirectPath = ROUTES.USER.DASHBOARD;
+          redirectPath = 'https://www.app.leema.kz';
         }
 
-        // Store user data
-        const accessToken = response.accessToken || response.access_token;
-        if (!accessToken) {
-          throw new Error('No access token received from server');
-        }
+        // Store user data only if not regular user
+        if (finalAccountType !== 'user') {
+          const accessToken = response.accessToken || response.access_token;
+          if (!accessToken) {
+            throw new Error('No access token received from server');
+          }
 
-        login(response.user!, accessToken);
+          login(response.user!, accessToken);
+        }
       } else {
         throw new Error('Некорректный ответ от сервера: отсутствуют данные пользователя');
       }
@@ -145,7 +143,20 @@ function AuthCallbackPage() {
       }
 
       // Success - redirect to dashboard
-      navigate(redirectPath, { replace: true });
+      // Small delay to ensure Zustand persist completes
+      const currentUser = useAuthStore.getState().user;
+      logger.debug('[AuthCallback] Redirecting to dashboard', {
+        redirectPath,
+        finalAccountType,
+        userRole: currentUser?.role,
+        isAuthenticated: useAuthStore.getState().isAuthenticated,
+        hasAccessToken: !!useAuthStore.getState().accessToken
+      });
+
+      setTimeout(() => {
+        logger.debug('[AuthCallback] Executing navigation to', redirectPath);
+        navigate(redirectPath, { replace: true });
+      }, 250); // Increased delay to ensure persistence completes
     } catch (err: any) {
       logger.error('Auth callback error', err);
       setError({

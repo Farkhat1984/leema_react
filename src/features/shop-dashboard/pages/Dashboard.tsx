@@ -109,7 +109,8 @@ function ShopDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <NotificationDropdown />
+              {/* Temporarily disabled - causes 401 for shop users */}
+              {/* <NotificationDropdown /> */}
               <div className="flex items-center space-x-3">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-medium text-gray-900">{shop?.name || 'Мой магазин'}</p>

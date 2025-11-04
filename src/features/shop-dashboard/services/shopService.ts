@@ -243,6 +243,24 @@ export const shopService = {
       { responseType: 'blob' }
     )
   },
+
+  /**
+   * Get shop balance
+   * @returns Shop balance data
+   */
+  getBalance: async (): Promise<{
+    current_balance: number;
+    pending_balance?: number;
+    currency?: string;
+  }> => {
+    // Note: Balance is now part of shop profile
+    const shop = await apiRequest<Shop>(API_ENDPOINTS.SHOPS.ME);
+    return {
+      current_balance: shop.balance || 0,
+      pending_balance: 0,
+      currency: 'KZT'
+    };
+  },
 }
 
 export default shopService

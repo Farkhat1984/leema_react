@@ -1,6 +1,7 @@
 /**
  * Login Page - Fashion AI Platform
- * Supports Google OAuth login for users, shop owners, and admins
+ * Supports Google OAuth login for shop owners and admins
+ * Redirects users to mobile app download page
  */
 
 import { useEffect, useState } from 'react';
@@ -10,7 +11,7 @@ import { CONFIG, ROUTES } from '@/shared/constants/config';
 import { Button } from '@/shared/components/ui/Button';
 import { logger } from '@/shared/lib/utils/logger';
 
-type AccountType = 'user' | 'shop' | 'admin';
+type AccountType = 'shop' | 'admin';
 
 /**
  * Google SVG Icon Component
@@ -24,6 +25,15 @@ const GoogleIcon = () => (
   </svg>
 );
 
+/**
+ * Mobile App Icon Component
+ */
+const MobileAppIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+  </svg>
+);
+
 function LoginPage() {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
@@ -33,8 +43,19 @@ function LoginPage() {
    * Redirect if already authenticated
    */
   useEffect(() => {
+    logger.debug('[LoginPage] Auth state changed', {
+      isAuthenticated,
+      userRole: user?.role,
+      currentPath: window.location.pathname
+    });
+
     if (isAuthenticated && user) {
       const redirectPath = getRedirectPath(user.role);
+      logger.debug('[LoginPage] User is authenticated, redirecting from login page', {
+        userRole: user.role,
+        redirectPath,
+        currentPath: window.location.pathname
+      });
       navigate(redirectPath, { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
@@ -49,12 +70,12 @@ function LoginPage() {
       case 'shop_owner':
         return ROUTES.SHOP.DASHBOARD;
       default:
-        return ROUTES.USER.DASHBOARD;
+        return ROUTES.ADMIN.DASHBOARD;
     }
   };
 
   /**
-   * Handle Google OAuth login
+   * Handle Google OAuth login for shop/admin
    */
   const handleGoogleLogin = (accountType: AccountType) => {
     setIsLoading(true);
@@ -89,6 +110,13 @@ function LoginPage() {
     window.location.href = googleAuthUrl;
   };
 
+  /**
+   * Handle user app redirect
+   */
+  const handleUserAppRedirect = () => {
+    window.location.href = 'https://www.app.leema.kz';
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -103,14 +131,13 @@ function LoginPage() {
 
           {/* Login Buttons */}
           <div className="space-y-4">
-            {/* User Login */}
+            {/* User App Download */}
             <Button
-              onClick={() => handleGoogleLogin('user')}
-              disabled={isLoading}
+              onClick={handleUserAppRedirect}
               variant="outline"
               className="w-full h-12 text-gray-700 border-2 border-gray-300 hover:border-purple-500 hover:bg-purple-50 transition-all duration-200"
             >
-              <GoogleIcon />
+              <MobileAppIcon />
               <span className="ml-3">Войти как пользователь</span>
             </Button>
 
@@ -138,7 +165,8 @@ function LoginPage() {
 
           {/* Footer Info */}
           <div className="mt-6 text-center text-sm text-gray-500">
-            <p>Используя Google OAuth для безопасной авторизации</p>
+            <p className="mb-2">Магазины и админы используют Google OAuth</p>
+            <p>Пользователи - скачайте мобильное приложение</p>
           </div>
         </div>
       </div>

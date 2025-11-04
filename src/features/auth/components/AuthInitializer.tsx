@@ -11,33 +11,51 @@ import { logger } from '@/shared/lib/utils/logger';
 export const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initializeAuth = () => {
-      const token = getAccessToken();
+      const tokenInSessionStorage = getAccessToken();
       const { isAuthenticated, user, accessToken } = useAuthStore.getState();
 
       logger.debug('Initializing authentication', {
-        hasTokenInStorage: !!token,
+        hasTokenInSessionStorage: !!tokenInSessionStorage,
+        hasTokenInStore: !!accessToken,
         isAuthenticated,
         hasUser: !!user,
-        tokensMatch: token === accessToken,
       });
 
-      // Case 1: User is authenticated and has valid token in sessionStorage
-      if (token && isAuthenticated && !isTokenExpired(token)) {
-        logger.debug('Valid token found, updating store');
-        // Update store with token from sessionStorage if different
-        if (token !== accessToken) {
-          useAuthStore.getState().setAccessToken(token);
-        }
+      // Determine which token to use (prefer store token from Zustand persist)
+      const activeToken = accessToken || tokenInSessionStorage;
+
+      // Case 1: User is authenticated and has valid token
+      if (activeToken && isAuthenticated && !isTokenExpired(activeToken)) {
+        logger.debug('Valid token found, syncing storage', {
+          userRole: user?.role,
+          hasShop: !!useAuthStore.getState().shop
+        });
+        // Ensure token is in both sessionStorage and store
+        useAuthStore.getState().setAccessToken(activeToken);
       }
-      // Case 2: User is authenticated but no token in sessionStorage
-      else if (!token && isAuthenticated) {
-        // Token was lost (page refresh) - logout user
-        logger.warn('Access token missing - logging out user');
+      // Case 2: User is authenticated but no token available
+      else if (!activeToken && isAuthenticated) {
+        // Token was lost - logout user
+        logger.warn('Access token missing - logging out user', {
+          userRole: user?.role,
+          fromPath: window.location.pathname
+        });
         useAuthStore.getState().logout();
       }
       // Case 3: Token exists but is expired
-      else if (token && isTokenExpired(token)) {
-        logger.warn('Access token expired - logging out user');
+      else if (activeToken && isTokenExpired(activeToken)) {
+        logger.warn('Access token expired - logging out user', {
+          userRole: user?.role,
+          fromPath: window.location.pathname
+        });
+        useAuthStore.getState().logout();
+      }
+      // Case 4: Token exists in sessionStorage but user not authenticated in store
+      else if (tokenInSessionStorage && !isAuthenticated) {
+        // Clear orphaned token
+        logger.warn('Orphaned token in sessionStorage - clearing', {
+          fromPath: window.location.pathname
+        });
         useAuthStore.getState().logout();
       }
     };

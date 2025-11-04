@@ -135,6 +135,8 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    host: '0.0.0.0', // Allow external connections
+    allowedHosts: ['www.leema.kz', 'leema.kz', 'localhost'], // Allow these hosts
     proxy: {
       '/api': {
         target: 'https://api.leema.kz',

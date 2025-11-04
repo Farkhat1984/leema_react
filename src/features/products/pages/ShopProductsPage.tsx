@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import { Plus, Edit, Trash2, Eye, Search, Filter, X } from 'lucide-react';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
+import { productService } from '../services/productService';
 import { Button } from '@/shared/components/ui/Button';
 import { SearchInput } from '@/shared/components/ui/SearchInput';
 import { StatusBadge } from '@/shared/components/ui/StatusBadge';
@@ -20,7 +21,6 @@ import { FormModal } from '@/shared/components/ui/FormModal';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { FormInput } from '@/shared/components/forms/FormInput';
 import { FormTextarea } from '@/shared/components/forms/FormTextarea';
-import { FormSelect } from '@/shared/components/forms/FormSelect';
 import { ImageUploadMultiple, UploadedImage } from '@/shared/components/ui/ImageUploadMultiple';
 import { Pagination } from '@/shared/components/ui/Pagination';
 import { productSchema, type ProductFormData } from '@/shared/lib/validation/schemas';
@@ -70,12 +70,18 @@ function ShopProductsPage() {
    */
   const loadCategories = async () => {
     try {
-      const response = await apiRequest<Category[]>(API_ENDPOINTS.CATEGORIES.LIST);
-      // Ensure response is an array
+      const response = await apiRequest<{ categories: Category[]; total: number } | Category[]>(
+        API_ENDPOINTS.CATEGORIES.LIST
+      );
+
+      // Handle both response formats
       if (Array.isArray(response)) {
         setCategories(response);
+      } else if (response && typeof response === 'object' && 'categories' in response) {
+        // Backend returns {categories: [...], total: N}
+        setCategories(Array.isArray(response.categories) ? response.categories : []);
       } else {
-        logger.warn('Categories response is not an array:', response);
+        logger.warn('Categories response has unexpected format:', response);
         setCategories([]);
       }
     } catch (error) {
@@ -151,23 +157,34 @@ function ShopProductsPage() {
    */
   const handleEdit = (product: Product) => {
     setSelectedProduct(product);
+
+    // Extract sizes and colors from characteristics if they exist
+    const characteristics = product.characteristics || {};
+    const sizes = characteristics.sizes || product.sizes || [];
+    const colors = characteristics.colors || product.colors || [];
+
     reset({
       name: product.name,
       description: product.description,
       price: product.price,
       category_id: product.category_id,
-      sizes: Array.isArray(product.sizes) ? product.sizes.join(', ') : '',
-      colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
+      sizes: Array.isArray(sizes) ? sizes.join(', ') : '',
+      colors: Array.isArray(colors) ? colors.join(', ') : '',
     });
 
-    // Safely handle images array
+    // Safely handle images array - extract URLs from objects or use strings directly
     const imagesArray = Array.isArray(product.images) ? product.images : [];
     setUploadedImages(
-      imagesArray.map((img, index) => ({
-        id: `img-${index}`,
-        url: img.url,
-        quality: img.quality,
-      }))
+      imagesArray.map((img, index) => {
+        // Handle both string URLs and image objects {url, quality}
+        const url = typeof img === 'string' ? img : img.url;
+        const quality = typeof img === 'object' ? img.quality : 'medium';
+        return {
+          id: `img-${index}`,
+          url,
+          quality,
+        };
+      })
     );
     setShowEditModal(true);
   };
@@ -188,22 +205,29 @@ function ShopProductsPage() {
     try {
       // Upload images first
       const imageUrls: string[] = [];
-      for (const img of uploadedImages) {
-        if (img.url.startsWith('blob:')) {
-          // New image - upload it
-          const file = await fetch(img.url).then((r) => r.blob());
-          const formData = new FormData();
-          formData.append('image', file);
+      const newImages = uploadedImages.filter(img => img.url.startsWith('blob:'));
+      const existingImages = uploadedImages.filter(img => !img.url.startsWith('blob:'));
 
-          const uploadResponse = await apiRequest<{ url: string }>(
-            API_ENDPOINTS.PRODUCTS.UPLOAD_IMAGES,
-            'POST',
-            formData
-          );
-          imageUrls.push(uploadResponse.url);
-        } else {
-          // Existing image
-          imageUrls.push(img.url);
+      // Add existing image URLs first
+      existingImages.forEach(img => imageUrls.push(img.url));
+
+      // Upload new images in batch if any
+      if (newImages.length > 0) {
+        const formData = new FormData();
+        for (const img of newImages) {
+          const file = await fetch(img.url).then((r) => r.blob());
+          formData.append('files', file, `image-${Date.now()}.jpg`);
+        }
+
+        const uploadResponse = await apiRequest<{ urls: string[]; count: number }>(
+          API_ENDPOINTS.PRODUCTS.UPLOAD_IMAGES,
+          'POST',
+          formData
+        );
+
+        // Add newly uploaded URLs
+        if (uploadResponse.urls && Array.isArray(uploadResponse.urls)) {
+          imageUrls.push(...uploadResponse.urls);
         }
       }
 
@@ -216,23 +240,21 @@ function ShopProductsPage() {
         description: data.description,
         price: data.price,
         category_id: data.category_id,
-        sizes,
-        colors,
+        characteristics: {
+          sizes,
+          colors,
+        },
         images: imageUrls,
       };
 
       if (selectedProduct) {
         // Update existing product
-        await apiRequest(
-          API_ENDPOINTS.PRODUCTS.UPDATE(selectedProduct.id),
-          'PUT',
-          payload
-        );
+        await productService.updateProduct(selectedProduct.id, payload);
         toast.success('Product updated successfully');
         setShowEditModal(false);
       } else {
         // Create new product
-        await apiRequest(API_ENDPOINTS.PRODUCTS.CREATE, 'POST', payload);
+        await productService.createProduct(payload);
         toast.success('Product created and submitted for approval');
         setShowCreateModal(false);
       }
@@ -507,19 +529,27 @@ function ShopProductsPage() {
                 required
               />
 
-              <FormSelect options={[]}
-                label="Category"
-                {...register('category_id', { valueAsNumber: true })}
-                error={errors.category_id?.message}
-                required
-              >
-                <option value="">Select category</option>
-                {Array.isArray(categories) && categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </FormSelect>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category <span className="text-red-500">*</span>
+                </label>
+                <select
+                  {...register('category_id', { valueAsNumber: true })}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                    errors.category_id ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Select category</option>
+                  {Array.isArray(categories) && categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.category_id && (
+                  <p className="mt-1 text-sm text-red-600">{errors.category_id.message}</p>
+                )}
+              </div>
             </div>
 
             <FormInput
@@ -548,11 +578,9 @@ function ShopProductsPage() {
                 value={uploadedImages}
                 onChange={setUploadedImages}
                 maxFiles={5}
-                maxSize={5}
+                maxSize={5 * 1024 * 1024}
+                helperText="Upload up to 5 images. First image will be the main product image."
               />
-              <p className="mt-1 text-xs text-gray-500">
-                Upload up to 5 images. First image will be the main product image.
-              </p>
             </div>
           </div>
         </FormModal>
@@ -592,19 +620,27 @@ function ShopProductsPage() {
                 required
               />
 
-              <FormSelect options={[]}
-                label="Category"
-                {...register('category_id', { valueAsNumber: true })}
-                error={errors.category_id?.message}
-                required
-              >
-                <option value="">Select category</option>
-                {Array.isArray(categories) && categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </FormSelect>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category <span className="text-red-500">*</span>
+                </label>
+                <select
+                  {...register('category_id', { valueAsNumber: true })}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                    errors.category_id ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Select category</option>
+                  {Array.isArray(categories) && categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.category_id && (
+                  <p className="mt-1 text-sm text-red-600">{errors.category_id.message}</p>
+                )}
+              </div>
             </div>
 
             <FormInput
@@ -631,7 +667,8 @@ function ShopProductsPage() {
                 value={uploadedImages}
                 onChange={setUploadedImages}
                 maxFiles={5}
-                maxSize={5}
+                maxSize={5 * 1024 * 1024}
+                helperText="Upload up to 5 images. First image will be the main product image."
               />
             </div>
           </div>

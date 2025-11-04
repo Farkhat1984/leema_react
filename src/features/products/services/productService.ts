@@ -39,9 +39,9 @@ export interface ProductUpdate {
   name?: string
   description?: string
   price?: number
-  characteristics?: Record<string, any>
+  characteristics?: Record<string, any>  // Should contain sizes and colors
   category_id?: number
-  images?: string[]
+  images?: string[]  // Array of URL strings, not objects
   is_active?: boolean
 }
 

@@ -122,9 +122,7 @@ const AdminNotifications = lazy(() => import('@/features/admin-dashboard').then(
 const AdminShopsPending = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminShopsPendingPage })));
 const AdminShopProfile = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminShopProfilePage })));
 
-// User dashboard pages
-const UserDashboard = lazy(() => import('@/features/user-dashboard').then(m => ({ default: m.UserDashboard })));
-const UserProfile = lazy(() => import('@/features/user-dashboard').then(m => ({ default: m.UserProfilePage })));
+// User dashboard pages - REMOVED (users use mobile app only)
 
 /**
  * Router configuration
@@ -280,15 +278,7 @@ export const router = createBrowserRouter([
     element: withErrorBoundary(<AdminReports />, { allowedRoles: ['admin'] }),
   },
 
-  // User routes
-  {
-    path: ROUTES.USER.DASHBOARD,
-    element: withErrorBoundary(<UserDashboard />, { allowedRoles: ['user'] }),
-  },
-  {
-    path: ROUTES.USER.PROFILE,
-    element: withErrorBoundary(<UserProfile />, { allowedRoles: ['user'] }),
-  },
+  // User routes - REMOVED (users use mobile app only)
 
   // Root redirect to login
   {

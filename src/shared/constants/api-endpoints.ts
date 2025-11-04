@@ -65,6 +65,15 @@ export const API_ENDPOINTS = {
     CONTACTS_IMPORT_EXCEL: '/api/v1/shops/me/contacts/import',
     CONTACTS_EXPORT_EXCEL: '/api/v1/shops/me/contacts/export',
     CONTACTS_DOWNLOAD_TEMPLATE: '/api/v1/shops/me/contacts/template',
+
+    // WhatsApp Integration
+    WHATSAPP_QR: '/api/v1/shops/me/whatsapp/qr',
+    WHATSAPP_STATUS: '/api/v1/shops/me/whatsapp/status',
+    WHATSAPP_DISCONNECT: '/api/v1/shops/me/whatsapp/disconnect',
+    WHATSAPP_INQUIRY: (shopId: string | number, productId: string | number) =>
+      `/api/v1/shops/${shopId}/products/${productId}/whatsapp-inquiry`,
+    WHATSAPP_SEND_INQUIRY: (shopId: string | number, productId: string | number) =>
+      `/api/v1/shops/${shopId}/products/${productId}/send-whatsapp-inquiry`,
   },
 
   // ==================== PRODUCTS ====================
@@ -90,8 +99,8 @@ export const API_ENDPOINTS = {
     PRODUCTS_BULK_ACTION: '/api/v1/admin/products/bulk-action',
     MODERATION_QUEUE: '/api/v1/admin/moderation/queue',
     PRODUCT_BY_ID: (id: string | number) => `/api/v1/admin/products/${id}`,
-    APPROVE_PRODUCT: (id: string | number) => `/api/v1/admin/products/${id}/approve`,
-    REJECT_PRODUCT: (id: string | number) => `/api/v1/admin/products/${id}/reject`,
+    APPROVE_PRODUCT: (id: string | number) => `/api/v1/admin/moderation/${id}/approve`,
+    REJECT_PRODUCT: (id: string | number) => `/api/v1/admin/moderation/${id}/reject`,
 
     // Shops
     SHOPS: '/api/v1/admin/shops',

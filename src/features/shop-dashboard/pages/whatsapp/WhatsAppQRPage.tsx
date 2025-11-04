@@ -1,96 +1,161 @@
 /**
- * WhatsApp QR Page - Generate and display WhatsApp QR code for shop
- * Allows customers to quickly connect via WhatsApp
+ * WhatsApp QR Page - Connect WhatsApp Business API
+ * Allows shop owners to connect their WhatsApp account to the platform
  */
 
-import { ArrowLeft, Download, Printer, AlertTriangle, RefreshCw, Lightbulb, CheckCircle } from "lucide-react";
-import { logger } from '@/shared/lib/utils/logger';
+import { ArrowLeft, RefreshCw, Lightbulb, CheckCircle, XCircle, Loader } from "lucide-react";
 import { useState, useEffect } from 'react';
-import { logger } from '@/shared/lib/utils/logger';
 import { Link } from 'react-router-dom';
-import { logger } from '@/shared/lib/utils/logger';
 import { useAuthStore } from '@/features/auth/store/authStore';
-import { logger } from '@/shared/lib/utils/logger';
 import { apiRequest } from '@/shared/lib/api/client';
-import { logger } from '@/shared/lib/utils/logger';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
-import { logger } from '@/shared/lib/utils/logger';
 import { ROUTES } from '@/shared/constants/config';
-import { logger } from '@/shared/lib/utils/logger';
 import { Card } from '@/shared/components/feedback/Card';
-import { logger } from '@/shared/lib/utils/logger';
 import { Spinner } from '@/shared/components/feedback/Spinner';
-import { logger } from '@/shared/lib/utils/logger';
 import { Button } from '@/shared/components/ui/Button';
 import { logger } from '@/shared/lib/utils/logger';
+import { useWhatsAppEvents } from '@/features/websocket/hooks/useWhatsAppEvents';
 import toast from 'react-hot-toast';
-import { logger } from '@/shared/lib/utils/logger';
 
-interface QRCodeData {
-  qrCodeUrl: string;
-  whatsappNumber: string;
-  message: string;
+interface WhatsAppQRResponse {
+  qr_code: string | null;
+  status: string;
+  message?: string;
+  already_connected?: boolean;
+}
+
+interface WhatsAppStatusResponse {
+  status: string;
+  ready?: boolean;
+  has_qr?: boolean;
 }
 
 function WhatsAppQRPage() {
   const { shop } = useAuthStore();
-  const [qrData, setQrData] = useState<QRCodeData | null>(null);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>('disconnected');
   const [isLoading, setIsLoading] = useState(true);
-  const [customMessage, setCustomMessage] = useState('');
+  const [isAlreadyConnected, setIsAlreadyConnected] = useState(false);
+
+  // Listen to WebSocket events for real-time status updates
+  useWhatsAppEvents();
 
   useEffect(() => {
-    loadQRCode();
-  }, []);
+    loadWhatsAppStatus();
+    // Auto-refresh QR code every 30 seconds if not connected
+    const interval = setInterval(() => {
+      if (status !== 'connected' && !isAlreadyConnected) {
+        loadWhatsAppStatus();
+      }
+    }, 30000);
 
-  const loadQRCode = async () => {
+    return () => clearInterval(interval);
+  }, [status, isAlreadyConnected]);
+
+  const loadWhatsAppStatus = async () => {
     try {
       setIsLoading(true);
-      const response = await apiRequest<QRCodeData>(
-        `${API_ENDPOINTS.SHOPS.ME}/whatsapp-qr`
+      // First check current status
+      const statusResponse = await apiRequest<WhatsAppStatusResponse>(
+        API_ENDPOINTS.SHOPS.WHATSAPP_STATUS
       );
-      setQrData(response);
-      setCustomMessage(response.message || '');
+
+      setStatus(statusResponse.status || 'disconnected');
+
+      // If not connected, get QR code
+      if (statusResponse.status !== 'connected') {
+        const qrResponse = await apiRequest<WhatsAppQRResponse>(
+          API_ENDPOINTS.SHOPS.WHATSAPP_QR
+        );
+
+        if (qrResponse.already_connected) {
+          setIsAlreadyConnected(true);
+          setStatus('connected');
+          toast.success('WhatsApp уже подключен!');
+        } else if (qrResponse.qr_code) {
+          setQrCode(qrResponse.qr_code);
+          setStatus(qrResponse.status || 'qr_received');
+        } else if (qrResponse.status === 'generating') {
+          setStatus('generating');
+          toast('QR код генерируется, подождите...', { icon: 'ℹ️' });
+          // Retry after 3 seconds
+          setTimeout(loadWhatsAppStatus, 3000);
+        }
+      } else {
+        setIsAlreadyConnected(true);
+        toast.success('WhatsApp подключен!');
+      }
     } catch (error) {
-      logger.error('Failed to load QR code', error);
-      toast.error('Не удалось загрузить QR код');
+      logger.error('Failed to load WhatsApp status/QR', error);
+      toast.error('Не удалось загрузить статус WhatsApp');
+      setStatus('error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleRegenerateQR = async () => {
+  const handleDisconnect = async () => {
     try {
-      setIsLoading(true);
-      const response = await apiRequest<QRCodeData>(
-        `${API_ENDPOINTS.SHOPS.ME}/whatsapp-qr/regenerate`,
-        'POST',
-        { message: customMessage }
+      await apiRequest(
+        API_ENDPOINTS.SHOPS.WHATSAPP_DISCONNECT,
+        'POST'
       );
-      setQrData(response);
-      toast.success('QR код обновлен');
+      toast.success('WhatsApp отключен. Отсканируйте новый QR код для подключения.');
+      setIsAlreadyConnected(false);
+      setStatus('disconnected');
+      setQrCode(null);
+      // Reload to get new QR
+      setTimeout(loadWhatsAppStatus, 1000);
     } catch (error) {
-      logger.error('Failed to regenerate QR code', error);
-      toast.error('Не удалось обновить QR код');
-    } finally {
-      setIsLoading(false);
+      logger.error('Failed to disconnect WhatsApp', error);
+      toast.error('Не удалось отключить WhatsApp');
     }
   };
 
-  const handleDownloadQR = () => {
-    if (!qrData?.qrCodeUrl) return;
-
-    const link = document.createElement('a');
-    link.href = qrData.qrCodeUrl;
-    link.download = `whatsapp-qr-${shop?.name || 'shop'}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('QR код скачан');
+  const handleRefreshQR = () => {
+    setQrCode(null);
+    loadWhatsAppStatus();
+    toast('Обновление QR кода...', { icon: 'ℹ️' });
   };
 
-  const handlePrintQR = () => {
-    window.print();
-    toast.success('Окно печати открыто');
+  const getStatusBadge = () => {
+    switch (status) {
+      case 'connected':
+        return (
+          <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-full">
+            <CheckCircle className="w-5 h-5" />
+            <span className="font-medium">Подключено</span>
+          </div>
+        );
+      case 'generating':
+        return (
+          <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-full">
+            <Loader className="w-5 h-5 animate-spin" />
+            <span className="font-medium">Генерация QR...</span>
+          </div>
+        );
+      case 'qr_received':
+        return (
+          <div className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full">
+            <RefreshCw className="w-5 h-5" />
+            <span className="font-medium">Ожидание сканирования</span>
+          </div>
+        );
+      case 'error':
+        return (
+          <div className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-800 rounded-full">
+            <XCircle className="w-5 h-5" />
+            <span className="font-medium">Ошибка</span>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded-full">
+            <XCircle className="w-5 h-5" />
+            <span className="font-medium">Не подключено</span>
+          </div>
+        );
+    }
   };
 
   if (isLoading) {
@@ -104,22 +169,23 @@ function WhatsAppQRPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b border-gray-200 print:hidden">
+      <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <Link
                 to={ROUTES.SHOP.DASHBOARD}
-                className="text-gray-600 hover:text-gray-900"
+                className="flex items-center text-gray-600 hover:text-gray-900"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Назад
               </Link>
               <div className="flex items-center">
                 <i className="fab fa-whatsapp text-green-600 text-2xl mr-3"></i>
-                <span className="text-xl font-bold text-gray-900">WhatsApp QR код</span>
+                <span className="text-xl font-bold text-gray-900">WhatsApp Business</span>
               </div>
             </div>
+            {getStatusBadge()}
           </div>
         </div>
       </nav>
@@ -127,150 +193,151 @@ function WhatsAppQRPage() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* QR Code Display */}
+          {/* QR Code Display or Connected Status */}
           <Card className="p-8">
             <div className="text-center">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                QR код для WhatsApp
+                {isAlreadyConnected || status === 'connected'
+                  ? 'WhatsApp подключен!'
+                  : 'Подключение WhatsApp'}
               </h2>
 
-              {qrData?.qrCodeUrl ? (
+              {isAlreadyConnected || status === 'connected' ? (
+                <div className="py-12">
+                  <CheckCircle className="w-24 h-24 mx-auto text-green-500 mb-4" />
+                  <p className="text-lg font-medium text-gray-900 mb-2">
+                    WhatsApp Business подключен
+                  </p>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Ваш магазин может отправлять сообщения клиентам
+                  </p>
+                  <Button
+                    onClick={handleDisconnect}
+                    variant="outline"
+                    className="border-red-500 text-red-600 hover:bg-red-50"
+                  >
+                    Отключить WhatsApp
+                  </Button>
+                </div>
+              ) : qrCode ? (
                 <div className="mb-6">
                   <div className="inline-block p-4 bg-white border-4 border-green-500 rounded-lg">
                     <img
-                      src={qrData.qrCodeUrl}
+                      src={`data:image/png;base64,${qrCode}`}
                       alt="WhatsApp QR Code"
                       className="w-64 h-64 mx-auto"
                     />
                   </div>
                   <p className="mt-4 text-sm text-gray-600">
-                    Отсканируйте QR код для связи через WhatsApp
+                    Отсканируйте QR код в WhatsApp на телефоне
                   </p>
+                  <Button
+                    onClick={handleRefreshQR}
+                    variant="outline"
+                    className="mt-4"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Обновить QR код
+                  </Button>
                 </div>
               ) : (
                 <div className="py-12">
-                  <i className="fab fa-whatsapp text-gray-300 text-6xl mb-4"></i>
-                  <p className="text-gray-500">QR код недоступен</p>
+                  {status === 'generating' ? (
+                    <>
+                      <Loader className="w-16 h-16 mx-auto text-blue-500 animate-spin mb-4" />
+                      <p className="text-gray-500">Генерация QR кода...</p>
+                    </>
+                  ) : (
+                    <>
+                      <i className="fab fa-whatsapp text-gray-300 text-6xl mb-4"></i>
+                      <p className="text-gray-500 mb-4">QR код недоступен</p>
+                      <Button onClick={handleRefreshQR} variant="primary">
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Получить QR код
+                      </Button>
+                    </>
+                  )}
                 </div>
               )}
-
-              <div className="space-y-3 print:hidden">
-                <Button
-                  onClick={handleDownloadQR}
-                  variant="primary"
-                  className="w-full"
-                  disabled={!qrData?.qrCodeUrl}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Скачать QR код
-                </Button>
-                <Button
-                  onClick={handlePrintQR}
-                  variant="outline"
-                  className="w-full"
-                  disabled={!qrData?.qrCodeUrl}
-                >
-                  <Printer className="w-4 h-4 mr-2" />
-                  Распечатать
-                </Button>
-              </div>
             </div>
           </Card>
 
-          {/* Configuration */}
-          <div className="space-y-6 print:hidden">
+          {/* Instructions */}
+          <div className="space-y-6">
             <Card className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Информация
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Lightbulb className="w-5 h-5 mr-2 text-yellow-500" />
+                Как подключить WhatsApp
               </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Номер WhatsApp
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 font-mono">
-                      {qrData?.whatsappNumber || shop?.phone || 'Не указан'}
-                    </div>
-                  </div>
-                  {!shop?.phone && (
-                    <p className="mt-2 text-sm text-orange-600">
-                      <AlertTriangle className="w-4 h-4 mr-1" />
-                      Добавьте номер телефона в настройках магазина
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Приветственное сообщение
-                  </label>
-                  <textarea
-                    value={customMessage}
-                    onChange={(e) => setCustomMessage(e.target.value)}
-                    rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Например: Здравствуйте! Я хочу узнать о ваших товарах."
-                  />
-                  <p className="mt-2 text-sm text-gray-500">
-                    Это сообщение будет автоматически добавлено при сканировании QR кода
-                  </p>
-                </div>
-
-                <Button
-                  onClick={handleRegenerateQR}
-                  variant="primary"
-                  className="w-full"
-                  isLoading={isLoading}
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Обновить QR код
-                </Button>
-              </div>
+              <ol className="space-y-3 text-sm text-gray-700">
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">
+                    1
+                  </span>
+                  <span>Откройте WhatsApp на своем телефоне</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">
+                    2
+                  </span>
+                  <span>
+                    Перейдите в <strong>Настройки</strong> → <strong>Связанные устройства</strong>
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">
+                    3
+                  </span>
+                  <span>Нажмите <strong>"Привязать устройство"</strong></span>
+                </li>
+                <li className="flex items-start">
+                  <span className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">
+                    4
+                  </span>
+                  <span>Отсканируйте QR код на экране слева</span>
+                </li>
+              </ol>
             </Card>
 
-            <Card className="p-6 bg-green-50 border-green-200">
-              <h3 className="text-lg font-semibold text-green-900 mb-3">
-                <Lightbulb className="w-4 h-4 mr-2" />
-                Как использовать
+            <Card className="p-6 bg-blue-50 border-blue-200">
+              <h3 className="text-lg font-semibold text-blue-900 mb-3">
+                <CheckCircle className="w-5 h-5 inline mr-2" />
+                Что дает подключение
               </h3>
-              <ul className="space-y-2 text-sm text-green-800">
+              <ul className="space-y-2 text-sm text-blue-800">
                 <li className="flex items-start">
                   <CheckCircle className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0" />
-                  <span>Распечатайте QR код и разместите его в вашем магазине</span>
+                  <span>Автоматическая отправка сообщений клиентам о товарах</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0" />
-                  <span>Добавьте QR код на визитки и рекламные материалы</span>
+                  <span>Рассылка акций и новостей через WhatsApp</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0" />
-                  <span>Разместите на вашем сайте или в социальных сетях</span>
+                  <span>Уведомления о новых заказах в WhatsApp</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0" />
-                  <span>Клиенты смогут быстро связаться с вами через WhatsApp</span>
+                  <span>Повышение конверсии обращений клиентов</span>
                 </li>
+              </ul>
+            </Card>
+
+            <Card className="p-6 bg-yellow-50 border-yellow-200">
+              <h3 className="text-lg font-semibold text-yellow-900 mb-3">
+                ⚠️ Важно
+              </h3>
+              <ul className="space-y-2 text-sm text-yellow-800">
+                <li>• QR код действителен 60 секунд</li>
+                <li>• После сканирования подключение произойдет автоматически</li>
+                <li>• Вы можете отключить WhatsApp в любое время</li>
+                <li>• Убедитесь, что у вас есть номер WhatsApp в настройках магазина</li>
               </ul>
             </Card>
           </div>
         </div>
       </div>
-
-      {/* Print Styles */}
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          .print\\:block, .print\\:block * {
-            visibility: visible;
-          }
-          .print\\:hidden {
-            display: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

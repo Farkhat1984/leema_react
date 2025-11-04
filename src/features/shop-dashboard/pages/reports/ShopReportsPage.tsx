@@ -4,25 +4,15 @@
  */
 
 import { useState } from 'react';
-import { logger } from '@/shared/lib/utils/logger';
 import { Link } from 'react-router-dom';
-import { logger } from '@/shared/lib/utils/logger';
 import { ArrowLeft, FileText, TrendingUp, ShoppingCart, Package, Users, Download, Check, Info } from 'lucide-react';
-import { logger } from '@/shared/lib/utils/logger';
 import { apiRequest } from '@/shared/lib/api/client';
-import { logger } from '@/shared/lib/utils/logger';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
-import { logger } from '@/shared/lib/utils/logger';
 import { ROUTES } from '@/shared/constants/config';
-import { logger } from '@/shared/lib/utils/logger';
 import { Card } from '@/shared/components/feedback/Card';
-import { logger } from '@/shared/lib/utils/logger';
 import { Button } from '@/shared/components/ui/Button';
-import { logger } from '@/shared/lib/utils/logger';
 import { FormDateRangePicker } from '@/shared/components/forms/FormDateRangePicker';
-import { logger } from '@/shared/lib/utils/logger';
 import type { DateRange } from '@/shared/types/common';
-import { logger } from '@/shared/lib/utils/logger';
 import toast from 'react-hot-toast';
 import { logger } from '@/shared/lib/utils/logger';
 

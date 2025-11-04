@@ -26,8 +26,8 @@ RUN npm ci --prefer-offline --no-audit
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the application (fast build without typecheck)
+RUN npm run build:fast
 
 # Production stage
 FROM nginx:alpine

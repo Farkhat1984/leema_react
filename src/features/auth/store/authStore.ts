@@ -87,11 +87,26 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      // Only persist user and shop data, not tokens (for security)
+      // Use sessionStorage instead of localStorage for security
+      storage: {
+        getItem: (name) => {
+          const str = sessionStorage.getItem(name);
+          return str ? JSON.parse(str) : null;
+        },
+        setItem: (name, value) => {
+          sessionStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => {
+          sessionStorage.removeItem(name);
+        },
+      },
+      // Persist user, shop, auth state, and access token
+      // Note: Access token is also stored in sessionStorage separately for API client
       partialize: (state) => ({
         user: state.user,
         shop: state.shop,
         isAuthenticated: state.isAuthenticated,
+        accessToken: state.accessToken,
       }),
     }
   )

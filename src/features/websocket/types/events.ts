@@ -45,6 +45,7 @@ export type WebSocketEventType =
   | 'moderation_queue.added'
   | 'moderation_queue.removed'
   // Connection Events
+  | 'connected'
   | 'ping'
   | 'pong';
 
@@ -210,11 +211,20 @@ export const settingsEventSchema = z.object({
   }),
 });
 
-// Connection Event Schema (ping/pong)
-export const connectionEventSchema = z.object({
-  event: z.enum(['ping', 'pong']),
-  data: z.unknown().optional(),
-});
+// Connection Event Schema (ping/pong) - supports both 'event' and 'type' fields
+export const connectionEventSchema = z.union([
+  z.object({
+    event: z.enum(['connected', 'ping', 'pong']),
+    client_type: z.string().optional(),
+    client_id: z.number().optional(),
+    timestamp: z.string().optional(),
+    data: z.unknown().optional(),
+  }),
+  z.object({
+    type: z.enum(['ping', 'pong']),
+    timestamp: z.unknown().optional(),
+  }),
+]);
 
 // ==================== TYPESCRIPT TYPES (INFERRED FROM SCHEMAS) ====================
 
@@ -292,7 +302,13 @@ export const isSettingsEvent = (event: WebSocketEvent): event is SettingsEvent =
 };
 
 export const isConnectionEvent = (event: WebSocketEvent): event is ConnectionEvent => {
-  return event.event === 'ping' || event.event === 'pong';
+  if ('event' in event) {
+    return event.event === 'connected' || event.event === 'ping' || event.event === 'pong';
+  }
+  if ('type' in event) {
+    return event.type === 'ping' || event.type === 'pong';
+  }
+  return false;
 };
 
 // ==================== VALIDATION HELPERS ====================
@@ -306,7 +322,18 @@ export const validateWebSocketEvent = (rawMessage: unknown): WebSocketEvent | nu
     return null;
   }
 
-  const message = rawMessage as { event?: string };
+  const message = rawMessage as { event?: string; type?: string };
+
+  // Check for connection events first (support both 'event' and 'type' fields)
+  if (message.event === 'connected' || message.event === 'ping' || message.event === 'pong' ||
+      message.type === 'ping' || message.type === 'pong') {
+    try {
+      return connectionEventSchema.parse(rawMessage);
+    } catch {
+      return null;
+    }
+  }
+
   if (!message.event) {
     return null;
   }
@@ -333,8 +360,6 @@ export const validateWebSocketEvent = (rawMessage: unknown): WebSocketEvent | nu
       return moderationQueueEventSchema.parse(rawMessage);
     } else if (message.event === 'settings.updated') {
       return settingsEventSchema.parse(rawMessage);
-    } else if (message.event === 'ping' || message.event === 'pong') {
-      return connectionEventSchema.parse(rawMessage);
     }
 
     return null;

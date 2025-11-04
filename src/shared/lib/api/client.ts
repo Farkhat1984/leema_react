@@ -57,9 +57,18 @@ apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = useAuthStore.getState().accessToken;
 
+    logger.debug('[API Request]', {
+      url: config.url,
+      method: config.method,
+      hasToken: !!token,
+      isValidToken: token ? isValidJWT(token) : false
+    });
+
     // Validate token before adding it
     if (token && isValidJWT(token)) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else if (token) {
+      logger.warn('[API Request] Invalid JWT token detected', { url: config.url });
     }
 
     // Add CSRF token for state-changing requests
@@ -70,9 +79,14 @@ apiClient.interceptors.request.use(
       }
     }
 
-    // Sanitize request body to prevent XSS
-    if (config.data && typeof config.data === 'object') {
+    // Sanitize request body to prevent XSS (skip FormData for file uploads)
+    if (config.data && typeof config.data === 'object' && !(config.data instanceof FormData)) {
       config.data = sanitizeRequestBody(config.data as Record<string, unknown>);
+    }
+
+    // For FormData, let browser set Content-Type with boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
     }
 
     // Add security headers
@@ -148,6 +162,10 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
+      logger.debug('[API] Attempting token refresh', {
+        url: originalRequest?.url
+      });
+
       // Try to refresh the token using HttpOnly cookie
       // Note: Refresh token is automatically sent via HttpOnly cookie (withCredentials: true)
       const response = await axios.post(
@@ -157,6 +175,10 @@ apiClient.interceptors.response.use(
       );
 
       const { accessToken } = response.data;
+
+      logger.debug('[API] Token refresh successful', {
+        hasNewToken: !!accessToken
+      });
 
       // Update token in store and sessionStorage
       setStorageToken(accessToken);
@@ -171,6 +193,11 @@ apiClient.interceptors.response.use(
       // Retry original request
       return apiClient(originalRequest);
     } catch (refreshError) {
+      logger.error('[API] Token refresh failed, logging out user', {
+        url: originalRequest?.url,
+        error: refreshError
+      });
+
       // Token refresh failed, logout user
       processQueue(refreshError as Error, null);
       useAuthStore.getState().logout();
@@ -184,6 +211,7 @@ apiClient.interceptors.response.use(
 
       // Redirect to login
       if (typeof window !== 'undefined') {
+        logger.warn('[API] Redirecting to login page');
         window.location.href = ROUTES.PUBLIC.LOGIN;
       }
 

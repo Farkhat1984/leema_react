@@ -127,7 +127,8 @@ export const moderationService = {
   approveProduct: async (id: number): Promise<{ message: string }> => {
     return apiRequest<{ message: string }>(
       API_ENDPOINTS.ADMIN.APPROVE_PRODUCT(id),
-      'POST'
+      'POST',
+      {} // Empty body required by backend
     )
   },
 
@@ -141,7 +142,7 @@ export const moderationService = {
     return apiRequest<{ message: string }>(
       API_ENDPOINTS.ADMIN.REJECT_PRODUCT(id),
       'POST',
-      { reason }
+      { notes: reason } // Backend expects 'notes' field, not 'reason'
     )
   },
 
@@ -160,7 +161,7 @@ export const moderationService = {
     return apiRequest<{ message: string }>(
       API_ENDPOINTS.ADMIN.PRODUCTS_BULK_ACTION,
       'POST',
-      { product_ids: productIds, action, reason }
+      { product_ids: productIds, action, notes: reason } // Backend expects 'notes' field
     )
   },
 

@@ -6,21 +6,13 @@
 import { useEffect, useState } from 'react';
 import { logger } from '@/shared/lib/utils/logger';
 import { formatNumber } from '@/shared/lib/utils';
-import { logger } from '@/shared/lib/utils/logger';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { logger } from '@/shared/lib/utils/logger';
 import { apiRequest } from '@/shared/lib/api/client';
-import { logger } from '@/shared/lib/utils/logger';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
-import { logger } from '@/shared/lib/utils/logger';
 import { ROUTES } from '@/shared/constants/config';
-import { logger } from '@/shared/lib/utils/logger';
 import { Button } from '@/shared/components/ui/Button';
-import { logger } from '@/shared/lib/utils/logger';
 import { Spinner } from '@/shared/components/feedback/Spinner';
-import { logger } from '@/shared/lib/utils/logger';
 import { CheckCircle } from 'lucide-react';
-import { logger } from '@/shared/lib/utils/logger';
 
 type PaymentDetails = {
   paymentId: string;

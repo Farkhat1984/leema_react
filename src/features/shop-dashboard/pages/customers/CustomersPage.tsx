@@ -4,27 +4,16 @@
  */
 
 import { useState, useEffect } from 'react';
-import { logger } from '@/shared/lib/utils/logger';
 import { Link } from 'react-router-dom';
-import { logger } from '@/shared/lib/utils/logger';
 import { ArrowLeft, Users as UsersIcon, Download } from 'lucide-react';
-import { logger } from '@/shared/lib/utils/logger';
 import { apiRequest } from '@/shared/lib/api/client';
-import { logger } from '@/shared/lib/utils/logger';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
-import { logger } from '@/shared/lib/utils/logger';
 import { ROUTES } from '@/shared/constants/config';
-import { logger } from '@/shared/lib/utils/logger';
 import { Card } from '@/shared/components/feedback/Card';
-import { logger } from '@/shared/lib/utils/logger';
 import { Spinner } from '@/shared/components/feedback/Spinner';
-import { logger } from '@/shared/lib/utils/logger';
 import { DataTable } from '@/shared/components/ui/DataTable';
-import { logger } from '@/shared/lib/utils/logger';
 import { StatsCard } from '@/shared/components/ui/StatsCard';
-import { logger } from '@/shared/lib/utils/logger';
 import { SearchInput } from '@/shared/components/ui/SearchInput';
-import { logger } from '@/shared/lib/utils/logger';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { logger } from '@/shared/lib/utils/logger';
 

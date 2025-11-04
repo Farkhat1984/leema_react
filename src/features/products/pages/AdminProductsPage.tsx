@@ -6,35 +6,20 @@
 import { useState, useEffect } from 'react';
 import { logger } from '@/shared/lib/utils/logger';
 import { formatNumber } from '@/shared/lib/utils';
-import { logger } from '@/shared/lib/utils/logger';
 import toast from 'react-hot-toast';
-import { logger } from '@/shared/lib/utils/logger';
-import { CheckCircle, XCircle, Eye, Search, Filter, X } from 'lucide-react';
-import { logger } from '@/shared/lib/utils/logger';
+import { CheckCircle, XCircle, Eye, X } from 'lucide-react';
 import { apiRequest } from '@/shared/lib/api/client';
-import { logger } from '@/shared/lib/utils/logger';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
-import { logger } from '@/shared/lib/utils/logger';
 import { Button } from '@/shared/components/ui/Button';
-import { logger } from '@/shared/lib/utils/logger';
 import { SearchInput } from '@/shared/components/ui/SearchInput';
-import { logger } from '@/shared/lib/utils/logger';
 import { StatusBadge } from '@/shared/components/ui/StatusBadge';
-import { logger } from '@/shared/lib/utils/logger';
 import { StatsCard } from '@/shared/components/ui/StatsCard';
-import { logger } from '@/shared/lib/utils/logger';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
-import { logger } from '@/shared/lib/utils/logger';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
-import { logger } from '@/shared/lib/utils/logger';
 import { RejectModal } from '@/shared/components/ui/RejectModal';
-import { logger } from '@/shared/lib/utils/logger';
 import { DetailModal } from '@/shared/components/ui/DetailModal';
-import { logger } from '@/shared/lib/utils/logger';
 import { Pagination } from '@/shared/components/ui/Pagination';
-import { logger } from '@/shared/lib/utils/logger';
 import type { Product, ProductsResponse, ProductStatus } from '../types';
-import { logger } from '@/shared/lib/utils/logger';
 
 interface ModerationStats {
   total: number;
@@ -161,7 +146,8 @@ function AdminProductsPage() {
     try {
       await apiRequest(
         API_ENDPOINTS.ADMIN.APPROVE_PRODUCT(selectedProduct.id),
-        'POST'
+        'POST',
+        { notes: '' } // Backend expects ModerationAction with notes field
       );
 
       toast.success(`Product "${selectedProduct.name}" approved successfully`);
@@ -187,7 +173,7 @@ function AdminProductsPage() {
       await apiRequest(
         API_ENDPOINTS.ADMIN.REJECT_PRODUCT(selectedProduct.id),
         'POST',
-        { reason }
+        { notes: reason } // Backend expects 'notes' field, not 'reason'
       );
 
       toast.success(`Product "${selectedProduct.name}" rejected`);
@@ -254,7 +240,7 @@ function AdminProductsPage() {
         {
           product_ids: selectedIds,
           action: 'reject',
-          reason,
+          notes: reason, // Backend expects 'notes' field, not 'reason'
         }
       );
 
@@ -381,45 +367,6 @@ function AdminProductsPage() {
             </select>
           </div>
 
-          {/* Bulk Actions */}
-          {selectedIds.length > 0 && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-              <span className="text-sm text-gray-600">
-                {selectedIds.length} product(s) selected
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleBulkApprove}
-                  variant="primary"
-                  size="sm"
-                  disabled={isProcessing}
-                  className="flex items-center gap-1"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Approve Selected
-                </Button>
-                <Button
-                  onClick={handleBulkReject}
-                  variant="ghost"
-                  size="sm"
-                  disabled={isProcessing}
-                  className="text-red-600 hover:bg-red-50 flex items-center gap-1"
-                >
-                  <XCircle className="w-4 h-4" />
-                  Reject Selected
-                </Button>
-                <Button
-                  onClick={() => setSelectedIds([])}
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-1"
-                >
-                  <X className="w-4 h-4" />
-                  Clear
-                </Button>
-              </div>
-            </div>
-          )}
 
           {/* Clear Filters */}
           {(searchTerm || selectedStatus !== 'pending') && (
@@ -455,41 +402,15 @@ function AdminProductsPage() {
           />
         ) : (
           <>
-            {/* Select All */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={selectedIds.length === products.length && products.length > 0}
-                  onChange={toggleSelectAll}
-                  className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                />
-                <span className="text-sm font-medium text-gray-700">Select All</span>
-              </label>
-            </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product) => (
                 <div
                   key={product.id}
-                  className={`bg-white rounded-lg shadow-sm border-2 overflow-hidden hover:shadow-md transition-all ${
-                    selectedIds.includes(product.id) ? 'border-purple-500' : 'border-gray-200'
-                  }`}
+                  className="bg-white rounded-lg shadow-sm border-2 border-gray-200 overflow-hidden hover:shadow-md transition-all"
                 >
-                  {/* Selection Checkbox */}
-                  <div className="absolute top-2 left-2 z-10">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(product.id)}
-                      onChange={() => toggleSelection(product.id)}
-                      className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 cursor-pointer"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-
                   {/* Product Image */}
                   <div className="relative aspect-square bg-gray-100">
-                    {product.images[0] ? (
+                    {product.images && product.images.length > 0 ? (
                       <img
                         src={product.images[0].url}
                         alt={product.name}
@@ -526,10 +447,10 @@ function AdminProductsPage() {
                     </p>
 
                     {/* Rejection Reason */}
-                    {product.status === 'rejected' && product.rejection_reason && (
+                    {product.status === 'rejected' && product.moderation_notes && (
                       <div className="bg-red-50 border border-red-200 rounded p-2 mb-3">
                         <p className="text-xs text-red-800">
-                          <span className="font-semibold">Rejected:</span> {product.rejection_reason}
+                          <span className="font-semibold">Rejected:</span> {product.moderation_notes}
                         </p>
                       </div>
                     )}
@@ -545,30 +466,30 @@ function AdminProductsPage() {
                         <Eye className="w-4 h-4 mr-1" />
                         View Details
                       </Button>
-                      {product.status === 'pending' && (
-                        <div className="flex items-center gap-2">
-                          <Button
-                            onClick={() => handleApprove(product)}
-                            variant="primary"
-                            size="sm"
-                            className="flex-1"
-                            disabled={isProcessing}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Approve
-                          </Button>
-                          <Button
-                            onClick={() => handleReject(product)}
-                            variant="ghost"
-                            size="sm"
-                            className="flex-1 text-red-600 hover:bg-red-50"
-                            disabled={isProcessing}
-                          >
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Reject
-                          </Button>
-                        </div>
-                      )}
+
+                      {/* Show approve/reject buttons (disabled if not pending) */}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={() => handleApprove(product)}
+                          variant="primary"
+                          size="sm"
+                          className="flex-1"
+                          disabled={isProcessing || product.status !== 'pending'}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          onClick={() => handleReject(product)}
+                          variant="ghost"
+                          size="sm"
+                          className="flex-1 text-red-600 hover:bg-red-50"
+                          disabled={isProcessing || product.status !== 'pending'}
+                        >
+                          <XCircle className="w-4 h-4 mr-1" />
+                          Reject
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -620,7 +541,7 @@ function AdminProductsPage() {
           >
             <div className="space-y-6">
               {/* Images */}
-              {selectedProduct.images.length > 0 && (
+              {selectedProduct.images && selectedProduct.images.length > 0 && (
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Images</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -628,7 +549,7 @@ function AdminProductsPage() {
                       <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
                         <img src={img.url} alt={`Product ${idx + 1}`} className="w-full h-full object-cover" />
                         <div className="absolute top-1 left-1 px-2 py-0.5 bg-black bg-opacity-60 text-white text-xs rounded">
-                          {img.quality.toUpperCase()}
+                          {img.quality?.toUpperCase() || 'MEDIUM'}
                         </div>
                       </div>
                     ))}
@@ -669,11 +590,19 @@ function AdminProductsPage() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="text-sm font-medium text-gray-600">Sizes</span>
-                  <span className="text-sm text-gray-900">{selectedProduct.sizes.join(', ')}</span>
+                  <span className="text-sm text-gray-900">
+                    {selectedProduct.sizes && selectedProduct.sizes.length > 0
+                      ? selectedProduct.sizes.join(', ')
+                      : 'N/A'}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="text-sm font-medium text-gray-600">Colors</span>
-                  <span className="text-sm text-gray-900">{selectedProduct.colors.join(', ')}</span>
+                  <span className="text-sm text-gray-900">
+                    {selectedProduct.colors && selectedProduct.colors.length > 0
+                      ? selectedProduct.colors.join(', ')
+                      : 'N/A'}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="text-sm font-medium text-gray-600">Views</span>
@@ -683,43 +612,43 @@ function AdminProductsPage() {
                   <span className="text-sm font-medium text-gray-600">Try-ons</span>
                   <span className="text-sm text-gray-900">{selectedProduct.try_ons}</span>
                 </div>
-                {selectedProduct.rejection_reason && (
+                {selectedProduct.moderation_notes && (
                   <div className="py-2">
                     <span className="text-sm font-medium text-red-600 block mb-1">Rejection Reason</span>
                     <p className="text-sm text-red-800 bg-red-50 p-3 rounded">
-                      {selectedProduct.rejection_reason}
+                      {selectedProduct.moderation_notes}
                     </p>
                   </div>
                 )}
               </div>
 
-              {/* Actions */}
-              {selectedProduct.status === 'pending' && (
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
-                  <Button
-                    onClick={() => {
-                      setShowDetailModal(false);
-                      handleApprove(selectedProduct);
-                    }}
-                    variant="primary"
-                    className="flex-1"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Approve Product
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setShowDetailModal(false);
-                      handleReject(selectedProduct);
-                    }}
-                    variant="ghost"
-                    className="flex-1 text-red-600 hover:bg-red-50"
-                  >
-                    <XCircle className="w-4 h-4 mr-2" />
-                    Reject Product
-                  </Button>
-                </div>
-              )}
+              {/* Actions - Always show buttons */}
+              <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
+                <Button
+                  onClick={() => {
+                    setShowDetailModal(false);
+                    handleApprove(selectedProduct);
+                  }}
+                  variant="primary"
+                  className="flex-1"
+                  disabled={selectedProduct.status !== 'pending'}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Approve Product
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowDetailModal(false);
+                    handleReject(selectedProduct);
+                  }}
+                  variant="ghost"
+                  className="flex-1 text-red-600 hover:bg-red-50"
+                  disabled={selectedProduct.status !== 'pending'}
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Reject Product
+                </Button>
+              </div>
             </div>
           </DetailModal>
         )}

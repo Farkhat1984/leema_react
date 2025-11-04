@@ -4,273 +4,297 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Leema React** - Fashion AI Platform migration from legacy codebase to modern React + TypeScript stack. This is a multi-role application serving shop owners, administrators, and end users with role-based dashboards, real-time notifications via WebSocket, and Google OAuth authentication.
+Leema React is a production-grade e-commerce platform frontend for shop owners and admins. This is a TypeScript + React + Vite application with a feature-based architecture. **Note: End users access the platform through a separate mobile app (www.app.leema.kz) - this web application is exclusively for shop owners and administrators.**
 
-## Commands
+## Essential Commands
 
 ### Development
 ```bash
-npm run dev              # Start dev server on http://localhost:5173
-npm run typecheck        # Run TypeScript type checking (NO build)
+npm run dev                    # Start dev server on port 5173
+npm run build                  # Full production build with type checking
+npm run build:fast             # Fast build without type checking
+npm run build:analyze          # Build and open bundle analyzer
+npm run preview                # Preview production build
 ```
 
 ### Testing
 ```bash
-npm run test            # Run unit tests with Vitest
-npm run test:ui         # Open Vitest UI
-npm run test:e2e        # Run Playwright E2E tests
+npm run test                   # Run tests in watch mode
+npm run test:run               # Run tests once
+npm run test:coverage          # Run tests with coverage report
+npm run test:ui                # Open Vitest UI
+npm run test:e2e               # Run Playwright E2E tests
+npm run typecheck              # Type check without emitting files
 ```
 
 ### Code Quality
 ```bash
-npm run lint            # Check for linting errors
-npm run lint:fix        # Auto-fix linting errors
-npm run format          # Format code with Prettier
-npm run format:check    # Check code formatting
+npm run lint                   # Check for linting errors
+npm run lint:fix               # Auto-fix linting errors
+npm run format                 # Format code with Prettier
+npm run format:check           # Check code formatting
 ```
 
-### Build & Deploy
+### Docker
 ```bash
-npm run build              # Production build (includes type checking)
-npm run build:analyze      # Build with bundle analysis (opens dist/stats.html)
-npm run preview            # Preview production build locally
+docker-compose up -d           # Start in production mode
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d  # Start in dev mode
+docker-compose ps              # Check container status
+docker-compose logs -f         # View logs
+docker-compose restart         # Restart containers
 ```
 
-## Architecture
+## Architecture Overview
 
 ### Feature-Based Structure
 
-The codebase uses **feature-based architecture** where each feature is self-contained with its own pages, components, hooks, services, types, and store. Features are lazy-loaded for optimal performance.
+The codebase follows a **strict feature-based architecture** where each feature is self-contained:
 
-**Features:**
-- `features/auth/` - Authentication (Google OAuth, token management)
-- `features/shop-dashboard/` - Shop owner dashboard and analytics
-- `features/admin-dashboard/` - Admin management tools
-- `features/user-dashboard/` - End user profile and preferences
-- `features/products/` - Product catalog and management
-- `features/notifications/` - Notification system
-- `features/websocket/` - Real-time WebSocket communication
+```
+src/
+├── features/              # Feature modules (each feature is independent)
+│   ├── auth/             # Authentication (Google OAuth, JWT, token refresh)
+│   ├── shop-dashboard/   # Shop owner dashboard & pages
+│   ├── admin-dashboard/  # Admin dashboard & pages
+│   ├── products/         # Product management (admin & shop views)
+│   ├── orders/           # Order management
+│   ├── billing/          # Billing and payments
+│   ├── analytics/        # Analytics and reports
+│   ├── newsletters/      # Newsletter management
+│   ├── websocket/        # Real-time WebSocket connection manager
+│   └── ...
+├── shared/               # Shared utilities and components
+│   ├── components/       # Reusable UI components
+│   │   ├── ui/          # Base UI components
+│   │   ├── forms/       # Form components
+│   │   ├── layout/      # Layout components
+│   │   └── feedback/    # Loading, error, and toast components
+│   ├── lib/             # Core utilities
+│   │   ├── api/         # API client with axios interceptors
+│   │   ├── security/    # Security utils (CSRF, XSS, JWT validation)
+│   │   ├── utils/       # General utilities and error handling
+│   │   └── validation/  # Zod schemas
+│   ├── constants/       # App-wide constants (routes, config, API endpoints)
+│   ├── hooks/           # Shared React hooks
+│   └── types/           # Shared TypeScript types
+└── app/                 # App-level config
+    └── router.tsx       # Route definitions with lazy loading
+```
 
-### Shared Code
+### Key Architectural Patterns
 
-`shared/` contains reusable code across features:
-- `shared/components/` - UI components organized by type (ui/, layout/, feedback/, forms/)
-- `shared/hooks/` - Reusable React hooks (useCSRF, useSanitizedInput, useSecureStorage, usePerformanceMonitor)
-- `shared/lib/api/` - API client with automatic token refresh, interceptors, and security middleware
-- `shared/lib/security/` - Security utilities (sanitization, CSRF, secure storage)
-- `shared/lib/validation/` - Zod schemas for input validation
-- `shared/lib/utils/` - Helper functions (cn for className merging, performance utilities)
-- `shared/types/` - Shared TypeScript types
-- `shared/constants/` - App-wide constants (API endpoints, routes, config)
+1. **Authentication Flow**
+   - Google OAuth via `@react-oauth/google`
+   - JWT tokens: Access token (sessionStorage) + HttpOnly refresh token (cookie)
+   - Automatic token refresh in axios interceptors (src/shared/lib/api/client.ts)
+   - Auth state managed by Zustand store (src/features/auth/store/authStore.ts)
+   - Protected routes by role: `admin`, `shop_owner`
 
-### State Management
+2. **State Management**
+   - **Zustand** for global state (auth, websocket)
+   - **React Query (@tanstack/react-query)** for server state and data fetching
+   - Each feature has its own service layer for API calls
 
-- **Zustand** for global state (auth store in `features/auth/store/authStore.ts`)
-- **React Query** (@tanstack/react-query) for server state with optimized caching:
-  - 5-minute stale time
-  - 10-minute garbage collection
-  - Smart retry logic (no retry on 4xx errors)
-  - Configured in `src/main.tsx`
+3. **API Client (src/shared/lib/api/client.ts)**
+   - Centralized axios instance with interceptors
+   - Automatic token injection and refresh
+   - CSRF protection for state-changing requests
+   - XSS sanitization of request bodies
+   - Centralized error handling with toast notifications
+   - Request/response logging in development
 
-### Routing
+4. **WebSocket Manager (src/features/websocket/WebSocketManager.ts)**
+   - Real-time connection for notifications, orders, and updates
+   - Automatic reconnection with exponential backoff
+   - Client type-based connection (shop/admin)
+   - Event subscription system for components
+   - Heartbeat mechanism to keep connection alive
 
-- **React Router v7** with lazy loading
-- **Protected routes** via `ProtectedRoute` component with role-based access control
-- Route configuration in `src/app/router.tsx`
-- All pages use `<Suspense fallback={<PageLoader />}>` for code splitting
+5. **Security**
+   - CSRF tokens for all mutations
+   - XSS sanitization on input/output
+   - JWT validation before use
+   - HttpOnly cookies for refresh tokens
+   - sessionStorage for access tokens (cleared on tab close)
+   - Content Security Policy headers
 
-### Security Implementation
+6. **Code Splitting**
+   - Route-based code splitting with React lazy()
+   - Feature-based chunks (admin-features, shop-features, etc.)
+   - Vendor chunks separated by library type (react-vendor, form-vendor, charts-vendor)
+   - Configuration in vite.config.ts manualChunks
 
-This application has comprehensive security features. **Always** follow these patterns:
-
-1. **Token Management:**
-   - Access tokens stored in `sessionStorage` (NOT localStorage)
-   - Refresh tokens in HttpOnly cookies (set by backend)
-   - Use `setAccessToken()` / `getAccessToken()` from `@/shared/lib/security`
-   - API client automatically handles token refresh on 401 responses
-
-2. **Input Sanitization:**
-   - All user inputs **MUST** be sanitized using `sanitizeInput()` or `sanitizeHTML()`
-   - API request bodies automatically sanitized by interceptor
-   - Use `useSanitizedInput` hook for form inputs
-
-3. **CSRF Protection:**
-   - CSRF tokens automatically added to POST/PUT/PATCH/DELETE requests
-   - Token stored in sessionStorage, added via `X-CSRF-Token` header
-   - Initialized on app startup in `src/shared/lib/api/client.ts`
-
-4. **XSS Prevention:**
-   - Use DOMPurify via `sanitizeHTML()` for any user-generated HTML
-   - Never use `dangerouslySetInnerHTML` without sanitization
-   - Content Security Policy configured in `index.html`
-
-5. **URL Validation:**
-   - Use `isValidUrl()` and `sanitizeUrl()` before using user-provided URLs
-   - Prevents javascript: and data: URL schemes
-
-See `SECURITY.md` for complete security documentation.
+7. **Error Handling**
+   - React Error Boundaries on all routes
+   - Centralized error handler (src/shared/lib/utils/error-handler.ts)
+   - Toast notifications for user-facing errors
+   - Structured error codes and types
+   - Automatic error reporting for 5xx errors
 
 ## Path Aliases
 
-TypeScript path aliases are configured in `tsconfig.app.json` and `vite.config.ts`:
-
 ```typescript
-import Component from '@/shared/components/ui/Button'
-import { useAuth } from '@/features/auth/hooks/useAuth'
-import logo from '@/assets/images/logo.png'
-import { mockUser } from '@/tests/mocks/user'
+@/*              → ./src/*
+@/features/*     → ./src/features/*
+@/shared/*       → ./src/shared/*
+@/assets/*       → ./src/assets/*
+@/tests/*        → ./src/tests/*
 ```
 
-## API Client Usage
+These are configured in:
+- `tsconfig.app.json` (TypeScript)
+- `vite.config.ts` (Vite)
+- `vitest.config.ts` (Vitest)
 
-The API client (`@/shared/lib/api/client.ts`) automatically handles:
-- Authentication headers (Bearer token)
-- Token refresh on 401 errors
-- CSRF token injection
-- Request/response sanitization
-- Error handling with retry logic
+## Environment Configuration
 
-```typescript
-import { apiRequest } from '@/shared/lib/api/client'
-import { API_ENDPOINTS } from '@/shared/constants/api-endpoints'
+Required environment variables (validated at startup with Zod):
 
-// Generic request
-const data = await apiRequest<UserData>(API_ENDPOINTS.USER.PROFILE)
-
-// With method and data
-await apiRequest(API_ENDPOINTS.USER.UPDATE, 'PUT', { name: 'John' })
+```bash
+VITE_API_URL=https://api.leema.kz                    # Backend API URL
+VITE_WS_URL=wss://api.leema.kz/ws                    # WebSocket URL
+VITE_GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com # Google OAuth Client ID
+VITE_ENV=development|staging|production              # Environment
 ```
 
-**Important:** Never bypass the API client. It includes critical security middleware.
+Copy `.env.example` to `.env` and fill in values. Missing or invalid variables will cause immediate startup failure.
 
-## Performance Optimizations
+## Important Conventions
 
-Stage 6 optimizations are fully implemented:
-
-1. **Code Splitting:**
-   - Route-based splitting via React.lazy
-   - Manual vendor chunking (react-vendor, query-vendor, form-vendor, charts-vendor)
-   - Feature-based chunks (shop-features, admin-features, user-features, auth-features)
-
-2. **Image Optimization:**
-   - Automatic compression via vite-plugin-imagemin
-   - JPEG/PNG/WebP quality: 80%
-   - SVG optimization with SVGO
-
-3. **Build Optimizations:**
-   - Gzip and Brotli compression (threshold: 10KB)
-   - Content hash filenames for cache busting
-   - Bundle analyzer integration (`npm run build:analyze`)
-   - Pre-optimized dependencies (react, react-dom, react-router-dom, @tanstack/react-query, zustand)
-
-4. **Virtual Scrolling:**
-   - Use `@tanstack/react-virtual` for long lists
-   - Components: `VirtualList`, `VirtualGrid` in `@/shared/components/ui/`
-
-See `PERFORMANCE.md` for complete performance documentation.
-
-## Environment Variables
-
-Required environment variables (create `.env` from `.env.example`):
-
-```env
-VITE_API_URL=https://api.leema.kz
-VITE_WS_URL=wss://api.leema.kz/ws
-VITE_GOOGLE_CLIENT_ID=your-google-client-id
-VITE_ENV=development
-```
-
-Access via `import.meta.env.VITE_*` or use `CONFIG` object from `@/shared/constants/config`.
-
-## Common Patterns
-
-### Creating a New Feature
-
-1. Create feature directory: `src/features/my-feature/`
-2. Add subdirectories: `pages/`, `components/`, `hooks/`, `services/`, `types/`, `store/`
-3. Export main page from feature
-4. Add lazy-loaded route in `src/app/router.tsx`
-5. Add API endpoints to `@/shared/constants/api-endpoints.ts`
-6. Update manual chunking in `vite.config.ts` if needed
-
-### Adding Protected Routes
+### API Service Pattern
+Each feature should have a `services/` folder with API calls:
 
 ```typescript
-<ProtectedRoute allowedRoles={['admin', 'shop_owner']}>
-  <Suspense fallback={<PageLoader />}>
-    <MyPage />
-  </Suspense>
-</ProtectedRoute>
+// features/products/services/productService.ts
+export const productService = {
+  getProducts: (params) => apiRequest<ProductResponse>('/products', 'GET', undefined, params),
+  createProduct: (data) => apiRequest<Product>('/products', 'POST', data),
+  // ...
+};
 ```
 
-### Using React Query
+### Protected Routes
+All routes except login, auth callback, and payment pages require authentication:
 
 ```typescript
-import { useQuery, useMutation } from '@tanstack/react-query'
-import { apiRequest } from '@/shared/lib/api/client'
-
-// Query
-const { data, isLoading } = useQuery({
-  queryKey: ['users', userId],
-  queryFn: () => apiRequest<User>(`/api/users/${userId}`)
-})
-
-// Mutation
-const mutation = useMutation({
-  mutationFn: (data) => apiRequest('/api/users', 'POST', data),
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['users'] })
-  }
-})
+// Example from router.tsx
+{
+  path: ROUTES.SHOP.DASHBOARD,
+  element: withErrorBoundary(<ShopDashboard />, { allowedRoles: ['shop_owner'] }),
+}
 ```
 
-### Form Validation with Zod
+### React Query Usage
+All data fetching should use React Query hooks:
 
 ```typescript
-import { z } from 'zod'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { isValidEmail } from '@/shared/lib/security'
+const { data, isLoading, error } = useQuery({
+  queryKey: ['products', shopId],
+  queryFn: () => productService.getProducts({ shop_id: shopId }),
+  staleTime: 5 * 60 * 1000, // 5 minutes
+});
+```
 
+### Form Validation
+Use `react-hook-form` + `zod` + `@hookform/resolvers/zod`:
+
+```typescript
 const schema = z.object({
-  email: z.string().refine(isValidEmail, 'Invalid email'),
-  password: z.string().min(8)
-})
+  name: z.string().min(1, 'Name is required'),
+});
 
-const { register, handleSubmit } = useForm({
-  resolver: zodResolver(schema)
-})
+const { register, handleSubmit, formState: { errors } } = useForm({
+  resolver: zodResolver(schema),
+});
+```
+
+### Component Exports
+Features export their pages/components via index.ts:
+
+```typescript
+// features/shop-dashboard/index.ts
+export { ShopDashboard } from './pages/Dashboard';
+export { ShopProductsPage } from './pages/products/ShopProductsPage';
 ```
 
 ## Testing
 
-- **Unit tests:** Vitest + React Testing Library
-- **E2E tests:** Playwright
-- **Test utilities:** `src/tests/utils/` and `src/tests/mocks/`
+- **Unit/Integration Tests**: Vitest + React Testing Library
+- **E2E Tests**: Playwright
+- **Test Setup**: `src/tests/setup.ts` configures test environment
+- **Coverage Target**: 80% for branches, functions, lines, statements
+- **Mock Service Worker (MSW)**: For API mocking in tests
 
-Currently, test coverage is minimal (Stage 7 pending). When writing tests, place them adjacent to the code being tested: `MyComponent.test.tsx`
+## Production Build
 
-## Important Notes
+The production build process:
 
-- **TypeScript strict mode is enabled** - all code must be type-safe
-- **Do NOT store tokens in localStorage** - use security helpers only
-- **All user input must be sanitized** - no exceptions
-- **CSP is enforced** - inline scripts are restricted
-- **The project is NOT in a git repository** - no git commands available
-- **Role-based access:** 'admin', 'shop_owner', 'user'
-- **The backend API is at https://api.leema.kz** - uses HttpOnly cookies for refresh tokens
+1. TypeScript compilation (`tsc -b`)
+2. Vite bundling with optimizations
+3. Image optimization (vite-plugin-imagemin)
+4. Gzip and Brotli compression
+5. Bundle analysis (stats.html in dist/)
+6. Multi-stage Docker build
+7. Nginx serving with SSL support
 
-## Migration Status
+Build outputs include:
+- Optimized chunks with content hashing
+- Source maps (if enabled)
+- Bundle visualization (dist/stats.html)
 
-This is an ongoing migration from a legacy codebase. Stages completed:
-- ✅ Stage 1: Project initialization
-- ✅ Stage 3: Core infrastructure (API client, auth, routing, WebSocket)
-- ✅ Stage 5: Feature migration (all dashboards, Google OAuth)
-- ✅ Stage 6: Performance optimizations
+## API Proxy
 
-Pending stages:
-- ⏳ Stage 2: Design system completion
-- ⏳ Stage 7: Testing & QA (80%+ coverage goal)
-- ⏳ Stage 8: Documentation
+Development server proxies `/api` to `https://api.leema.kz` (configured in vite.config.ts). This avoids CORS issues during development.
 
-See `README.md` for complete migration roadmap and `STAGE*_COMPLETE.md` files for detailed completion reports.
+## Browser Support
+
+Target: ES2022+ browsers. Build target is ES2015 for wider compatibility but uses modern syntax (see vite.config.ts).
+
+## Styling
+
+- **TailwindCSS** for utility-first styling
+- **CVA (Class Variance Authority)** for component variants
+- **clsx** + **tailwind-merge** for conditional classes
+- Custom design system in `src/shared/components/ui/`
+
+## Logging
+
+Use the centralized logger (src/shared/lib/utils/logger.ts):
+
+```typescript
+import { logger } from '@/shared/lib/utils/logger';
+
+logger.debug('Debug message', { data });
+logger.info('Info message');
+logger.warn('Warning message');
+logger.error('Error message', error);
+```
+
+Logging levels are automatically adjusted based on `VITE_ENV`.
+
+## Key Files to Understand
+
+- **src/app/router.tsx**: All route definitions and lazy loading
+- **src/shared/lib/api/client.ts**: API client with auth interceptors
+- **src/features/auth/store/authStore.ts**: Authentication state management
+- **src/features/websocket/WebSocketManager.ts**: Real-time connection handling
+- **src/shared/constants/config.ts**: Environment config and route constants
+- **src/shared/lib/utils/error-handler.ts**: Centralized error handling
+- **vite.config.ts**: Build configuration and code splitting strategy
+
+## Development Workflow
+
+1. Create feature branches from `main`
+2. Run `npm run dev` for development
+3. Run `npm run typecheck` before committing
+4. Run `npm run lint:fix` to auto-fix issues
+5. Run `npm run test` to verify changes
+6. Build succeeds with `npm run build` before merging
+
+## Common Issues
+
+- **Token refresh loops**: Check that access token is valid JWT before use
+- **WebSocket disconnects**: Verify token is passed correctly in query params
+- **CORS errors**: Ensure API proxy is configured in vite.config.ts for dev
+- **Build failures**: Run `npm run typecheck` to catch type errors early
+- **Slow builds**: Use `npm run build:fast` to skip type checking during development
