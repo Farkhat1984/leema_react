@@ -48,10 +48,30 @@ export function useWhatsAppEvents() {
           break;
 
         case 'disconnected':
-          toast.error('WhatsApp отключен', {
+          // Check if disconnection was due to number change
+          const reason = (event as any).reason;
+          if (reason === 'whatsapp_number_changed') {
+            toast.warning('WhatsApp отключен', {
+              ...toastConfig,
+              duration: 8000,
+              icon: '🔄',
+              description: (event as any).message || 'Номер WhatsApp был изменен. Пожалуйста, подключите новый номер.',
+            });
+          } else {
+            toast.error('WhatsApp отключен', {
+              ...toastConfig,
+              icon: '📵',
+              description: 'Необходимо повторное подключение через QR-код',
+            });
+          }
+          break;
+
+        case 'phone_mismatch':
+          toast.error('Номер WhatsApp не совпадает!', {
             ...toastConfig,
-            icon: '📵',
-            description: 'Необходимо повторное подключение через QR-код',
+            duration: 10000,
+            icon: '⚠️',
+            description: (event as any).message || 'Номер WhatsApp не совпадает с номером в профиле. Пожалуйста, отсканируйте QR код с правильным номером.',
           });
           break;
 
@@ -80,9 +100,27 @@ export function useWhatsAppEvents() {
       }
     });
 
-    // Cleanup subscription
+    // WhatsApp disconnected event (for profile updates)
+    const unsubscribeWhatsAppDisconnected = subscribe('whatsapp_disconnected', (data: unknown) => {
+      const event = data as any;
+
+      // Invalidate WhatsApp-related queries
+      queryClient.invalidateQueries({ queryKey: ['shop', 'whatsapp'] });
+      queryClient.invalidateQueries({ queryKey: ['shop', 'whatsapp', 'status'] });
+      queryClient.invalidateQueries({ queryKey: ['shop', 'whatsapp', 'qr'] });
+
+      // Show notification
+      toast.warning('WhatsApp отключен', {
+        duration: 8000,
+        icon: '🔄',
+        description: event.message || 'Номер WhatsApp был изменен. Пожалуйста, подключите новый номер.',
+      });
+    });
+
+    // Cleanup subscriptions
     return () => {
       unsubscribeWhatsAppStatus();
+      unsubscribeWhatsAppDisconnected();
     };
   }, [isConnected, subscribe, queryClient]);
 }

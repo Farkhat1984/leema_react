@@ -28,6 +28,17 @@ export function NewsletterDetailModal({
 
   const statusConfig = STATUS_CONFIG[newsletter.status]
 
+  // Convert relative image paths to full URLs
+  const API_URL = import.meta.env.VITE_API_URL || 'https://api.leema.kz'
+  const fullImageUrls = newsletter.creative_images?.map(imagePath => {
+    // If already a full URL, return as is
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath
+    }
+    // Convert relative path to full URL
+    return `${API_URL}${imagePath}`
+  }) || []
+
   return (
     <DetailModal
       isOpen={isOpen}
@@ -81,31 +92,16 @@ export function NewsletterDetailModal({
         )}
 
         {/* Images */}
-        {/* @ts-ignore - backend returns creative_images */}
-        {newsletter.creative_images && newsletter.creative_images.length > 0 && (
+        {fullImageUrls.length > 0 && (
           <DetailSection title="Images" icon={<ImageIcon className="w-5 h-5" />}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {/* @ts-ignore */}
-              {newsletter.creative_images.map((imageUrl: string, index: number) => (
-                <div
-                  key={index}
-                  className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group"
-                >
+              {fullImageUrls.map((imageUrl, index) => (
+                <div key={index} className="rounded-lg border border-gray-200 overflow-hidden h-48">
                   <img
                     src={imageUrl}
                     alt={`Newsletter image ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
-                  <a
-                    href={imageUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center"
-                  >
-                    <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">
-                      View Full
-                    </span>
-                  </a>
                 </div>
               ))}
             </div>
@@ -119,12 +115,12 @@ export function NewsletterDetailModal({
             value={
               newsletter.recipient_type === 'all'
                 ? 'All Contacts'
-                : `Selected Contacts (${newsletter.recipient_ids.length})`
+                : `Selected Contacts (${newsletter.recipient_ids?.length || 0})`
             }
           />
           <DetailRow
             label="Total Recipients"
-            value={newsletter.total_recipients.toString()}
+            value={newsletter.total_recipients?.toString() || '0'}
           />
         </DetailSection>
 

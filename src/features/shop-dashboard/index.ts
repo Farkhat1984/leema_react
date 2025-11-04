@@ -5,5 +5,4 @@ export { default as ShopNotificationsPage } from './pages/notifications/ShopNoti
 export { default as ShopProfilePage } from './pages/profile/ShopProfilePage';
 export { default as ShopReportsPage } from './pages/reports/ShopReportsPage';
 export { default as ShopReviewsPage } from './pages/reviews/ShopReviewsPage';
-export { default as WhatsAppQRPage } from './pages/whatsapp/WhatsAppQRPage';
-export { default as ShopWhatsAppPage } from './pages/whatsapp-manage/ShopWhatsAppPage';
+export { default as UnifiedWhatsAppPage } from './pages/whatsapp/UnifiedWhatsAppPage';

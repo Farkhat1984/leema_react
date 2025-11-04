@@ -44,6 +44,7 @@ export interface ShopUpdate {
   avatar_url?: string
   phone?: string
   whatsapp_number?: string
+  address?: string
 }
 
 export interface ShopAnalytics {

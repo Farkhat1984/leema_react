@@ -80,11 +80,10 @@ const PaymentCancelPage = lazy(() => import('@/features/payment').then(m => ({ d
 const ShopDashboard = lazy(() => import('@/features/shop-dashboard').then(m => ({ default: m.ShopDashboard })));
 const ShopRegistration = lazy(() => import('@/features/shop-dashboard').then(m => ({ default: m.ShopRegistrationPage })));
 const ShopCustomers = lazy(() => import('@/features/shop-dashboard').then(m => ({ default: m.CustomersPage })));
-const ShopWhatsAppQR = lazy(() => import('@/features/shop-dashboard').then(m => ({ default: m.WhatsAppQRPage })));
+const UnifiedWhatsApp = lazy(() => import('@/features/shop-dashboard').then(m => ({ default: m.UnifiedWhatsAppPage })));
 const ShopProfile = lazy(() => import('@/features/shop-dashboard').then(m => ({ default: m.ShopProfilePage })));
 const ShopReports = lazy(() => import('@/features/shop-dashboard').then(m => ({ default: m.ShopReportsPage })));
 const ShopNotifications = lazy(() => import('@/features/shop-dashboard').then(m => ({ default: m.ShopNotificationsPage })));
-const ShopWhatsApp = lazy(() => import('@/features/shop-dashboard').then(m => ({ default: m.ShopWhatsAppPage })));
 const ShopReviews = lazy(() => import('@/features/shop-dashboard').then(m => ({ default: m.ShopReviewsPage })));
 
 // Product pages
@@ -184,8 +183,12 @@ export const router = createBrowserRouter([
     element: withErrorBoundary(<ShopCustomers />, { allowedRoles: ['shop_owner'] }),
   },
   {
+    path: ROUTES.SHOP.WHATSAPP,
+    element: withErrorBoundary(<UnifiedWhatsApp />, { allowedRoles: ['shop_owner'] }),
+  },
+  {
     path: ROUTES.SHOP.WHATSAPP_QR,
-    element: withErrorBoundary(<ShopWhatsAppQR />, { allowedRoles: ['shop_owner'] }),
+    element: <Navigate to={ROUTES.SHOP.WHATSAPP} replace />,
   },
   {
     path: ROUTES.SHOP.PROFILE,
@@ -198,10 +201,6 @@ export const router = createBrowserRouter([
   {
     path: ROUTES.SHOP.NOTIFICATIONS,
     element: withErrorBoundary(<ShopNotifications />, { allowedRoles: ['shop_owner'] }),
-  },
-  {
-    path: ROUTES.SHOP.WHATSAPP,
-    element: withErrorBoundary(<ShopWhatsApp />, { allowedRoles: ['shop_owner'] }),
   },
   {
     path: ROUTES.SHOP.REVIEWS,

@@ -323,7 +323,7 @@ function ShopDashboard() {
               </div>
             </Link>
 
-            {/* WhatsApp */}
+            {/* WhatsApp Business */}
             <Link
               to={ROUTES.SHOP.WHATSAPP}
               className="flex items-center p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
@@ -332,22 +332,8 @@ function ShopDashboard() {
                 <MessageSquare className="text-green-600 w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">WhatsApp</h3>
-                <p className="text-sm text-gray-500">Управление WhatsApp</p>
-              </div>
-            </Link>
-
-            {/* WhatsApp QR */}
-            <Link
-              to={ROUTES.SHOP.WHATSAPP_QR}
-              className="flex items-center p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
-            >
-              <div className="w-10 h-10 bg-lime-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                <QrCode className="text-lime-600 w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">WhatsApp QR</h3>
-                <p className="text-sm text-gray-500">QR код для подключения</p>
+                <h3 className="font-medium text-gray-900">WhatsApp Business</h3>
+                <p className="text-sm text-gray-500">Подключение и настройки</p>
               </div>
             </Link>
 

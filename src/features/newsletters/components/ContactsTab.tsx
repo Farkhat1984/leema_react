@@ -8,7 +8,6 @@ import {
   Upload,
   Download,
   FileSpreadsheet,
-  Phone,
   MessageSquare,
   Check,
   X,
@@ -169,36 +168,36 @@ export function ContactsTab() {
       enableSorting: false,
     },
     {
-      accessorKey: 'name',
+      accessorKey: 'full_name',
       header: 'Name',
       cell: ({ row }) => (
-        <div className="font-medium text-gray-900">{row.original.name}</div>
+        <div className="font-medium text-gray-900">{row.original.full_name}</div>
       ),
     },
     {
-      accessorKey: 'phone',
-      header: 'Phone',
+      accessorKey: 'whatsapp_number',
+      header: 'WhatsApp Number',
       cell: ({ row }) => (
         <div className="flex items-center gap-2 text-gray-700">
-          <Phone className="w-4 h-4 text-gray-400" />
-          {row.original.phone}
+          <MessageSquare className="w-4 h-4 text-green-600" />
+          {row.original.whatsapp_number}
         </div>
       ),
     },
     {
-      accessorKey: 'has_whatsapp',
-      header: 'WhatsApp',
+      accessorKey: 'is_active',
+      header: 'Status',
       cell: ({ row }) => (
         <div className="flex items-center justify-center">
-          {row.original.has_whatsapp ? (
+          {row.original.is_active ? (
             <div className="flex items-center gap-1 text-green-600">
-              <MessageSquare className="w-4 h-4" />
-              <span className="text-sm">Yes</span>
+              <Check className="w-4 h-4" />
+              <span className="text-sm">Active</span>
             </div>
           ) : (
             <div className="flex items-center gap-1 text-gray-400">
               <X className="w-4 h-4" />
-              <span className="text-sm">No</span>
+              <span className="text-sm">Inactive</span>
             </div>
           )}
         </div>
@@ -359,7 +358,7 @@ export function ContactsTab() {
           }
         }}
         title="Delete Contact"
-        description={`Are you sure you want to delete "${deletingContact?.name}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${deletingContact?.full_name}"? This action cannot be undone.`}
         confirmText="Delete"
         variant="danger"
         isLoading={deleteMutation.isPending}

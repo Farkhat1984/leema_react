@@ -22,7 +22,7 @@ import { useDebounce } from '@/shared/hooks'
 import { contactsService } from '../services/contacts.service'
 import { newslettersService } from '../services/newsletters.service'
 import { newsletterSchema, type NewsletterFormData } from '@/shared/lib/validation/schemas'
-import type { Contact } from '../types/newsletter.types'
+import type { Contact, UploadedImage } from '../types/newsletter.types'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
@@ -79,7 +79,21 @@ export function CreateNewsletterTab() {
 
   // Create newsletter mutation
   const createMutation = useMutation({
-    mutationFn: (data: NewsletterFormData) => newslettersService.createNewsletter(data),
+    mutationFn: async (data: NewsletterFormData) => {
+      // Show uploading toast if there are images
+      if (data.images.length > 0) {
+        toast.loading(`Uploading ${data.images.length} image(s)...`, { id: 'upload' })
+      }
+
+      try {
+        const result = await newslettersService.createNewsletter(data)
+        toast.dismiss('upload')
+        return result
+      } catch (error) {
+        toast.dismiss('upload')
+        throw error
+      }
+    },
     onSuccess: () => {
       toast.success('Newsletter created successfully! Waiting for admin approval.')
       reset()
@@ -95,11 +109,17 @@ export function CreateNewsletterTab() {
   })
 
   const onSubmit = async (data: NewsletterFormData) => {
-    // Add scheduled_at if scheduling is enabled
-    if (!scheduleEnabled) {
-      data.scheduled_at = undefined
+    try {
+      // Add scheduled_at if scheduling is enabled
+      if (!scheduleEnabled) {
+        data.scheduled_at = undefined
+      }
+      console.log('Submitting newsletter:', data)
+      await createMutation.mutateAsync(data)
+    } catch (error) {
+      console.error('Newsletter submission error:', error)
+      // Error is already handled by mutation's onError
     }
-    await createMutation.mutateAsync(data)
   }
 
   const handleRecipientToggle = (contactId: number) => {
@@ -222,10 +242,10 @@ export function CreateNewsletterTab() {
 
         <ImageUploadMultiple
           maxFiles={5}
-          onChange={(files) => {
-            setValue('images', files as any);
+          onChange={(files: UploadedImage[]) => {
+            setValue('images', files);
           }}
-          value={(images as any) || []}
+          value={images || []}
         />
 
         <p className="text-sm text-gray-500">
@@ -313,13 +333,13 @@ export function CreateNewsletterTab() {
                     />
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-900">
-                        {contact.name}
+                        {contact.full_name}
                       </div>
-                      <div className="text-xs text-gray-500">{contact.phone}</div>
+                      <div className="text-xs text-gray-500 flex items-center gap-1">
+                        <MessageSquare className="w-3 h-3 text-green-600" />
+                        {contact.whatsapp_number}
+                      </div>
                     </div>
-                    {contact.has_whatsapp && (
-                      <MessageSquare className="w-4 h-4 text-green-600" />
-                    )}
                   </label>
                 ))
               ) : (
@@ -412,8 +432,8 @@ export function CreateNewsletterTab() {
         <Button
           type="submit"
           size="lg"
-          isLoading={isSubmitting}
-          disabled={isSubmitting}
+          isLoading={isSubmitting || createMutation.isPending}
+          disabled={isSubmitting || createMutation.isPending}
         >
           <Send className="w-5 h-5 mr-2" />
           Submit for Approval
@@ -424,6 +444,21 @@ export function CreateNewsletterTab() {
       {errors.texts && typeof errors.texts.message === 'string' && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">
           {errors.texts.message}
+        </div>
+      )}
+
+      {/* Display all form errors for debugging */}
+      {Object.keys(errors).length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">
+          <p className="font-semibold mb-2">Please fix the following errors:</p>
+          <ul className="list-disc list-inside space-y-1">
+            {errors.title && <li>Title: {errors.title.message}</li>}
+            {errors.description && <li>Description: {errors.description.message}</li>}
+            {errors.texts && typeof errors.texts.message === 'string' && <li>{errors.texts.message}</li>}
+            {errors.images && <li>Images: {errors.images.message as string}</li>}
+            {errors.recipient_ids && <li>Recipients: {errors.recipient_ids.message}</li>}
+            {errors.scheduled_at && <li>Schedule: {errors.scheduled_at.message}</li>}
+          </ul>
         </div>
       )}
     </form>

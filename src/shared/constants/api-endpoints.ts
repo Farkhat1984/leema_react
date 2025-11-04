@@ -49,11 +49,12 @@ export const API_ENDPOINTS = {
     ORDER_BY_ID: (id: string | number) => `/api/v1/shops/me/orders/${id}`,
 
     // Newsletters
-    NEWSLETTERS: '/api/v1/shops/me/newsletters',
+    NEWSLETTERS: '/api/v1/shops/me/newsletters/',
     NEWSLETTER_CREATE: '/api/v1/shops/me/newsletters',
     NEWSLETTER_BY_ID: (id: string | number) => `/api/v1/shops/me/newsletters/${id}`,
     NEWSLETTER_DELETE: (id: string | number) => `/api/v1/shops/me/newsletters/${id}`,
     NEWSLETTER_SEND: (id: string | number) => `/api/v1/shops/me/newsletters/${id}/send`,
+    NEWSLETTER_UPLOAD_IMAGE: '/api/v1/shops/me/newsletters/upload-image',
 
     // Contacts/WhatsApp
     CONTACTS: '/api/v1/shops/me/contacts',
@@ -62,7 +63,7 @@ export const API_ENDPOINTS = {
     CONTACT_BY_ID: (id: string | number) => `/api/v1/shops/me/contacts/${id}`,
     CONTACT_DELETE: (id: string | number) => `/api/v1/shops/me/contacts/${id}`,
     CONTACT_BULK_DELETE: '/api/v1/shops/me/contacts/bulk-delete',
-    CONTACTS_IMPORT_EXCEL: '/api/v1/shops/me/contacts/import',
+    CONTACTS_IMPORT_EXCEL: '/api/v1/shops/me/contacts/upload',
     CONTACTS_EXPORT_EXCEL: '/api/v1/shops/me/contacts/export',
     CONTACTS_DOWNLOAD_TEMPLATE: '/api/v1/shops/me/contacts/template',
 

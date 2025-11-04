@@ -75,11 +75,35 @@ export const isValidJWT = (token: string): boolean => {
 export const sanitizeRequestBody = <T extends Record<string, unknown>>(
   body: T
 ): T => {
+  // Handle arrays separately
+  if (Array.isArray(body)) {
+    return body.map((item) => {
+      if (typeof item === 'string') {
+        return sanitizeInput(item);
+      } else if (typeof item === 'object' && item !== null) {
+        return sanitizeRequestBody(item as Record<string, unknown>);
+      } else {
+        return item;
+      }
+    }) as unknown as T;
+  }
+
   const sanitized: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(body)) {
     if (typeof value === 'string') {
       sanitized[key] = sanitizeInput(value);
+    } else if (Array.isArray(value)) {
+      // Handle arrays within objects
+      sanitized[key] = value.map((item) => {
+        if (typeof item === 'string') {
+          return sanitizeInput(item);
+        } else if (typeof item === 'object' && item !== null) {
+          return sanitizeRequestBody(item as Record<string, unknown>);
+        } else {
+          return item;
+        }
+      });
     } else if (typeof value === 'object' && value !== null) {
       sanitized[key] = sanitizeRequestBody(value as Record<string, unknown>);
     } else {

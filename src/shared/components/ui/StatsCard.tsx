@@ -20,7 +20,7 @@ export interface StatsCardProps {
   title: string;
   value: string | number;
   icon?: ReactNode | string; // Support both JSX elements and icon names
-  variant?: string; // For future color variants (optional)
+  variant?: 'primary' | 'success' | 'warning' | 'danger' | 'info'; // Color variants
   trend?: {
     value: number;
     isPositive: boolean;
@@ -30,15 +30,40 @@ export interface StatsCardProps {
   loading?: boolean;
 }
 
+const variantStyles = {
+  primary: {
+    bg: 'bg-blue-100',
+    text: 'text-blue-600',
+  },
+  success: {
+    bg: 'bg-green-100',
+    text: 'text-green-600',
+  },
+  warning: {
+    bg: 'bg-yellow-100',
+    text: 'text-yellow-600',
+  },
+  danger: {
+    bg: 'bg-red-100',
+    text: 'text-red-600',
+  },
+  info: {
+    bg: 'bg-purple-100',
+    text: 'text-purple-600',
+  },
+}
+
 export const StatsCard = ({
   title,
   value,
   icon,
-  variant, // Accept but ignore for now (backward compatibility)
+  variant = 'primary',
   trend,
   className,
   loading = false,
 }: StatsCardProps) => {
+  const colors = variantStyles[variant];
+
   if (loading) {
     return (
       <Card className={cn('p-6', className)}>
@@ -87,7 +112,7 @@ export const StatsCard = ({
 
         {icon && (
           <div className="flex-shrink-0">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-primary-600">
+            <div className={cn('flex h-12 w-12 items-center justify-center rounded-full', colors.bg, colors.text)}>
               {icon}
             </div>
           </div>

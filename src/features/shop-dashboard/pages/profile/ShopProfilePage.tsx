@@ -21,30 +21,27 @@ import { PhoneInput } from '@/shared/components/forms/PhoneInput';
 import toast from 'react-hot-toast';
 
 const shopProfileSchema = z.object({
-  name: z.string().min(2, 'Название должно быть не менее 2 символов'),
+  shop_name: z.string().min(2, 'Название должно быть не менее 2 символов'),
+  owner_name: z.string().min(2, 'Имя владельца должно быть не менее 2 символов'),
   description: z.string().min(10, 'Описание должно быть не менее 10 символов'),
   address: z.string().min(5, 'Адрес должен быть не менее 5 символов'),
-  phone: z.string().min(10, 'Введите корректный номер телефона'),
-  whatsapp_phone: z.string().optional(),
-  email: z.string().email('Введите корректный email'),
-  instagram: z.string().optional(),
-  website: z.string().url('Введите корректный URL').optional().or(z.literal('')),
+  whatsapp_number: z.string().min(10, 'Введите корректный номер WhatsApp'),
+  phone: z.string().optional(),
 });
 
 type ShopProfileFormData = z.infer<typeof shopProfileSchema>;
 
 interface Shop {
   id: number;
-  name: string;
+  shop_name: string;
+  owner_name: string;
   description: string;
   address: string;
   phone: string;
-  whatsapp_phone: string | null;
-  email: string;
-  instagram: string | null;
-  website: string | null;
-  avatar: string | null;
-  status: string;
+  whatsapp_number: string | null;
+  avatar_url: string | null;
+  is_approved: boolean;
+  is_active: boolean;
 }
 
 function ShopProfilePage() {
@@ -71,18 +68,16 @@ function ShopProfilePage() {
   } = useForm<ShopProfileFormData>({
     resolver: zodResolver(shopProfileSchema),
     values: shop ? {
-      name: shop.name,
+      shop_name: shop.shop_name,
+      owner_name: shop.owner_name,
       description: shop.description,
       address: shop.address,
-      phone: shop.phone,
-      whatsapp_phone: shop.whatsapp_phone || '',
-      email: shop.email,
-      instagram: shop.instagram || '',
-      website: shop.website || '',
+      whatsapp_number: shop.whatsapp_number || shop.phone, // WhatsApp is primary, fallback to phone
+      phone: shop.phone || '',
     } : undefined,
   });
 
-  const phoneValue = watch('phone');
+  const whatsappValue = watch('whatsapp_number');
 
   const handleAvatarChange = (file: File | null) => {
     setAvatarFile(file);
@@ -172,10 +167,10 @@ function ShopProfilePage() {
           <Card className="p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-6">Аватар магазина</h2>
             <ImageUploadSingle
-              value={avatarPreview}
+              value={avatarPreview || shop?.avatar_url}
               onChange={handleAvatarChange}
               shape="square"
-              maxSize={5}
+              maxSize={5 * 1024 * 1024}
             />
           </Card>
 
@@ -189,12 +184,27 @@ function ShopProfilePage() {
                 </label>
                 <input
                   type="text"
-                  {...register('name')}
+                  {...register('shop_name')}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Введите название магазина"
                 />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                {errors.shop_name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.shop_name.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Имя владельца <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  {...register('owner_name')}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Введите имя владельца"
+                />
+                {errors.owner_name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.owner_name.message}</p>
                 )}
               </div>
 
@@ -236,79 +246,29 @@ function ShopProfilePage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Телефон <span className="text-red-500">*</span>
+                  WhatsApp <span className="text-red-500">*</span>
                 </label>
                 <PhoneInput
-                  value={phoneValue}
-                  onChange={(value) => setValue('phone', value)}
-                  error={errors.phone?.message}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  WhatsApp
-                </label>
-                <PhoneInput
-                  value={watch('whatsapp_phone') || ''}
-                  onChange={(value) => setValue('whatsapp_phone', value)}
+                  value={whatsappValue}
+                  onChange={(value) => setValue('whatsapp_number', value)}
+                  error={errors.whatsapp_number?.message}
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                  Если не указан, будет использоваться основной телефон
+                  Этот номер будет использоваться для WhatsApp интеграции
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email <span className="text-red-500">*</span>
+                  Телефон
                 </label>
-                <input
-                  type="email"
-                  {...register('email')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="email@example.com"
+                <PhoneInput
+                  value={watch('phone') || ''}
+                  onChange={(value) => setValue('phone', value)}
                 />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                )}
-              </div>
-            </div>
-          </Card>
-
-          {/* Social Media */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Социальные сети</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Instagram
-                </label>
-                <div className="flex">
-                  <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
-                    @
-                  </span>
-                  <input
-                    type="text"
-                    {...register('instagram')}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="username"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Сайт
-                </label>
-                <input
-                  type="url"
-                  {...register('website')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="https://yourwebsite.com"
-                />
-                {errors.website && (
-                  <p className="mt-1 text-sm text-red-600">{errors.website.message}</p>
-                )}
+                <p className="mt-1 text-sm text-gray-500">
+                  Дополнительный номер телефона (необязательно)
+                </p>
               </div>
             </div>
           </Card>
@@ -321,10 +281,9 @@ function ShopProfilePage() {
                 <div>
                   <p className="font-medium text-blue-900">Статус магазина</p>
                   <p className="text-sm text-blue-700">
-                    {shop.status === 'approved' && 'Одобрен'}
-                    {shop.status === 'pending' && 'Ожидает проверки'}
-                    {shop.status === 'rejected' && 'Отклонен'}
-                    {shop.status === 'deactivated' && 'Деактивирован'}
+                    {shop.is_approved && shop.is_active && 'Одобрен и активен'}
+                    {!shop.is_approved && 'Ожидает проверки'}
+                    {shop.is_approved && !shop.is_active && 'Деактивирован'}
                   </p>
                 </div>
               </div>

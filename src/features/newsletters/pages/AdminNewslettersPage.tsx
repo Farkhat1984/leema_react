@@ -9,7 +9,6 @@ import { StatsCard } from '@/shared/components/ui/StatsCard'
 import { StatusBadge } from '@/shared/components/ui/StatusBadge'
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog'
 import { RejectModal } from '@/shared/components/ui/RejectModal'
-import { FormDateRangePicker } from '@/shared/components/forms/FormDateRangePicker'
 import { useDebounce } from '@/shared/hooks'
 import { newslettersService } from '../services/newsletters.service'
 import { NewsletterDetailModal } from '../components/NewsletterDetailModal'
@@ -31,7 +30,6 @@ export default function AdminNewslettersPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<NewsletterStatus | 'all'>('all')
-  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({})
   const debouncedSearch = useDebounce(search, 300)
 
   // Modals state
@@ -89,22 +87,20 @@ export default function AdminNewslettersPage() {
   const clearFilters = () => {
     setSearch('')
     setStatusFilter('all')
-    setDateRange({})
   }
 
-  const hasFilters = search || statusFilter !== 'all' || dateRange.from || dateRange.to
+  const hasFilters = search || statusFilter !== 'all'
 
   // Table columns
   const columns: ColumnDef<Newsletter>[] = [
     {
-      accessorKey: 'shop',
+      accessorKey: 'shop_name',
       header: 'Shop',
       cell: ({ row }) => (
         <div className="flex items-center gap-2 min-w-[150px]">
           <Store className="w-4 h-4 text-gray-400" />
           <span className="font-medium text-gray-900">
-            {/* @ts-ignore - shop info from backend */}
-            {row.original.shop?.name || 'Unknown Shop'}
+            {row.original.shop_name || 'Unknown Shop'}
           </span>
         </div>
       ),
@@ -194,19 +190,12 @@ export default function AdminNewslettersPage() {
 
       {/* Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-          <StatsCard
-            title="Total Newsletters"
-            value={stats.total}
-            icon={<TrendingUp className="w-5 h-5" />}
-            variant="primary"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
             title="Pending Approval"
             value={stats.pending}
             icon={<Calendar className="w-5 h-5" />}
             variant="warning"
-            // trend removed
           />
           <StatsCard
             title="Approved"
@@ -230,21 +219,20 @@ export default function AdminNewslettersPage() {
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6 space-y-4">
-        <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-          Filters
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Search by title..."
-          />
+      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="w-full sm:w-80">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Search by title..."
+            />
+          </div>
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as NewsletterStatus | 'all')}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-56 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
@@ -254,20 +242,12 @@ export default function AdminNewslettersPage() {
             <option value="completed">Completed</option>
           </select>
 
-          <FormDateRangePicker
-            value={dateRange}
-            onChange={setDateRange}
-            placeholder="Select date range"
-          />
-        </div>
-
-        {hasFilters && (
-          <div className="flex justify-end">
-            <Button variant="outline" size="sm" onClick={clearFilters}>
+          {hasFilters && (
+            <Button variant="outline" size="sm" onClick={clearFilters} className="sm:ml-auto">
               Clear Filters
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Data Table */}

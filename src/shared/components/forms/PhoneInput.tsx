@@ -23,6 +23,12 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   required = false,
   country = 'kz',
 }) => {
+  const handleChange = (phoneValue: string) => {
+    // Ensure the phone number always has a + prefix
+    const formattedValue = phoneValue.startsWith('+') ? phoneValue : `+${phoneValue}`;
+    onChange(formattedValue);
+  };
+
   return (
     <div className="space-y-1">
       {label && (
@@ -34,10 +40,12 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
       <ReactPhoneInput
         country={country}
         value={value}
-        onChange={onChange}
+        onChange={handleChange}
         disabled={disabled}
         placeholder={placeholder}
         inputClass={error ? 'border-red-500' : ''}
+        enableSearch
+        disableSearchIcon
       />
       {error && <p className="text-sm text-red-600">{error}</p>}
     </div>

@@ -17,12 +17,27 @@ export interface GetContactsParams {
 export const contactsService = {
   async getContacts(params: GetContactsParams = {}): Promise<PaginatedContacts> {
     const queryParams = new URLSearchParams()
-    if (params.page) queryParams.append('page', params.page.toString())
-    if (params.per_page) queryParams.append('per_page', params.per_page.toString())
+    // Backend uses skip/limit, convert from page/per_page
+    if (params.page && params.per_page) {
+      const skip = (params.page - 1) * params.per_page
+      queryParams.append('skip', skip.toString())
+      queryParams.append('limit', params.per_page.toString())
+    } else if (params.per_page) {
+      queryParams.append('limit', params.per_page.toString())
+    }
     if (params.search) queryParams.append('search', params.search)
 
     const url = `${API_ENDPOINTS.SHOPS.CONTACTS}?${queryParams.toString()}`
-    return apiRequest<PaginatedContacts>(url)
+    const response = await apiRequest<any>(url)
+
+    // Transform backend response to match frontend expectations
+    return {
+      data: response.contacts || [],
+      total: response.total || 0,
+      page: params.page || 1,
+      per_page: params.per_page || 20,
+      total_pages: Math.ceil((response.total || 0) / (params.per_page || 20)),
+    }
   },
 
   async getContact(id: number): Promise<Contact> {

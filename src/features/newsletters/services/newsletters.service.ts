@@ -20,13 +20,29 @@ export const newslettersService = {
   // Shop endpoints
   async getNewsletters(params: GetNewslettersParams = {}): Promise<PaginatedNewsletters> {
     const queryParams = new URLSearchParams()
-    if (params.page) queryParams.append('page', params.page.toString())
-    if (params.per_page) queryParams.append('per_page', params.per_page.toString())
+
+    // Backend expects 'skip' and 'limit' instead of 'page' and 'per_page'
+    const page = params.page || 1
+    const perPage = params.per_page || 20
+    const skip = (page - 1) * perPage
+
+    queryParams.append('skip', skip.toString())
+    queryParams.append('limit', perPage.toString())
+
     if (params.search) queryParams.append('search', params.search)
     if (params.status) queryParams.append('status', params.status)
 
     const url = `${API_ENDPOINTS.SHOPS.NEWSLETTERS}?${queryParams.toString()}`
-    return apiRequest<PaginatedNewsletters>(url)
+    const response = await apiRequest<any>(url)
+
+    // Transform backend response to match frontend expectations
+    return {
+      data: response.newsletters || [],
+      total: response.total || 0,
+      page: page,
+      per_page: perPage,
+      total_pages: Math.ceil((response.total || 0) / perPage)
+    }
   },
 
   async getNewsletter(id: number): Promise<Newsletter> {
@@ -34,36 +50,47 @@ export const newslettersService = {
   },
 
   async createNewsletter(data: NewsletterCreateInput): Promise<Newsletter> {
-    const formData = new FormData()
-    formData.append('title', data.title)
-    if (data.description) formData.append('description', data.description)
-    formData.append('texts', JSON.stringify(data.texts))
-    formData.append('recipient_type', data.recipient_type)
-    formData.append('recipient_ids', JSON.stringify(data.recipient_ids))
-    if (data.scheduled_at) formData.append('scheduled_at', data.scheduled_at)
+    // Step 1: Upload images first to get URLs (only if they have File objects)
+    const imageUrls: string[] = []
+    for (const image of data.images) {
+      // Check if the image has a file to upload
+      if (image.file) {
+        const formData = new FormData()
+        formData.append('file', image.file)
 
-    // Add images
-    data.images.forEach((image, index) => {
-      formData.append(`images[${index}]`, image)
-    })
-
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}${API_ENDPOINTS.SHOPS.NEWSLETTER_CREATE}`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${sessionStorage.getItem('access_token')}`,
-        },
-        body: formData,
+        try {
+          const response = await apiRequest<{ url: string, image_url: string }>(
+            API_ENDPOINTS.SHOPS.NEWSLETTER_UPLOAD_IMAGE,
+            'POST',
+            formData
+          )
+          imageUrls.push(response.image_url || response.url)
+        } catch (error) {
+          console.error('Failed to upload image:', error)
+          throw new Error('Failed to upload newsletter image')
+        }
+      } else if (image.url && !image.url.startsWith('blob:')) {
+        // If it's already a server URL (not a blob), use it directly
+        imageUrls.push(image.url)
       }
-    )
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.message || 'Failed to create newsletter')
     }
 
-    return response.json()
+    // Step 2: Transform data to match backend schema
+    const backendData = {
+      title: data.title,
+      creative_texts: data.texts.map(t => t.content),
+      creative_images: imageUrls,
+      send_to_all: data.recipient_type === 'all',
+      contact_ids: data.recipient_type === 'selected' ? data.recipient_ids : [],
+      scheduled_at: data.scheduled_at || undefined,
+    }
+
+    // Step 3: Create newsletter
+    return apiRequest<Newsletter>(
+      API_ENDPOINTS.SHOPS.NEWSLETTER_CREATE,
+      'POST',
+      backendData
+    )
   },
 
   async deleteNewsletter(id: number): Promise<void> {
@@ -77,14 +104,29 @@ export const newslettersService = {
   // Admin endpoints
   async getAdminNewsletters(params: GetNewslettersParams = {}): Promise<PaginatedNewsletters> {
     const queryParams = new URLSearchParams()
-    if (params.page) queryParams.append('page', params.page.toString())
-    if (params.per_page) queryParams.append('per_page', params.per_page.toString())
+
+    // Admin endpoint uses 'page' and 'per_page' directly
+    const page = params.page || 1
+    const perPage = params.per_page || 20
+
+    queryParams.append('page', page.toString())
+    queryParams.append('per_page', perPage.toString())
+
     if (params.search) queryParams.append('search', params.search)
     if (params.status) queryParams.append('status', params.status)
     if (params.shop_id) queryParams.append('shop_id', params.shop_id.toString())
 
     const url = `${API_ENDPOINTS.ADMIN.NEWSLETTERS}?${queryParams.toString()}`
-    return apiRequest<PaginatedNewsletters>(url)
+    const response = await apiRequest<any>(url)
+
+    // Backend returns { data, total, page, per_page, total_pages }
+    return {
+      data: response.data || [],
+      total: response.total || 0,
+      page: response.page || page,
+      per_page: response.per_page || perPage,
+      total_pages: response.total_pages || Math.ceil((response.total || 0) / perPage)
+    }
   },
 
   async getAdminNewsletter(id: number): Promise<Newsletter> {
@@ -96,7 +138,9 @@ export const newslettersService = {
   },
 
   async rejectNewsletter(id: number, reason: string): Promise<void> {
-    return apiRequest<void>(API_ENDPOINTS.ADMIN.NEWSLETTER_REJECT(id), 'POST', { reason })
+    // Backend expects reason as query parameter, not body
+    const url = `${API_ENDPOINTS.ADMIN.NEWSLETTER_REJECT(id)}?reason=${encodeURIComponent(reason)}`
+    return apiRequest<void>(url, 'POST')
   },
 
   async getNewsletterStats(): Promise<NewsletterStats> {

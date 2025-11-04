@@ -86,18 +86,22 @@ export function NewsletterHistoryTab() {
     {
       accessorKey: 'sent_count',
       header: 'Sent/Total',
-      cell: ({ row }) => (
-        <div className="text-center">
-          <div className="font-medium text-gray-900">
-            {row.original.sent_count} / {row.original.total_recipients}
-          </div>
-          {row.original.total_recipients > 0 && (
-            <div className="text-xs text-gray-500">
-              {((row.original.sent_count / row.original.total_recipients) * 100).toFixed(0)}%
+      cell: ({ row }) => {
+        const sentCount = row.original.sent_count || 0
+        const totalRecipients = row.original.total_recipients || 0
+        return (
+          <div className="text-center">
+            <div className="font-medium text-gray-900">
+              {sentCount} / {totalRecipients}
             </div>
-          )}
-        </div>
-      ),
+            {totalRecipients > 0 && (
+              <div className="text-xs text-gray-500">
+                {((sentCount / totalRecipients) * 100).toFixed(0)}%
+              </div>
+            )}
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'created_at',

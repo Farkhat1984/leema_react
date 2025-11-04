@@ -107,7 +107,14 @@ export const newsletterSchema = z.object({
       })
     )
     .min(0),
-  images: z.array(z.instanceof(File)).min(0),
+  images: z.array(
+    z.object({
+      id: z.string(),
+      file: z.instanceof(File).optional(),
+      url: z.string(),
+      quality: z.enum(['low', 'medium', 'high']).optional(),
+    })
+  ).min(0),
   recipient_type: z.enum(['all', 'selected']),
   recipient_ids: z.array(z.number()).min(0),
   scheduled_at: z.string().optional(),
@@ -263,16 +270,16 @@ export type TopUpFormData = z.infer<typeof topUpSchema>;
  * Contact form validation schema (for newsletters)
  */
 export const contactSchema = z.object({
-  name: z
+  full_name: z
     .string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(100, 'Name is too long'),
-  phone: z
+    .min(1, 'Full name is required')
+    .max(255, 'Full name is too long'),
+  whatsapp_number: z
     .string()
-    .min(10, 'Phone number must be at least 10 digits')
-    .max(20, 'Phone number is too long')
+    .min(10, 'WhatsApp number must be at least 10 digits')
+    .max(50, 'WhatsApp number is too long')
     .regex(/^[\d\s\-\+\(\)]+$/, 'Invalid phone number format'),
-  has_whatsapp: z.boolean().default(false),
+  is_active: z.boolean().default(true).optional(),
 });
 
 export type ContactFormData = z.infer<typeof contactSchema>;
