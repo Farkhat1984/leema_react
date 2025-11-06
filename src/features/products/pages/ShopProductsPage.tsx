@@ -203,58 +203,86 @@ function ShopProductsPage() {
   const onSubmit = async (data: ProductFormData) => {
     setIsSaving(true);
     try {
-      // Upload images first
-      const imageUrls: string[] = [];
-      const newImages = uploadedImages.filter(img => img.url.startsWith('blob:'));
-      const existingImages = uploadedImages.filter(img => !img.url.startsWith('blob:'));
-
-      // Add existing image URLs first
-      existingImages.forEach(img => imageUrls.push(img.url));
-
-      // Upload new images in batch if any
-      if (newImages.length > 0) {
-        const formData = new FormData();
-        for (const img of newImages) {
-          const file = await fetch(img.url).then((r) => r.blob());
-          formData.append('files', file, `image-${Date.now()}.jpg`);
-        }
-
-        const uploadResponse = await apiRequest<{ urls: string[]; count: number }>(
-          API_ENDPOINTS.PRODUCTS.UPLOAD_IMAGES,
-          'POST',
-          formData
-        );
-
-        // Add newly uploaded URLs
-        if (uploadResponse.urls && Array.isArray(uploadResponse.urls)) {
-          imageUrls.push(...uploadResponse.urls);
-        }
-      }
-
       // Parse sizes and colors
       const sizes = data.sizes.split(',').map((s) => s.trim()).filter(Boolean);
       const colors = data.colors.split(',').map((c) => c.trim()).filter(Boolean);
 
-      const payload = {
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        category_id: data.category_id,
-        characteristics: {
-          sizes,
-          colors,
-        },
-        images: imageUrls,
-      };
+      const newImages = uploadedImages.filter(img => img.url.startsWith('blob:'));
+      const existingImages = uploadedImages.filter(img => !img.url.startsWith('blob:'));
 
       if (selectedProduct) {
         // Update existing product
+        const imageUrls: string[] = [];
+
+        // Add existing image URLs first
+        existingImages.forEach(img => imageUrls.push(img.url));
+
+        // Upload new images if any (with product_id)
+        if (newImages.length > 0) {
+          const files = await Promise.all(
+            newImages.map(async (img) => {
+              const blob = await fetch(img.url).then((r) => r.blob());
+              return new File([blob], `image-${Date.now()}.jpg`, { type: 'image/jpeg' });
+            })
+          );
+
+          const uploadResponse = await productService.uploadImages(selectedProduct.id, files);
+
+          // Add newly uploaded URLs
+          if (uploadResponse.urls && Array.isArray(uploadResponse.urls)) {
+            imageUrls.push(...uploadResponse.urls);
+          }
+        }
+
+        const payload = {
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          category_id: data.category_id,
+          characteristics: {
+            sizes,
+            colors,
+          },
+          images: imageUrls,
+        };
+
         await productService.updateProduct(selectedProduct.id, payload);
         toast.success('Product updated successfully');
         setShowEditModal(false);
       } else {
-        // Create new product
-        await productService.createProduct(payload);
+        // Create new product first (without images)
+        const payload = {
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          category_id: data.category_id,
+          characteristics: {
+            sizes,
+            colors,
+          },
+        };
+
+        const createdProduct = await productService.createProduct(payload);
+
+        // Then upload images with the product_id
+        if (newImages.length > 0) {
+          const files = await Promise.all(
+            newImages.map(async (img) => {
+              const blob = await fetch(img.url).then((r) => r.blob());
+              return new File([blob], `image-${Date.now()}.jpg`, { type: 'image/jpeg' });
+            })
+          );
+
+          const uploadResponse = await productService.uploadImages(createdProduct.id, files);
+
+          // Update product with uploaded image URLs
+          if (uploadResponse.urls && Array.isArray(uploadResponse.urls)) {
+            await productService.updateProduct(createdProduct.id, {
+              images: uploadResponse.urls,
+            });
+          }
+        }
+
         toast.success('Product created and submitted for approval');
         setShowCreateModal(false);
       }

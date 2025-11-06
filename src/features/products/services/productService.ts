@@ -160,16 +160,17 @@ export const productService = {
 
   /**
    * Upload product images
+   * @param productId - Product ID (required for new upload structure)
    * @param files - Image files
    * @returns Array of uploaded image URLs
    */
-  uploadImages: async (files: File[]): Promise<{ urls: string[] }> => {
+  uploadImages: async (productId: number, files: File[]): Promise<{ urls: string[] }> => {
     const formData = new FormData()
     files.forEach((file) => {
       formData.append('files', file)
     })
     return apiRequest<{ urls: string[] }>(
-      API_ENDPOINTS.PRODUCTS.UPLOAD_IMAGES,
+      `${API_ENDPOINTS.PRODUCTS.UPLOAD_IMAGES}?product_id=${productId}`,
       'POST',
       formData
     )

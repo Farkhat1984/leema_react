@@ -49,7 +49,7 @@ export const newslettersService = {
     return apiRequest<Newsletter>(API_ENDPOINTS.SHOPS.NEWSLETTER_BY_ID(id))
   },
 
-  async createNewsletter(data: NewsletterCreateInput): Promise<Newsletter> {
+  async createNewsletter(data: NewsletterCreateInput, newsletterId?: number): Promise<Newsletter> {
     // Step 1: Upload images first to get URLs (only if they have File objects)
     const imageUrls: string[] = []
     for (const image of data.images) {
@@ -59,8 +59,13 @@ export const newslettersService = {
         formData.append('file', image.file)
 
         try {
+          // Add newsletter_id if provided (recommended for organization)
+          const uploadUrl = newsletterId
+            ? `${API_ENDPOINTS.SHOPS.NEWSLETTER_UPLOAD_IMAGE}?newsletter_id=${newsletterId}`
+            : API_ENDPOINTS.SHOPS.NEWSLETTER_UPLOAD_IMAGE
+
           const response = await apiRequest<{ url: string, image_url: string }>(
-            API_ENDPOINTS.SHOPS.NEWSLETTER_UPLOAD_IMAGE,
+            uploadUrl,
             'POST',
             formData
           )
