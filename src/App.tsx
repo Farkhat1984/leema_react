@@ -19,9 +19,26 @@ function App() {
   // Initialize WebSocket connection when user is authenticated
   useEffect(() => {
     if (accessToken && user) {
-      // Determine client type based on account type
-      const clientType = shop ? 'shop' : user.accountType || 'user';
-      connect(accessToken, clientType as 'user' | 'shop' | 'admin');
+      // Determine client type based on role and shop presence
+      // Priority: role (admin) > shop presence > default (user)
+      let clientType: 'user' | 'shop' | 'admin';
+
+      if (user.role === 'admin') {
+        clientType = 'admin';
+      } else if (shop) {
+        // Only connect WebSocket for approved and active shops
+        // Unapproved shops should not have real-time access
+        if (shop.is_approved && shop.is_active) {
+          clientType = 'shop';
+        } else {
+          // Don't connect WebSocket for unapproved/inactive shops
+          return;
+        }
+      } else {
+        clientType = 'user';
+      }
+
+      connect(accessToken, clientType);
     }
 
     return () => {

@@ -27,6 +27,10 @@ export interface Shop {
   ownerId: string;
   balance: number;
   status: 'active' | 'suspended' | 'pending';
+  is_approved: boolean;
+  is_active: boolean;
+  rejection_reason?: string;
+  deactivation_reason?: string;
   createdAt: string;
   updatedAt?: string;
 }

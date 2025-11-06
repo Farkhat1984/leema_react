@@ -69,10 +69,14 @@ export const useWebSocketStore = create<WSState>((set, get) => ({
 
       // Connection opened
       socket.onopen = () => {
-        logger.info('[WebSocket] Connected');
+        const wasReconnecting = get().reconnectAttempts > 0;
+        logger.info('[WebSocket] Connected', {
+          clientType: get().clientType,
+          attempt: wasReconnecting ? get().reconnectAttempts + 1 : 1,
+          wasReconnecting,
+        });
 
         // Show success notification if reconnected
-        const wasReconnecting = get().reconnectAttempts > 0;
         if (wasReconnecting) {
           toast.success('Подключение восстановлено');
         }
@@ -156,10 +160,11 @@ export const useWebSocketStore = create<WSState>((set, get) => ({
         if (event.code !== 1000) {
           const attempts = get().reconnectAttempts;
           if (attempts < MAX_RECONNECT_ATTEMPTS) {
-            logger.info(
-              `[WebSocket] Reconnecting... (attempt ${attempts + 1}/${MAX_RECONNECT_ATTEMPTS})`
-            );
             const delay = RECONNECT_DELAY * Math.pow(2, attempts); // Exponential backoff
+            logger.info(
+              `[WebSocket] Reconnecting... (attempt ${attempts + 1}/${MAX_RECONNECT_ATTEMPTS})`,
+              { clientType: get().clientType, delay: `${delay}ms` }
+            );
             const reconnectTimeout = setTimeout(() => {
               set({ reconnectAttempts: attempts + 1, reconnectTimeout: null });
               const savedClientType = get().clientType || 'shop';
@@ -182,19 +187,12 @@ export const useWebSocketStore = create<WSState>((set, get) => ({
       socket.onerror = (error) => {
         set({ isConnecting: false });
 
-        // Show error notification only on first attempt
-        if (get().reconnectAttempts === 0) {
-          handleError(createError.websocket.connectionError(), {
-            showToast: true,
-            logError: true,
-          });
-        } else {
-          // Just log subsequent errors
-          handleError(createError.websocket.connectionError(), {
-            showToast: false,
-            logError: true,
-          });
-        }
+        // Don't show toast on first attempt - it usually succeeds on retry
+        // Only log the error for debugging
+        handleError(createError.websocket.connectionError(), {
+          showToast: false,  // Changed: don't show toast, reconnect usually works
+          logError: true,
+        });
       };
 
       set({ socket });

@@ -65,10 +65,27 @@ function AuthCallbackPage() {
       if (response.shop) {
         // User logged in as shop owner
         finalAccountType = 'shop';
-        redirectPath = ROUTES.SHOP.DASHBOARD;
+
+        // Check if shop is approved and active
+        const shopData: any = response.shop;
+        const isApproved = shopData.is_approved === true;
+        const isActive = shopData.is_active === true;
+
+        logger.debug('[AuthCallback] Shop status check', {
+          is_approved: isApproved,
+          is_active: isActive,
+          shop_id: shopData.id
+        });
+
+        // If shop is not approved or not active, redirect to registration page
+        if (!isApproved || !isActive) {
+          redirectPath = ROUTES.SHOP.REGISTER;
+          logger.info('[AuthCallback] Shop not approved/active, redirecting to registration');
+        } else {
+          redirectPath = ROUTES.SHOP.DASHBOARD;
+        }
 
         // Create minimal user object for shop (shop acts as user)
-        const shopData: any = response.shop;
         const shopAsUser: any = {
           id: String(shopData.id),
           email: shopData.email || '',

@@ -111,6 +111,7 @@ export const ROUTES = {
     NEWSLETTER: '/admin/newsletters',
     NOTIFICATIONS: '/admin/notifications',
     WARDROBES: '/admin/wardrobes',
+    WARDROBE_USER: (userId: string | number) => `/admin/wardrobes/user/${userId}`,
   },
   // USER routes removed - users use mobile app only (www.app.leema.kz)
 } as const;

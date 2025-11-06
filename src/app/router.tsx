@@ -117,6 +117,7 @@ const AdminLogs = lazy(() => import('@/features/admin-dashboard').then(m => ({ d
 const AdminReports = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminReportsPage })));
 const AdminCategories = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminCategoriesPage })));
 const AdminWardrobes = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminWardrobesPage })));
+const AdminUserWardrobe = lazy(() => import('@/features/admin-dashboard/pages/wardrobes/AdminUserWardrobePage'));
 const AdminNotifications = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminNotificationsPage })));
 const AdminShopsPending = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminShopsPendingPage })));
 const AdminShopProfile = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminShopProfilePage })));
@@ -239,6 +240,10 @@ export const router = createBrowserRouter([
   {
     path: ROUTES.ADMIN.WARDROBES,
     element: withErrorBoundary(<AdminWardrobes />, { allowedRoles: ['admin'] }),
+  },
+  {
+    path: '/admin/wardrobes/user/:userId',
+    element: withErrorBoundary(<AdminUserWardrobe />, { allowedRoles: ['admin'] }),
   },
   {
     path: ROUTES.ADMIN.NOTIFICATIONS,

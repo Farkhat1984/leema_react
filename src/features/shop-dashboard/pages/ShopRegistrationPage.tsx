@@ -95,8 +95,11 @@ function ShopRegistrationPage() {
         }
       }
     } catch (error: any) {
-      // If shop doesn't exist yet, it's a new registration
-      if (error.response?.status !== 404) {
+      // 404 = shop doesn't exist yet (new registration)
+      // 403 = shop not approved/active (expected on registration page)
+      // Only show error for other status codes
+      const status = error.response?.status;
+      if (status !== 404 && status !== 403) {
         logger.error('Failed to load shop data', error);
         toast.error('Failed to load shop information');
       }
@@ -163,8 +166,8 @@ function ShopRegistrationPage() {
           : 'Shop registration submitted for approval'
       );
 
-      // If approved, redirect to dashboard
-      if (response.status === 'approved') {
+      // If approved and active, redirect to dashboard
+      if (response.is_approved && response.is_active) {
         setTimeout(() => navigate(ROUTES.SHOP.DASHBOARD), 1500);
       }
     } catch (error: any) {

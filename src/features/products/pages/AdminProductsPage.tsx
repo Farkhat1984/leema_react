@@ -44,6 +44,16 @@ function AdminProductsPage() {
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<ProductStatus | 'all'>('pending');
+  const [selectedShopId, setSelectedShopId] = useState<string>('');
+  const [minPrice, setMinPrice] = useState<string>('');
+  const [maxPrice, setMaxPrice] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'created_at' | 'price' | 'name' | 'views'>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Available categories and shops for filters
+  const [categories, setCategories] = useState<Array<{ id: number; name: string }>>([]);
+  const [shops, setShops] = useState<Array<{ id: number; name: string }>>([]);
 
   // Modals
   const [showApproveDialog, setShowApproveDialog] = useState(false);
@@ -55,9 +65,56 @@ function AdminProductsPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   useEffect(() => {
+    loadCategories();
+    loadShops();
+  }, []);
+
+  useEffect(() => {
     loadStats();
     loadProducts();
-  }, [currentPage, searchTerm, selectedStatus]);
+  }, [currentPage, searchTerm, selectedStatus, selectedShopId, minPrice, maxPrice, selectedCategory, sortBy, sortOrder]);
+
+  /**
+   * Load categories for filter
+   */
+  const loadCategories = async () => {
+    try {
+      const response = await apiRequest<Array<{ id: number; name: string }>>(
+        API_ENDPOINTS.CATEGORIES.LIST
+      );
+      setCategories(Array.isArray(response) ? response : []);
+    } catch (error) {
+      logger.error('Failed to load categories', error);
+      setCategories([]);
+    }
+  };
+
+  /**
+   * Load shops for filter
+   */
+  const loadShops = async () => {
+    try {
+      // Use the /all endpoint with simplified fields
+      const response = await apiRequest<{
+        shops: Array<{
+          id: number;
+          shop_name: string;
+        }>
+      }>(
+        `${API_ENDPOINTS.ADMIN.SHOPS}/all?per_page=1000`
+      );
+
+      // Map shop_name to name for consistency
+      const shopsArray = (response.shops || []).map(shop => ({
+        id: shop.id,
+        name: shop.shop_name
+      }));
+      setShops(shopsArray);
+    } catch (error) {
+      logger.error('Failed to load shops', error);
+      setShops([]);
+    }
+  };
 
   /**
    * Load moderation statistics
@@ -86,17 +143,24 @@ function AdminProductsPage() {
   const loadProducts = async () => {
     setIsLoading(true);
     try {
-      const params = new URLSearchParams({
+      const params: Record<string, string> = {
         page: currentPage.toString(),
         per_page: '12',
-        ...(searchTerm && { search: searchTerm }),
-        ...(selectedStatus !== 'all' && { status: selectedStatus }),
-        sort_by: 'created_at',
-        sort_order: 'desc',
-      });
+        sort_by: sortBy,
+        sort_order: sortOrder,
+      };
 
+      // Add filters only if they have values
+      if (searchTerm) params.search = searchTerm;
+      if (selectedStatus !== 'all') params.status = selectedStatus;
+      if (selectedShopId) params.shop_id = selectedShopId;
+      if (minPrice) params.min_price = minPrice;
+      if (maxPrice) params.max_price = maxPrice;
+      if (selectedCategory) params.category_id = selectedCategory;
+
+      const queryString = new URLSearchParams(params).toString();
       const response = await apiRequest<ProductsResponse>(
-        `${API_ENDPOINTS.ADMIN.PRODUCTS}?${params}`
+        `${API_ENDPOINTS.ADMIN.PRODUCTS}?${queryString}`
       );
 
       // Ensure products is an array
@@ -284,6 +348,12 @@ function AdminProductsPage() {
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedStatus('pending');
+    setSelectedShopId('');
+    setMinPrice('');
+    setMaxPrice('');
+    setSelectedCategory('');
+    setSortBy('created_at');
+    setSortOrder('desc');
     setCurrentPage(1);
   };
 
@@ -338,38 +408,119 @@ function AdminProductsPage() {
             title="Rejected"
             value={stats.rejected}
             icon="x-circle"
-            variant="error"
+            variant="danger"
           />
         </div>
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Search */}
-            <div className="md:col-span-2">
-              <SearchInput
-                value={searchTerm}
-                onChange={setSearchTerm}
-                placeholder="Search products or shops..."
-              />
+          <div className="space-y-4">
+            {/* Row 1: Search and Status */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Search */}
+              <div className="md:col-span-2">
+                <SearchInput
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  placeholder="Поиск по названию, описанию..."
+                />
+              </div>
+
+              {/* Status Filter */}
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value as ProductStatus | 'all')}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="all">Все статусы</option>
+                <option value="pending">На модерации</option>
+                <option value="approved">Одобрено</option>
+                <option value="rejected">Отклонено</option>
+                <option value="draft">Черновик</option>
+              </select>
             </div>
 
-            {/* Status Filter */}
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value as ProductStatus | 'all')}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-            </select>
+            {/* Row 2: Shop and Category */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Shop Filter */}
+              <select
+                value={selectedShopId}
+                onChange={(e) => setSelectedShopId(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="">Все магазины</option>
+                {shops.map((shop) => (
+                  <option key={shop.id} value={shop.id}>
+                    {shop.name}
+                  </option>
+                ))}
+              </select>
+
+              {/* Category Filter */}
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="">Все категории</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Row 3: Price Range and Sorting */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Min Price */}
+              <div>
+                <input
+                  type="number"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  placeholder="Мин. цена"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              {/* Max Price */}
+              <div>
+                <input
+                  type="number"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  placeholder="Макс. цена"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              {/* Sort By */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'created_at' | 'price' | 'name' | 'views')}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="created_at">По дате</option>
+                <option value="name">По названию</option>
+                <option value="price">По цене</option>
+                <option value="views">По просмотрам</option>
+              </select>
+
+              {/* Sort Order */}
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="desc">По убыванию</option>
+                <option value="asc">По возрастанию</option>
+              </select>
+            </div>
           </div>
 
-
           {/* Clear Filters */}
-          {(searchTerm || selectedStatus !== 'pending') && (
+          {(searchTerm || selectedStatus !== 'pending' || selectedShopId || minPrice || maxPrice || selectedCategory || sortBy !== 'created_at' || sortOrder !== 'desc') && (
             <div className="flex justify-end mt-4 pt-4 border-t border-gray-200">
               <Button
                 onClick={clearFilters}
@@ -378,7 +529,7 @@ function AdminProductsPage() {
                 className="flex items-center gap-1"
               >
                 <X className="w-4 h-4" />
-                Clear Filters
+                Очистить фильтры
               </Button>
             </div>
           )}
@@ -443,7 +594,7 @@ function AdminProductsPage() {
 
                     {/* Shop Info */}
                     <p className="text-xs text-gray-500 mb-3">
-                      Shop ID: {product.shop_id}
+                      Магазин: {product.shop_name || `ID: ${product.shop_id}`}
                     </p>
 
                     {/* Rejection Reason */}
@@ -581,8 +732,10 @@ function AdminProductsPage() {
                   />
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">Shop ID</span>
-                  <span className="text-sm text-gray-900">{selectedProduct.shop_id}</span>
+                  <span className="text-sm font-medium text-gray-600">Магазин</span>
+                  <span className="text-sm text-gray-900">
+                    {selectedProduct.shop_name || `ID: ${selectedProduct.shop_id}`}
+                  </span>
                 </div>
                 <div className="py-2 border-b border-gray-200">
                   <span className="text-sm font-medium text-gray-600 block mb-1">Description</span>

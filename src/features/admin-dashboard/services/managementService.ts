@@ -172,7 +172,8 @@ export const managementService = {
    * @returns List of users
    */
   getUsers: async (filters?: UserFilters): Promise<User[]> => {
-    return apiRequest<User[]>(API_ENDPOINTS.ADMIN.USERS, 'GET', null, filters)
+    const response = await apiRequest<any>(`${API_ENDPOINTS.ADMIN.USERS}-all`, 'GET', null, filters);
+    return response.users || response;
   },
 
   /**

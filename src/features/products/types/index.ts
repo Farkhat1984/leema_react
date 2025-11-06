@@ -16,6 +16,7 @@ export interface ProductImage {
 export interface Product {
   id: number;
   shop_id: number;
+  shop_name?: string;
   name: string;
   description: string;
   price: number;
@@ -26,6 +27,7 @@ export interface Product {
   images: ProductImage[];
   status: ProductStatus;
   rejection_reason?: string;
+  moderation_notes?: string;
   views: number;
   try_ons: number;
   created_at: string;

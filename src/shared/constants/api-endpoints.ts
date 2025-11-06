@@ -146,6 +146,7 @@ export const API_ENDPOINTS = {
     // Wardrobes
     WARDROBES: '/api/v1/admin/wardrobes',
     WARDROBES_STATS: '/api/v1/admin/wardrobes/stats',
+    WARDROBES_FILTERS: '/api/v1/admin/wardrobes/filters',
     WARDROBES_USER: (userId: string | number) => `/api/v1/admin/wardrobes/user/${userId}`,
 
     // Reports & Analytics

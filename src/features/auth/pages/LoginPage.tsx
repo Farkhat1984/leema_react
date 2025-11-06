@@ -7,9 +7,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { CONFIG, ROUTES } from '@/shared/constants/config';
+import { ROUTES } from '@/shared/constants/config';
 import { Button } from '@/shared/components/ui/Button';
 import { logger } from '@/shared/lib/utils/logger';
+import authService from '../services/authService';
 
 type AccountType = 'shop' | 'admin';
 
@@ -76,38 +77,29 @@ function LoginPage() {
 
   /**
    * Handle Google OAuth login for shop/admin
+   * Uses backend API to generate secure OAuth URL with state and nonce
    */
-  const handleGoogleLogin = (accountType: AccountType) => {
+  const handleGoogleLogin = async (accountType: AccountType) => {
     setIsLoading(true);
 
-    // Store requested account type for callback
-    localStorage.setItem('requestedAccountType', accountType);
+    try {
+      // Store requested account type for callback
+      localStorage.setItem('requestedAccountType', accountType);
 
-    // Generate state for security
-    const state = Math.random().toString(36).substring(7);
-    localStorage.setItem('oauth_state', state);
+      // Get secure OAuth URL from backend with state and nonce
+      const { authorization_url } = await authService.getGoogleAuthUrl(accountType, 'web');
 
-    // Redirect to Google OAuth
-    const redirectUri = `${window.location.origin}/auth/callback`;
-    const clientId = CONFIG.GOOGLE_CLIENT_ID;
+      logger.debug('[LoginPage] Redirecting to Google OAuth', {
+        accountType,
+        url: authorization_url.substring(0, 100) + '...'
+      });
 
-    if (!clientId) {
-      logger.error('Google Client ID not configured');
+      // Redirect to Google OAuth
+      window.location.href = authorization_url;
+    } catch (error) {
+      logger.error('[LoginPage] Failed to get Google auth URL', error);
       setIsLoading(false);
-      return;
     }
-
-    const googleAuthUrl =
-      `https://accounts.google.com/o/oauth2/v2/auth?` +
-      `client_id=${clientId}&` +
-      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-      `response_type=code&` +
-      `scope=openid%20profile%20email&` +
-      `state=${state}&` +
-      `access_type=offline&` +
-      `prompt=consent`;
-
-    window.location.href = googleAuthUrl;
   };
 
   /**
@@ -154,7 +146,7 @@ function LoginPage() {
 
             {/* Admin Login */}
             <Button
-              onClick={() => handleGoogleLogin('admin')}
+              onClick={() => handleGoogleLogin('user')}
               disabled={isLoading}
               className="w-full h-12 bg-gray-800 hover:bg-gray-900 text-white transition-all duration-200"
             >
