@@ -128,9 +128,9 @@ export const ImageUploadMultiple: React.FC<ImageUploadMultipleProps> = ({
   };
 
   const qualityLabels = {
-    low: 'Low Quality',
-    medium: 'Medium Quality',
-    high: 'High Quality',
+    low: 'Низкое качество',
+    medium: 'Среднее качество',
+    high: 'Высокое качество',
   };
 
   return (
@@ -162,22 +162,22 @@ export const ImageUploadMultiple: React.FC<ImageUploadMultipleProps> = ({
             {isDragActive ? (
               <>
                 <Upload className="w-12 h-12 mb-3 text-indigo-500" />
-                <p className="text-sm font-medium">Drop images here</p>
+                <p className="text-sm font-medium">Перетащите изображения сюда</p>
               </>
             ) : (
               <>
                 <ImageIcon className="w-12 h-12 mb-3" />
                 <p className="text-sm font-medium mb-1">
-                  Click to upload or drag and drop
+                  Нажмите для загрузки или перетащите файлы
                 </p>
                 <p className="text-xs text-gray-400">
-                  PNG, JPG, WEBP up to {(maxSize / 1024 / 1024).toFixed(0)}MB
+                  PNG, JPG, WEBP до {(maxSize / 1024 / 1024).toFixed(0)}МБ
                 </p>
                 {helperText && (
                   <p className="text-xs text-gray-400 mt-1">{helperText}</p>
                 )}
                 <p className="text-xs text-gray-500 mt-2">
-                  {images.length}/{maxFiles} images uploaded
+                  {images.length}/{maxFiles} загружено изображений
                 </p>
               </>
             )}
@@ -193,7 +193,7 @@ export const ImageUploadMultiple: React.FC<ImageUploadMultipleProps> = ({
               <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                 <img
                   src={image.url}
-                  alt="Upload preview"
+                  alt="Предпросмотр загрузки"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -241,7 +241,7 @@ export const ImageUploadMultiple: React.FC<ImageUploadMultipleProps> = ({
       {images.length >= maxFiles && (
         <div className="mt-2 flex items-center text-sm text-amber-600">
           <AlertCircle className="w-4 h-4 mr-1" />
-          Maximum {maxFiles} images reached
+          Достигнут максимум {maxFiles} изображений
         </div>
       )}
     </div>

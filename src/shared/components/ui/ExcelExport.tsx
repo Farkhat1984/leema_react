@@ -28,7 +28,7 @@ export function ExcelExport<T = Record<string, unknown>>({
   variant = 'outline',
   size = 'md',
   className = '',
-  buttonText = 'Export to Excel',
+  buttonText = 'Экспортировать в Excel',
   onExportStart,
   onExportComplete,
   onExportError,
@@ -38,7 +38,7 @@ export function ExcelExport<T = Record<string, unknown>>({
       onExportStart?.();
 
       if (!data || data.length === 0) {
-        throw new Error('No data to export');
+        throw new Error('Нет данных для экспорта');
       }
 
       // Transform data based on columns config
@@ -133,7 +133,7 @@ export const exportToExcel = <T = Record<string, unknown>>(
   } = options || {};
 
   if (!data || data.length === 0) {
-    logger.warn('No data to export');
+    logger.warn('Нет данных для экспорта');
     return;
   }
 
@@ -180,7 +180,7 @@ export function ExcelTemplateDownload<T = Record<string, unknown>>({
   variant = 'outline',
   size = 'sm',
   className = '',
-  buttonText = 'Download Template',
+  buttonText = 'Загрузить шаблон',
 }: ExcelTemplateDownloadProps<T>) {
   const handleDownload = () => {
     // Create header row

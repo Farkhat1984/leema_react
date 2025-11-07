@@ -10,11 +10,11 @@ import { z } from 'zod';
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Invalid email format'),
+    .min(1, 'Email обязателен')
+    .email('Неверный формат email'),
   password: z
     .string()
-    .min(6, 'Password must be at least 6 characters'),
+    .min(6, 'Пароль должен быть не менее 6 символов'),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
@@ -25,23 +25,23 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 export const registerSchema = z.object({
   name: z
     .string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(50, 'Name must be less than 50 characters'),
+    .min(2, 'Имя должно быть не менее 2 символов')
+    .max(50, 'Имя должно быть не более 50 символов'),
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Invalid email format'),
+    .min(1, 'Email обязателен')
+    .email('Неверный формат email'),
   phone: z
     .string()
-    .regex(/^\+?7\d{10}$/, 'Invalid phone format (use +7XXXXXXXXXX)')
+    .regex(/^\+?7\d{10}$/, 'Неверный формат телефона (используйте +7XXXXXXXXXX)')
     .optional(),
   password: z
     .string()
-    .min(6, 'Password must be at least 6 characters')
-    .max(100, 'Password must be less than 100 characters'),
+    .min(6, 'Пароль должен быть не менее 6 символов')
+    .max(100, 'Пароль должен быть не более 100 символов'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: 'Пароли не совпадают',
   path: ['confirmPassword'],
 });
 
@@ -53,38 +53,38 @@ export type RegisterFormData = z.infer<typeof registerSchema>;
 export const productSchema = z.object({
   name: z
     .string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(200, 'Product name must be less than 200 characters'),
+    .min(2, 'Название должно быть не менее 2 символов')
+    .max(200, 'Название товара должно быть не более 200 символов'),
   description: z
     .string()
-    .min(10, 'Description must be at least 10 characters')
-    .max(2000, 'Description must be less than 2000 characters'),
+    .min(10, 'Описание должно быть не менее 10 символов')
+    .max(2000, 'Описание должно быть не более 2000 символов'),
   price: z
     .number()
-    .min(0.01, 'Price must be greater than 0')
+    .min(0.01, 'Цена должна быть больше 0')
     .or(z.string().transform((val) => parseFloat(val))),
   category_id: z
     .number()
-    .min(1, 'Please select a category')
+    .min(1, 'Выберите категорию')
     .or(z.string().transform((val) => parseInt(val, 10))),
   images: z
     .array(z.string())
-    .min(1, 'At least one image is required')
-    .max(10, 'Maximum 10 images allowed')
+    .min(1, 'Требуется хотя бы одно изображение')
+    .max(10, 'Максимум 10 изображений разрешено')
     .optional(),
   stock: z
     .number()
     .int()
-    .min(0, 'Stock must be non-negative')
+    .min(0, 'Складское количество должно быть неотрицательным')
     .or(z.string().transform((val) => parseInt(val, 10)))
     .optional(),
   sizes: z
     .string()
-    .min(1, 'Please enter at least one size (comma-separated)')
+    .min(1, 'Укажите хотя бы один размер (разделенные запятыми)')
     .or(z.array(z.string())),
   colors: z
     .string()
-    .min(1, 'Please enter at least one color (comma-separated)')
+    .min(1, 'Укажите хотя бы один цвет (разделенные запятыми)')
     .or(z.array(z.string())),
 });
 
@@ -96,13 +96,13 @@ export type ProductFormData = z.infer<typeof productSchema>;
 export const newsletterSchema = z.object({
   title: z
     .string()
-    .min(3, 'Title must be at least 3 characters')
-    .max(200, 'Title is too long'),
-  description: z.string().max(500, 'Description is too long').optional(),
+    .min(3, 'Название должно быть не менее 3 символов')
+    .max(200, 'Название слишком длинное'),
+  description: z.string().max(500, 'Описание слишком длинное').optional(),
   texts: z
     .array(
       z.object({
-        content: z.string().min(1, 'Text content cannot be empty'),
+        content: z.string().min(1, 'Содержимое текста не может быть пусто'),
         order: z.number(),
       })
     )
@@ -122,7 +122,7 @@ export const newsletterSchema = z.object({
   .refine(
     (data) => data.texts.length > 0 || data.images.length > 0,
     {
-      message: 'Newsletter must have at least one text message or image',
+      message: 'Рассылка должна содержать хотя бы одно текстовое сообщение или изображение',
       path: ['texts'],
     }
   )
@@ -134,7 +134,7 @@ export const newsletterSchema = z.object({
       return true;
     },
     {
-      message: 'Please select at least one contact',
+      message: 'Выберите хотя бы один контакт',
       path: ['recipient_ids'],
     }
   );
@@ -147,13 +147,13 @@ export type NewsletterFormData = z.infer<typeof newsletterSchema>;
 export const profileUpdateSchema = z.object({
   name: z
     .string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(50, 'Name must be less than 50 characters'),
+    .min(2, 'Имя должно быть не менее 2 символов')
+    .max(50, 'Имя должно быть не более 50 символов'),
   phone: z
     .string()
-    .regex(/^\+?7\d{10}$/, 'Invalid phone format (use +7XXXXXXXXXX)')
+    .regex(/^\+?7\d{10}$/, 'Неверный формат телефона (используйте +7XXXXXXXXXX)')
     .optional(),
-  avatar: z.string().url('Invalid avatar URL').optional(),
+  avatar: z.string().url('Неверный URL аватара').optional(),
 });
 
 export type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>;
@@ -256,11 +256,11 @@ export type CategoryFormData = z.infer<typeof categorySchema>;
 export const topUpSchema = z.object({
   amount: z
     .number()
-    .min(100, 'Minimum top-up amount is 100 KZT')
-    .max(1000000, 'Maximum top-up amount is 1,000,000 KZT')
+    .min(100, 'Минимальная сумма пополнения: 100 KZT')
+    .max(1000000, 'Максимальная сумма пополнения: 1,000,000 KZT')
     .or(z.string().transform((val) => parseFloat(val))),
   payment_method: z.enum(['card', 'kaspi', 'paypal'] as const, {
-    errorMap: () => ({ message: 'Please select a payment method' }),
+    errorMap: () => ({ message: 'Выберите способ оплаты' }),
   }),
 });
 
@@ -272,13 +272,13 @@ export type TopUpFormData = z.infer<typeof topUpSchema>;
 export const contactSchema = z.object({
   full_name: z
     .string()
-    .min(1, 'Full name is required')
-    .max(255, 'Full name is too long'),
+    .min(1, 'Полное имя обязательно')
+    .max(255, 'Полное имя слишком длинное'),
   whatsapp_number: z
     .string()
-    .min(10, 'WhatsApp number must be at least 10 digits')
-    .max(50, 'WhatsApp number is too long')
-    .regex(/^[\d\s\-\+\(\)]+$/, 'Invalid phone number format'),
+    .min(10, 'Номер WhatsApp должен содержать не менее 10 цифр')
+    .max(50, 'Номер WhatsApp слишком длинный')
+    .regex(/^[\d\s\-\+\(\)]+$/, 'Неверный формат номера телефона'),
   is_active: z.boolean().default(true).optional(),
 });
 
@@ -316,6 +316,6 @@ export const commonValidators = {
   email: z.string().email('Неверный формат email'),
   phone: z.string().regex(/^[\d\s\-\+\(\)]+$/, 'Неверный формат номера телефона'),
   url: z.string().url('Неверный формат URL'),
-  positiveNumber: z.number().min(0, 'Значение должно быть положительным'),
+  positiveNumber: z.number().min(0, 'Значение должно быть неотрицательным'),
   requiredString: (fieldName: string) => z.string().min(1, `${fieldName} обязательно`),
 };

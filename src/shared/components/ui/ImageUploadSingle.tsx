@@ -109,7 +109,7 @@ export const ImageUploadSingle: React.FC<ImageUploadSingleProps> = ({
           <>
             <img
               src={preview}
-              alt="Preview"
+              alt="Предпросмотр"
               className={`w-full h-full object-cover ${shapeClasses[shape]}`}
             />
             {!disabled && (
@@ -128,16 +128,16 @@ export const ImageUploadSingle: React.FC<ImageUploadSingleProps> = ({
             {isDragActive ? (
               <>
                 <Upload className="w-8 h-8 mb-2" />
-                <p className="text-sm text-center">Drop image here</p>
+                <p className="text-sm text-center">Перетащите изображение сюда</p>
               </>
             ) : (
               <>
                 <ImageIcon className="w-8 h-8 mb-2" />
                 <p className="text-xs text-center px-2">
-                  Click or drag image
+                  Нажмите или перетащите изображение
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
-                  Max {(maxSize / 1024 / 1024).toFixed(0)}MB
+                  Макс {(maxSize / 1024 / 1024).toFixed(0)}МБ
                 </p>
               </>
             )}

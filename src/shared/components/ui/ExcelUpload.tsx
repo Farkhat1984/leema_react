@@ -79,11 +79,11 @@ export function ExcelUpload({
       });
 
       if (jsonData.length === 0) {
-        throw new Error('Excel file is empty');
+        throw new Error('Файл Excel пуст');
       }
 
       if (jsonData.length > maxRows) {
-        throw new Error(`File contains too many rows. Maximum ${maxRows} rows allowed.`);
+        throw new Error(`Файл содержит слишком много строк. Максимум ${maxRows} строк разрешено.`);
       }
 
       // Extract headers
@@ -96,7 +96,7 @@ export function ExcelUpload({
         );
         if (missingColumns.length > 0) {
           throw new Error(
-            `Missing required columns: ${missingColumns.join(', ')}`
+            `Отсутствуют обязательные столбцы: ${missingColumns.join(', ')}`
           );
         }
       }
@@ -122,7 +122,7 @@ export function ExcelUpload({
         requiredColumns.forEach((col) => {
           if (!row[col] || String(row[col]).trim() === '') {
             isValid = false;
-            errors.push(`${col} is required`);
+            errors.push(`${col} обязателен`);
           }
         });
 
@@ -155,7 +155,7 @@ export function ExcelUpload({
       onDataParsed(data);
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Failed to parse Excel file';
+        err instanceof Error ? err.message : 'Не удалось разобрать файл Excel';
       setParseError(errorMessage);
       logger.error('Excel parse error', err);
     } finally {
@@ -226,28 +226,28 @@ export function ExcelUpload({
               {isProcessing ? (
                 <>
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mb-3"></div>
-                  <p className="text-sm font-medium">Processing Excel file...</p>
+                  <p className="text-sm font-medium">Обработка файла Excel...</p>
                 </>
               ) : isDragActive ? (
                 <>
                   <Upload className="w-12 h-12 mb-3 text-indigo-500" />
-                  <p className="text-sm font-medium">Drop Excel file here</p>
+                  <p className="text-sm font-medium">Перетащите файл Excel сюда</p>
                 </>
               ) : (
                 <>
                   <FileSpreadsheet className="w-12 h-12 mb-3" />
                   <p className="text-sm font-medium mb-1">
-                    Click to upload or drag and drop
+                    Нажмите для загрузки или перетащите файл
                   </p>
                   <p className="text-xs text-gray-400">
-                    XLSX, XLS, CSV up to {(maxSize / 1024 / 1024).toFixed(0)}MB
+                    XLSX, XLS, CSV до {(maxSize / 1024 / 1024).toFixed(0)}МБ
                   </p>
                   {helperText && (
                     <p className="text-xs text-gray-400 mt-1">{helperText}</p>
                   )}
                   {requiredColumns.length > 0 && (
                     <p className="text-xs text-gray-500 mt-2">
-                      Required columns: {requiredColumns.join(', ')}
+                      Обязательные столбцы: {requiredColumns.join(', ')}
                     </p>
                   )}
                 </>
@@ -264,7 +264,7 @@ export function ExcelUpload({
                 className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-700"
               >
                 <Download className="w-4 h-4 mr-1" />
-                Download template
+                Загрузить шаблон
               </a>
             </div>
           )}
@@ -282,16 +282,16 @@ export function ExcelUpload({
                   </p>
                   <div className="mt-1 flex flex-wrap gap-3 text-xs text-gray-500">
                     <span className="flex items-center">
-                      Total: {parsedData.totalRows} rows
+                      Всего: {parsedData.totalRows} строк
                     </span>
                     <span className="flex items-center text-green-600">
                       <CheckCircle className="w-3 h-3 mr-1" />
-                      Valid: {parsedData.validRows}
+                      Верные: {parsedData.validRows}
                     </span>
                     {parsedData.invalidRows > 0 && (
                       <span className="flex items-center text-red-600">
                         <AlertCircle className="w-3 h-3 mr-1" />
-                        Invalid: {parsedData.invalidRows}
+                        Ошибки: {parsedData.invalidRows}
                       </span>
                     )}
                   </div>
@@ -313,8 +313,8 @@ export function ExcelUpload({
             {showPreview && parsedData.rows.length > 0 && (
               <div className="mt-4 overflow-x-auto">
                 <p className="text-xs font-medium text-gray-700 mb-2">
-                  Preview (first {Math.min(previewRows, parsedData.rows.length)}{' '}
-                  rows):
+                  Предпросмотр (первые {Math.min(previewRows, parsedData.rows.length)}{' '}
+                  строк):
                 </p>
                 <table className="min-w-full divide-y divide-gray-200 text-xs">
                   <thead className="bg-gray-100">
@@ -331,7 +331,7 @@ export function ExcelUpload({
                         </th>
                       ))}
                       <th className="px-2 py-2 text-left text-xs font-medium text-gray-500">
-                        Status
+                        Статус
                       </th>
                     </tr>
                   </thead>
@@ -372,7 +372,7 @@ export function ExcelUpload({
                 </table>
                 {parsedData.rows.length > previewRows && (
                   <p className="mt-2 text-xs text-gray-500">
-                    ... and {parsedData.rows.length - previewRows} more rows
+                    ... и еще {parsedData.rows.length - previewRows} строк
                   </p>
                 )}
               </div>
