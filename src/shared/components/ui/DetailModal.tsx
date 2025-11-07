@@ -29,7 +29,7 @@ export const DetailModal: React.FC<DetailModalProps> = ({
   size = 'lg',
   showFooter = true,
   footerContent,
-  closeButtonText = 'Close',
+  closeButtonText = 'Закрыть',
   actions,
   closeOnOverlayClick = true,
   closeOnEscape = true,

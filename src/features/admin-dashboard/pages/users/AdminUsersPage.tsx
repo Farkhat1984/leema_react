@@ -28,7 +28,7 @@ function AdminUsersPage() {
 
   const columns = [
     {
-      header: 'User',
+      header: 'Пользователь',
       accessorKey: 'name',
       cell: ({ row }: { row: Row<User> }) => (
         <div className="flex items-center gap-3">
@@ -53,12 +53,12 @@ function AdminUsersPage() {
       ),
     },
     {
-      header: 'Created At',
+      header: 'Дата регистрации',
       accessorKey: 'created_at',
       cell: ({ row }: { row: Row<User> }) => formatDate(row.original.created_at),
     },
     {
-      header: 'Actions',
+      header: 'Действия',
       accessorKey: 'id',
       cell: ({ row }: { row: Row<User> }) => (
         <Button
@@ -76,9 +76,9 @@ function AdminUsersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Users</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Пользователи</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          View mobile app users
+          Просмотр пользователей мобильного приложения
         </p>
       </div>
 

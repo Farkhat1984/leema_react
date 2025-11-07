@@ -14,12 +14,12 @@ import { OrderDetailModal } from '../components/OrderDetailModal'
 import type { Order, OrderStatus } from '../types/order.types'
 
 const STATUS_CONFIG = {
-  pending: { label: 'Pending', color: 'gray' as const },
-  paid: { label: 'Paid', color: 'green' as const },
-  shipped: { label: 'Shipped', color: 'blue' as const },
-  completed: { label: 'Completed', color: 'green' as const },
-  cancelled: { label: 'Cancelled', color: 'red' as const },
-  refunded: { label: 'Refunded', color: 'yellow' as const },
+  pending: { label: 'Ожидание', color: 'gray' as const },
+  paid: { label: 'Оплачен', color: 'green' as const },
+  shipped: { label: 'Отправлен', color: 'blue' as const },
+  completed: { label: 'Завершен', color: 'green' as const },
+  cancelled: { label: 'Отменен', color: 'red' as const },
+  refunded: { label: 'Возврат', color: 'yellow' as const },
 }
 
 export default function ShopOrdersPage() {
@@ -68,7 +68,7 @@ export default function ShopOrdersPage() {
   const columns: ColumnDef<Order>[] = [
     {
       accessorKey: 'order_number',
-      header: 'Order #',
+      header: 'Заказ №',
       cell: ({ row }) => (
         <div className="font-medium text-blue-600">
           {ordersService.formatOrderNumber(row.original.order_number)}
@@ -77,7 +77,7 @@ export default function ShopOrdersPage() {
     },
     {
       accessorKey: 'customer',
-      header: 'Customer',
+      header: 'Клиент',
       cell: ({ row }) => (
         <div>
           <div className="font-medium text-gray-900">{row.original.customer.name}</div>
@@ -87,7 +87,7 @@ export default function ShopOrdersPage() {
     },
     {
       accessorKey: 'total',
-      header: 'Total',
+      header: 'Сумма',
       cell: ({ row }) => (
         <div className="font-semibold text-gray-900">
           {ordersService.formatCurrency(row.original.total)}
@@ -96,7 +96,7 @@ export default function ShopOrdersPage() {
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: 'Статус',
       cell: ({ row }) => {
         const config = STATUS_CONFIG[row.original.status]
         return <StatusBadge status={row.original.status} variant={config.color} />
@@ -104,16 +104,16 @@ export default function ShopOrdersPage() {
     },
     {
       accessorKey: 'ordered_at',
-      header: 'Date',
+      header: 'Дата',
       cell: ({ row }) => (
         <div className="text-gray-600 text-sm">
-          {new Date(row.original.ordered_at).toLocaleDateString()}
+          {new Date(row.original.ordered_at).toLocaleDateString('ru-RU')}
         </div>
       ),
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: 'Действия',
       cell: ({ row }) => (
         <Button
           variant="ghost"
@@ -121,7 +121,7 @@ export default function ShopOrdersPage() {
           onClick={() => setViewingOrder(row.original)}
         >
           <Eye className="w-4 h-4 mr-2" />
-          View
+          Просмотр
         </Button>
       ),
     },
@@ -131,33 +131,33 @@ export default function ShopOrdersPage() {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
-        <p className="text-gray-600 mt-2">Manage and track your orders</p>
+        <h1 className="text-3xl font-bold text-gray-900">Заказы</h1>
+        <p className="text-gray-600 mt-2">Управление и отслеживание заказов</p>
       </div>
 
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
-            title="Today's Orders"
+            title="Сегодня"
             value={stats.today}
             icon={<Calendar className="w-5 h-5" />}
             variant="primary"
           />
           <StatsCard
-            title="This Week"
+            title="За неделю"
             value={stats.this_week}
             icon={<TrendingUp className="w-5 h-5" />}
             variant="info"
           />
           <StatsCard
-            title="This Month"
+            title="За месяц"
             value={stats.this_month}
             icon={<TrendingUp className="w-5 h-5" />}
             variant="success"
           />
           <StatsCard
-            title="All Time"
+            title="За все время"
             value={stats.all_time}
             icon={<TrendingUp className="w-5 h-5" />}
             variant="warning"
@@ -168,13 +168,13 @@ export default function ShopOrdersPage() {
       {/* Filters */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
         <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">
-          Filters
+          Фильтры
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <SearchInput
             value={search}
             onChange={setSearch}
-            placeholder="Search by order # or customer..."
+            placeholder="Поиск по номеру заказа или клиенту..."
           />
 
           <select
@@ -182,46 +182,46 @@ export default function ShopOrdersPage() {
             onChange={(e) => setStatusFilter(e.target.value as OrderStatus | 'all')}
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="shipped">Shipped</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="refunded">Refunded</option>
+            <option value="all">Все статусы</option>
+            <option value="pending">Ожидание</option>
+            <option value="paid">Оплачен</option>
+            <option value="shipped">Отправлен</option>
+            <option value="completed">Завершен</option>
+            <option value="cancelled">Отменен</option>
+            <option value="refunded">Возврат</option>
           </select>
 
           <FormDateRangePicker
             value={dateRange}
             onChange={setDateRange}
-            placeholder="Select date range"
+            placeholder="Выберите период"
           />
         </div>
 
         <div className="flex items-center gap-4 mt-4">
           <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-700">Sort by:</label>
+            <label className="text-sm text-gray-700">Сортировка:</label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'date' | 'total')}
               className="px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="date">Date</option>
-              <option value="total">Total</option>
+              <option value="date">По дате</option>
+              <option value="total">По сумме</option>
             </select>
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
               className="px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="desc">Newest First</option>
-              <option value="asc">Oldest First</option>
+              <option value="desc">Сначала новые</option>
+              <option value="asc">Сначала старые</option>
             </select>
           </div>
 
           {hasFilters && (
             <Button variant="outline" size="sm" onClick={clearFilters}>
-              Clear Filters
+              Очистить фильтры
             </Button>
           )}
         </div>
@@ -239,7 +239,7 @@ export default function ShopOrdersPage() {
           totalRows={data?.total || 0}
           onPaginationChange={(pageIndex) => setPage(pageIndex + 1)}
           manualPagination
-          emptyMessage="No orders found"
+          emptyMessage="Заказы не найдены"
         />
       </div>
 

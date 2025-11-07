@@ -320,7 +320,7 @@ function AdminShopsPage() {
    */
   const handleBulkAction = async (action: 'approve' | 'reject' | 'activate' | 'deactivate') => {
     if (selectedIds.size === 0) {
-      toast.error('Please select shops first');
+      toast.error('Сначала выберите магазины');
       return;
     }
 
@@ -335,7 +335,7 @@ function AdminShopsPage() {
             await approveMutation.mutateAsync(shopId);
             break;
           case 'reject':
-            const reason = prompt('Enter rejection reason:');
+            const reason = prompt('Введите причину отклонения:');
             if (!reason) continue;
             await rejectMutation.mutateAsync({ shopId, reason });
             break;
@@ -343,13 +343,14 @@ function AdminShopsPage() {
             await activateMutation.mutateAsync(shopId);
             break;
           case 'deactivate':
-            const deactivateReason = prompt('Enter deactivation reason:');
+            const deactivateReason = prompt('Введите причину деактивации:');
             if (!deactivateReason) continue;
             await deactivateMutation.mutateAsync({ shopId, reason: deactivateReason });
             break;
         }
       }
-      toast.success(`${shopIds.length} shop(s) ${action}d successfully`);
+      const actionText = action === 'approve' ? 'одобрено' : action === 'reject' ? 'отклонено' : action === 'activate' ? 'активировано' : 'деактивировано';
+      toast.success(`${shopIds.length} магазин(ов) ${actionText}`);
       setSelectedIds(new Set());
     } catch (error) {
       // Individual errors are already handled by mutation callbacks
@@ -410,7 +411,7 @@ function AdminShopsPage() {
     },
     {
       accessorKey: 'name',
-      header: 'Shop Name',
+      header: 'Название магазина',
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
           {row.original.avatar && (
@@ -429,7 +430,7 @@ function AdminShopsPage() {
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: 'Статус',
       cell: ({ row }) => (
         <StatusBadge
           status={row.original.status}
@@ -439,31 +440,31 @@ function AdminShopsPage() {
     },
     {
       accessorKey: 'total_products',
-      header: 'Products',
+      header: 'Товары',
       cell: ({ row }) => (
         <div className="text-center">
           <div className="font-medium">{row.original.total_products}</div>
           <div className="text-xs text-gray-500">
-            {row.original.active_products} active
+            {row.original.active_products} активных
           </div>
         </div>
       ),
     },
     {
       accessorKey: 'total_orders',
-      header: 'Orders',
+      header: 'Заказы',
       cell: ({ row }) => <div className="text-center">{row.original.total_orders}</div>,
     },
     {
       accessorKey: 'total_revenue',
-      header: 'Revenue',
+      header: 'Выручка',
       cell: ({ row }) => (
         <div className="font-medium">{formatNumber(row.original.total_revenue)} ₸</div>
       ),
     },
     {
       accessorKey: 'created_at',
-      header: 'Created',
+      header: 'Создан',
       cell: ({ row }) => (
         <div className="text-sm text-gray-600">
           {new Date(row.original.created_at).toLocaleDateString()}
@@ -472,7 +473,7 @@ function AdminShopsPage() {
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: 'Действия',
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
           <Button
@@ -537,18 +538,18 @@ function AdminShopsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Shop Management</h1>
-          <p className="text-gray-600 mt-1">Manage and moderate shops on the platform</p>
+          <h1 className="text-3xl font-bold text-gray-900">Управление магазинами</h1>
+          <p className="text-gray-600 mt-1">Модерация и управление магазинами на платформе</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-          <StatsCard title="Total" value={stats.total} icon="store" variant="primary" />
-          <StatsCard title="Pending" value={stats.pending} icon="clock" variant="warning" />
-          <StatsCard title="Approved" value={stats.approved} icon="check" variant="success" />
-          <StatsCard title="Active" value={stats.active} icon="zap" variant="success" />
-          <StatsCard title="Rejected" value={stats.rejected} icon="x-circle" variant="error" />
-          <StatsCard title="Deactivated" value={stats.deactivated} icon="pause" variant="primary" />
+          <StatsCard title="Всего" value={stats.total} icon="store" variant="primary" />
+          <StatsCard title="На модерации" value={stats.pending} icon="clock" variant="warning" />
+          <StatsCard title="Одобрено" value={stats.approved} icon="check" variant="success" />
+          <StatsCard title="Активных" value={stats.active} icon="zap" variant="success" />
+          <StatsCard title="Отклонено" value={stats.rejected} icon="x-circle" variant="error" />
+          <StatsCard title="Деактивировано" value={stats.deactivated} icon="pause" variant="primary" />
         </div>
 
         {/* Filters */}
@@ -559,7 +560,7 @@ function AdminShopsPage() {
               <SearchInput
                 value={searchTerm}
                 onChange={setSearchTerm}
-                placeholder="Search shops by name or owner..."
+                placeholder="Поиск по названию или владельцу..."
               />
             </div>
 
@@ -569,19 +570,19 @@ function AdminShopsPage() {
               onChange={(e) => setSelectedStatus(e.target.value as ShopStatus | 'all')}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="active">Active</option>
-              <option value="rejected">Rejected</option>
-              <option value="deactivated">Deactivated</option>
+              <option value="all">Все статусы</option>
+              <option value="pending">На модерации</option>
+              <option value="approved">Одобрено</option>
+              <option value="active">Активный</option>
+              <option value="rejected">Отклонено</option>
+              <option value="deactivated">Деактивирован</option>
             </select>
           </div>
 
           {/* Bulk Actions */}
           {selectedIds.size > 0 && (
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-              <span className="text-sm text-gray-600">{selectedIds.size} shop(s) selected</span>
+              <span className="text-sm text-gray-600">Выбрано магазинов: {selectedIds.size}</span>
               <div className="flex items-center gap-2">
                 <Button
                   onClick={() => handleBulkAction('approve')}
@@ -590,7 +591,7 @@ function AdminShopsPage() {
                   disabled={approveMutation.isPending || rejectMutation.isPending || activateMutation.isPending || deactivateMutation.isPending}
                   isLoading={approveMutation.isPending}
                 >
-                  Approve
+                  Одобрить
                 </Button>
                 <Button
                   onClick={() => handleBulkAction('reject')}
@@ -599,7 +600,7 @@ function AdminShopsPage() {
                   disabled={approveMutation.isPending || rejectMutation.isPending || activateMutation.isPending || deactivateMutation.isPending}
                   className="text-red-600"
                 >
-                  Reject
+                  Отклонить
                 </Button>
                 <Button
                   onClick={() => handleBulkAction('activate')}
@@ -607,7 +608,7 @@ function AdminShopsPage() {
                   size="sm"
                   disabled={approveMutation.isPending || rejectMutation.isPending || activateMutation.isPending || deactivateMutation.isPending}
                 >
-                  Activate
+                  Активировать
                 </Button>
                 <Button
                   onClick={() => handleBulkAction('deactivate')}
@@ -616,7 +617,7 @@ function AdminShopsPage() {
                   disabled={approveMutation.isPending || rejectMutation.isPending || activateMutation.isPending || deactivateMutation.isPending}
                   className="text-orange-600"
                 >
-                  Deactivate
+                  Деактивировать
                 </Button>
               </div>
             </div>
@@ -627,7 +628,7 @@ function AdminShopsPage() {
             <div className="flex justify-end mt-4 pt-4 border-t border-gray-200">
               <Button onClick={clearFilters} variant="ghost" size="sm" className="flex items-center gap-1">
                 <X className="w-4 h-4" />
-                Clear Filters
+                Сбросить фильтры
               </Button>
             </div>
           )}
@@ -640,8 +641,8 @@ function AdminShopsPage() {
           </div>
         ) : shops.length === 0 ? (
           <EmptyState
-            title="No shops found"
-            message={searchTerm ? 'Try adjusting your filters' : 'No shops match your criteria'}
+            title="Магазины не найдены"
+            message={searchTerm ? 'Попробуйте изменить фильтры' : 'Нет магазинов соответствующих критериям'}
           />
         ) : (
           <>
@@ -674,9 +675,9 @@ function AdminShopsPage() {
           isOpen={showApproveDialog}
           onClose={() => setShowApproveDialog(false)}
           onConfirm={confirmApprove}
-          title="Approve Shop"
-          message={`Are you sure you want to approve "${selectedShop?.name}"?`}
-          confirmText="Approve"
+          title="Одобрить магазин"
+          message={`Вы уверены, что хотите одобрить магазин "${selectedShop?.name}"?`}
+          confirmText="Одобрить"
           variant="primary"
           loading={approveMutation.isPending}
         />
@@ -685,8 +686,8 @@ function AdminShopsPage() {
           isOpen={showRejectModal}
           onClose={() => setShowRejectModal(false)}
           onConfirm={confirmReject}
-          title="Reject Shop"
-          message={`Please provide a reason for rejecting "${selectedShop?.name}".`}
+          title="Отклонить магазин"
+          message={`Укажите причину отклонения магазина "${selectedShop?.name}".`}
           loading={rejectMutation.isPending}
         />
 
@@ -694,9 +695,9 @@ function AdminShopsPage() {
           isOpen={showActivateDialog}
           onClose={() => setShowActivateDialog(false)}
           onConfirm={confirmActivate}
-          title="Activate Shop"
-          message={`Are you sure you want to activate "${selectedShop?.name}"?`}
-          confirmText="Activate"
+          title="Активировать магазин"
+          message={`Вы уверены, что хотите активировать магазин "${selectedShop?.name}"?`}
+          confirmText="Активировать"
           variant="primary"
           loading={activateMutation.isPending}
         />
@@ -705,9 +706,9 @@ function AdminShopsPage() {
           isOpen={showDeactivateModal}
           onClose={() => setShowDeactivateModal(false)}
           onSubmit={confirmDeactivate}
-          title="Deactivate Shop"
-          description={`Please provide a reason for deactivating "${selectedShop?.name}". The shop will no longer be able to sell products until reactivated.`}
-          submitText="Deactivate"
+          title="Деактивировать магазин"
+          description={`Укажите причину деактивации магазина "${selectedShop?.name}". Магазин не сможет продавать товары до повторной активации.`}
+          submitText="Деактивировать"
           loading={deactivateMutation.isPending}
         />
       </div>

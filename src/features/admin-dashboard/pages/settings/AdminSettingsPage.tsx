@@ -24,8 +24,8 @@ interface Setting {
 
 // Validation schemas
 const addSettingSchema = z.object({
-  key: z.string().min(1, 'Key is required').regex(/^[a-z0-9_]+$/, 'Key must be lowercase alphanumeric with underscores'),
-  value: z.string().min(1, 'Value is required'),
+  key: z.string().min(1, 'Ключ обязателен').regex(/^[a-z0-9_]+$/, 'Ключ должен содержать только строчные буквы, цифры и подчеркивания'),
+  value: z.string().min(1, 'Значение обязательно'),
   description: z.string().optional(),
 });
 
@@ -56,12 +56,12 @@ export default function SettingsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-settings'] });
-      toast.success('Setting updated successfully');
+      toast.success('Настройка успешно обновлена');
       setEditingId(null);
       setEditValue('');
     },
     onError: () => {
-      toast.error('Failed to update setting');
+      toast.error('Не удалось обновить настройку');
     },
   });
 
@@ -73,12 +73,12 @@ export default function SettingsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-settings'] });
-      toast.success('Setting deleted successfully');
+      toast.success('Настройка успешно удалена');
       setDeleteDialogOpen(false);
       setSettingToDelete(null);
     },
     onError: () => {
-      toast.error('Failed to delete setting');
+      toast.error('Не удалось удалить настройку');
     },
   });
 
@@ -90,11 +90,11 @@ export default function SettingsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-settings'] });
-      toast.success('Setting created successfully');
+      toast.success('Настройка успешно создана');
       setAddModalOpen(false);
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || 'Failed to create setting';
+      const message = error.response?.data?.message || 'Не удалось создать настройку';
       toast.error(message);
     },
   });
@@ -156,13 +156,13 @@ export default function SettingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <SettingsIcon className="w-7 h-7" />
-            Platform Settings
+            Настройки платформы
           </h1>
-          <p className="text-gray-600 mt-1">Manage system configuration and settings</p>
+          <p className="text-gray-600 mt-1">Управление системными параметрами и настройками</p>
         </div>
         <Button onClick={() => setAddModalOpen(true)} className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
-          Add Setting
+          Добавить настройку
         </Button>
       </div>
 
@@ -173,19 +173,19 @@ export default function SettingsPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Setting Key
+                  Ключ настройки
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Value
+                  Значение
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Description
+                  Описание
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Last Updated
+                  Обновлено
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  Действия
                 </th>
               </tr>
             </thead>
@@ -197,7 +197,7 @@ export default function SettingsPage() {
                       <span className="text-sm font-medium text-gray-900">{setting.key}</span>
                       {setting.is_system && (
                         <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                          System
+                          Системная
                         </span>
                       )}
                     </div>
@@ -233,7 +233,7 @@ export default function SettingsPage() {
                           className="flex items-center gap-1"
                         >
                           <Save className="w-4 h-4" />
-                          Save
+                          Сохранить
                         </Button>
                         <Button size="sm" variant="secondary" onClick={handleCancel}>
                           <X className="w-4 h-4" />
@@ -244,7 +244,7 @@ export default function SettingsPage() {
                         <button
                           onClick={() => handleEdit(setting)}
                           className="text-blue-600 hover:text-blue-700 p-1 hover:bg-blue-50 rounded transition-colors"
-                          title="Edit"
+                          title="Редактировать"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
@@ -252,7 +252,7 @@ export default function SettingsPage() {
                           <button
                             onClick={() => handleDeleteClick(setting)}
                             className="text-red-600 hover:text-red-700 p-1 hover:bg-red-50 rounded transition-colors"
-                            title="Delete"
+                            title="Удалить"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -269,9 +269,9 @@ export default function SettingsPage() {
           {settings?.length === 0 && (
             <div className="text-center py-12">
               <SettingsIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No settings found</p>
+              <p className="text-gray-500">Настройки не найдены</p>
               <Button onClick={() => setAddModalOpen(true)} className="mt-4">
-                Add First Setting
+                Добавить первую настройку
               </Button>
             </div>
           )}
@@ -283,9 +283,9 @@ export default function SettingsPage() {
         isOpen={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleDeleteConfirm}
-        title="Delete Setting"
-        message={`Are you sure you want to delete the setting "${settingToDelete?.key}"? This action cannot be undone.`}
-        confirmText="Delete"
+        title="Удалить настройку"
+        message={`Вы уверены, что хотите удалить настройку "${settingToDelete?.key}"? Это действие нельзя отменить.`}
+        confirmText="Удалить"
         variant="danger"
         isLoading={deleteMutation.isPending}
       />
@@ -294,9 +294,9 @@ export default function SettingsPage() {
       <FormModal
         isOpen={addModalOpen}
         onClose={handleAddModalClose}
-        title="Add New Setting"
+        title="Добавить новую настройку"
         onSubmit={handleSubmit(onAddSubmit)}
-        submitText="Create Setting"
+        submitText="Создать настройку"
         isSubmitting={isSubmitting || addMutation.isPending}
         size="md"
       >
@@ -304,29 +304,29 @@ export default function SettingsPage() {
           {/* Key */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Setting Key <span className="text-red-500">*</span>
+              Ключ настройки <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               {...register('key')}
-              placeholder="e.g., newsletter_min_frequency_days"
+              placeholder="например, newsletter_min_frequency_days"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
             {errors.key && <p className="text-red-500 text-sm mt-1">{errors.key.message}</p>}
             <p className="text-gray-500 text-xs mt-1">
-              Use lowercase letters, numbers, and underscores only
+              Используйте только строчные буквы, цифры и подчеркивания
             </p>
           </div>
 
           {/* Value */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Value <span className="text-red-500">*</span>
+              Значение <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               {...register('value')}
-              placeholder="e.g., 7"
+              placeholder="например, 7"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
             {errors.value && <p className="text-red-500 text-sm mt-1">{errors.value.message}</p>}
@@ -335,11 +335,11 @@ export default function SettingsPage() {
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+              Описание
             </label>
             <textarea
               {...register('description')}
-              placeholder="Optional description of what this setting controls"
+              placeholder="Необязательное описание настройки"
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />

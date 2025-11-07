@@ -72,7 +72,7 @@ function UserProfileModal({ userId, onClose }: UserProfileModalProps) {
       <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">User Profile</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Профиль пользователя</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="w-5 h-5" />
           </Button>
@@ -107,32 +107,32 @@ function UserProfileModal({ userId, onClose }: UserProfileModalProps) {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">Balance</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Баланс</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">${user.balance || 0}</p>
             </div>
             <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">Free Generations Left</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Бесплатные генерации</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{user.free_generations_left || 0}</p>
             </div>
             <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">Free Try-Ons Left</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Бесплатные примерки</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{user.free_try_ons_left || 0}</p>
             </div>
           </div>
 
           {/* Personal Details */}
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Personal Information</h4>
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Личная информация</h4>
             <div className="space-y-3">
               {user.full_name && (
                 <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Full Name</span>
+                  <span className="text-gray-600 dark:text-gray-400">Полное имя</span>
                   <span className="font-medium text-gray-900 dark:text-white">{user.full_name}</span>
                 </div>
               )}
               {user.phone && (
                 <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Phone</span>
+                  <span className="text-gray-600 dark:text-gray-400">Телефон</span>
                   <span className="font-medium text-gray-900 dark:text-white">{user.phone}</span>
                 </div>
               )}
@@ -144,25 +144,25 @@ function UserProfileModal({ userId, onClose }: UserProfileModalProps) {
               )}
               {user.age && (
                 <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Age</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{user.age} years</span>
+                  <span className="text-gray-600 dark:text-gray-400">Возраст</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{user.age} лет</span>
                 </div>
               )}
               {user.height && (
                 <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Height</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{user.height} cm</span>
+                  <span className="text-gray-600 dark:text-gray-400">Рост</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{user.height} см</span>
                 </div>
               )}
               {user.weight && (
                 <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Weight</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{user.weight} kg</span>
+                  <span className="text-gray-600 dark:text-gray-400">Вес</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{user.weight} кг</span>
                 </div>
               )}
               {user.body_type && (
                 <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Body Type</span>
+                  <span className="text-gray-600 dark:text-gray-400">Тип телосложения</span>
                   <span className="font-medium text-gray-900 dark:text-white capitalize">{user.body_type}</span>
                 </div>
               )}
@@ -171,24 +171,24 @@ function UserProfileModal({ userId, onClose }: UserProfileModalProps) {
 
           {/* System Details */}
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">System Information</h4>
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Системная информация</h4>
             <div className="space-y-3">
               <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">User ID</span>
+                <span className="text-gray-600 dark:text-gray-400">ID пользователя</span>
                 <span className="font-medium text-gray-900 dark:text-white">{user.id}</span>
               </div>
               {user.total_generations !== undefined && (
                 <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Total Generations</span>
+                  <span className="text-gray-600 dark:text-gray-400">Всего генераций</span>
                   <span className="font-medium text-gray-900 dark:text-white">{user.total_generations}</span>
                 </div>
               )}
               <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">Created At</span>
+                <span className="text-gray-600 dark:text-gray-400">Дата регистрации</span>
                 <span className="font-medium text-gray-900 dark:text-white">{formatDate(user.created_at)}</span>
               </div>
               <div className="flex justify-between py-2">
-                <span className="text-gray-600 dark:text-gray-400">Last Updated</span>
+                <span className="text-gray-600 dark:text-gray-400">Последнее обновление</span>
                 <span className="font-medium text-gray-900 dark:text-white">{formatDate(user.updated_at)}</span>
               </div>
             </div>
@@ -198,7 +198,7 @@ function UserProfileModal({ userId, onClose }: UserProfileModalProps) {
         {/* Footer */}
         <div className="flex justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
           <Button variant="outline" onClick={onClose}>
-            Close
+            Закрыть
           </Button>
         </div>
       </div>

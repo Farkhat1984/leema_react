@@ -380,32 +380,32 @@ function AdminProductsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Product Moderation</h1>
-          <p className="text-gray-600 mt-1">Review and moderate products from shops</p>
+          <h1 className="text-3xl font-bold text-gray-900">Модерация товаров</h1>
+          <p className="text-gray-600 mt-1">Проверка и модерация товаров из магазинов</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatsCard
-            title="Total Products"
+            title="Всего товаров"
             value={stats.total}
             icon="box"
             variant="primary"
           />
           <StatsCard
-            title="Pending Approval"
+            title="На модерации"
             value={stats.pending}
             icon="clock"
             variant="warning"
           />
           <StatsCard
-            title="Approved"
+            title="Одобрено"
             value={stats.approved}
             icon="check-circle"
             variant="success"
           />
           <StatsCard
-            title="Rejected"
+            title="Отклонено"
             value={stats.rejected}
             icon="x-circle"
             variant="danger"
@@ -542,13 +542,13 @@ function AdminProductsPage() {
           </div>
         ) : products.length === 0 ? (
           <EmptyState
-            title="No products found"
+            title="Товары не найдены"
             message={
               searchTerm
-                ? 'Try adjusting your filters'
+                ? 'Попробуйте изменить фильтры'
                 : selectedStatus === 'pending'
-                ? 'No products pending approval'
-                : 'No products match your criteria'
+                ? 'Нет товаров на модерации'
+                : 'Нет товаров, соответствующих критериям'
             }
           />
         ) : (
@@ -601,7 +601,7 @@ function AdminProductsPage() {
                     {product.status === 'rejected' && product.moderation_notes && (
                       <div className="bg-red-50 border border-red-200 rounded p-2 mb-3">
                         <p className="text-xs text-red-800">
-                          <span className="font-semibold">Rejected:</span> {product.moderation_notes}
+                          <span className="font-semibold">Отклонено:</span> {product.moderation_notes}
                         </p>
                       </div>
                     )}
@@ -615,7 +615,7 @@ function AdminProductsPage() {
                         className="w-full"
                       >
                         <Eye className="w-4 h-4 mr-1" />
-                        View Details
+                        Просмотр
                       </Button>
 
                       {/* Show approve/reject buttons (disabled if not pending) */}
@@ -628,7 +628,7 @@ function AdminProductsPage() {
                           disabled={isProcessing || product.status !== 'pending'}
                         >
                           <CheckCircle className="w-4 h-4 mr-1" />
-                          Approve
+                          Одобрить
                         </Button>
                         <Button
                           onClick={() => handleReject(product)}
@@ -638,7 +638,7 @@ function AdminProductsPage() {
                           disabled={isProcessing || product.status !== 'pending'}
                         >
                           <XCircle className="w-4 h-4 mr-1" />
-                          Reject
+                          Отклонить
                         </Button>
                       </div>
                     </div>
@@ -665,9 +665,9 @@ function AdminProductsPage() {
           isOpen={showApproveDialog}
           onClose={() => setShowApproveDialog(false)}
           onConfirm={confirmApprove}
-          title="Approve Product"
-          message={`Are you sure you want to approve "${selectedProduct?.name}"? The product will become visible to all users.`}
-          confirmText="Approve"
+          title="Одобрить товар"
+          message={`Вы уверены, что хотите одобрить "${selectedProduct?.name}"? Товар станет виден всем пользователям.`}
+          confirmText="Одобрить"
           variant="primary"
           loading={isProcessing}
         />
@@ -677,8 +677,8 @@ function AdminProductsPage() {
           isOpen={showRejectModal}
           onClose={() => setShowRejectModal(false)}
           onConfirm={confirmReject}
-          title="Reject Product"
-          message={`Please provide a reason for rejecting "${selectedProduct?.name}". The shop owner will be notified.`}
+          title="Отклонить товар"
+          message={`Укажите причину отклонения товара "${selectedProduct?.name}". Владелец магазина получит уведомление.`}
           loading={isProcessing}
         />
 
@@ -687,14 +687,14 @@ function AdminProductsPage() {
           <DetailModal
             isOpen={showDetailModal}
             onClose={() => setShowDetailModal(false)}
-            title="Product Details"
+            title="Детали товара"
             size="lg"
           >
             <div className="space-y-6">
               {/* Images */}
               {selectedProduct.images && selectedProduct.images.length > 0 && (
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Images</h4>
+                  <h4 className="font-semibold text-gray-900 mb-2">Изображения</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {selectedProduct.images.map((img, idx) => (
                       <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
@@ -711,21 +711,21 @@ function AdminProductsPage() {
               {/* Details */}
               <div className="space-y-3">
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">Product Name</span>
+                  <span className="text-sm font-medium text-gray-600">Название товара</span>
                   <span className="text-sm text-gray-900">{selectedProduct.name}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">Price</span>
+                  <span className="text-sm font-medium text-gray-600">Цена</span>
                   <span className="text-sm font-semibold text-gray-900">
                     {formatNumber(selectedProduct.price)} ₸
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">Category</span>
-                  <span className="text-sm text-gray-900">{selectedProduct.category_name || 'N/A'}</span>
+                  <span className="text-sm font-medium text-gray-600">Категория</span>
+                  <span className="text-sm text-gray-900">{selectedProduct.category_name || 'Не указана'}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">Status</span>
+                  <span className="text-sm font-medium text-gray-600">Статус</span>
                   <StatusBadge
                     status={selectedProduct.status}
                     variant={getStatusVariant(selectedProduct.status)}
@@ -738,36 +738,36 @@ function AdminProductsPage() {
                   </span>
                 </div>
                 <div className="py-2 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600 block mb-1">Description</span>
+                  <span className="text-sm font-medium text-gray-600 block mb-1">Описание</span>
                   <p className="text-sm text-gray-900">{selectedProduct.description}</p>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">Sizes</span>
+                  <span className="text-sm font-medium text-gray-600">Размеры</span>
                   <span className="text-sm text-gray-900">
                     {selectedProduct.sizes && selectedProduct.sizes.length > 0
                       ? selectedProduct.sizes.join(', ')
-                      : 'N/A'}
+                      : 'Не указаны'}
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">Colors</span>
+                  <span className="text-sm font-medium text-gray-600">Цвета</span>
                   <span className="text-sm text-gray-900">
                     {selectedProduct.colors && selectedProduct.colors.length > 0
                       ? selectedProduct.colors.join(', ')
-                      : 'N/A'}
+                      : 'Не указаны'}
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">Views</span>
+                  <span className="text-sm font-medium text-gray-600">Просмотры</span>
                   <span className="text-sm text-gray-900">{selectedProduct.views}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">Try-ons</span>
+                  <span className="text-sm font-medium text-gray-600">Примерки</span>
                   <span className="text-sm text-gray-900">{selectedProduct.try_ons}</span>
                 </div>
                 {selectedProduct.moderation_notes && (
                   <div className="py-2">
-                    <span className="text-sm font-medium text-red-600 block mb-1">Rejection Reason</span>
+                    <span className="text-sm font-medium text-red-600 block mb-1">Причина отклонения</span>
                     <p className="text-sm text-red-800 bg-red-50 p-3 rounded">
                       {selectedProduct.moderation_notes}
                     </p>
@@ -787,7 +787,7 @@ function AdminProductsPage() {
                   disabled={selectedProduct.status !== 'pending'}
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Approve Product
+                  Одобрить товар
                 </Button>
                 <Button
                   onClick={() => {
@@ -799,7 +799,7 @@ function AdminProductsPage() {
                   disabled={selectedProduct.status !== 'pending'}
                 >
                   <XCircle className="w-4 h-4 mr-2" />
-                  Reject Product
+                  Отклонить товар
                 </Button>
               </div>
             </div>

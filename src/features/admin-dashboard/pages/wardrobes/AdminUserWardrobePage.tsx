@@ -343,6 +343,7 @@ function AdminUserWardrobePage() {
               <h3 className="text-lg font-semibold text-gray-900">Фильтры</h3>
               {(selectedSource || selectedFolder || isFavorite !== null) && (
                 <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+                  <X className="w-4 h-4 mr-1" />
                   Очистить фильтры
                 </Button>
               )}

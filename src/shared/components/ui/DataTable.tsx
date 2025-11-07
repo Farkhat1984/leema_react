@@ -76,7 +76,7 @@ export function DataTable<TData>({
   getRowId,
   bulkActions,
   loading = false,
-  emptyMessage = 'No data found',
+  emptyMessage = 'Данные не найдены',
   emptyIcon,
   className = '',
   stickyHeader = false,

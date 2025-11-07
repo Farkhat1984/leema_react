@@ -1,5 +1,7 @@
 # Multi-stage build for production-ready React app
-FROM node:20-alpine AS builder
+
+# Base stage with dependencies
+FROM node:20-alpine AS base
 
 # Set working directory
 WORKDIR /app
@@ -23,14 +25,29 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci --prefer-offline --no-audit
 
+# Development stage (for hot-reload)
+FROM base AS development
+
+# Copy source code (will be overridden by volumes)
+COPY . .
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Start Vite dev server with hot-reload
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+# Builder stage (for production build)
+FROM base AS builder
+
 # Copy source code
 COPY . .
 
 # Build the application (fast build without typecheck)
 RUN npm run build:fast
 
-# Production stage
-FROM nginx:alpine
+# Production stage (Nginx with static files)
+FROM nginx:alpine AS production
 
 # Install certbot for SSL (optional, can be handled externally)
 RUN apk add --no-cache certbot certbot-nginx

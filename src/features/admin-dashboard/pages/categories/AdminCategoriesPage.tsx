@@ -89,12 +89,12 @@ function AdminCategoriesPage() {
       return { previousCategories };
     },
     onSuccess: () => {
-      toast.success('Category created successfully');
+      toast.success('Категория успешно создана');
       setIsCreateModalOpen(false);
       reset();
     },
     onError: (_error, _variables, context) => {
-      toast.error('Failed to create category');
+      toast.error('Не удалось создать категорию');
       // Rollback to previous data
       if (context?.previousCategories) {
         queryClient.setQueryData(['admin-categories'], context.previousCategories);
@@ -142,12 +142,12 @@ function AdminCategoriesPage() {
       return { previousCategories };
     },
     onSuccess: () => {
-      toast.success('Category updated successfully');
+      toast.success('Категория успешно обновлена');
       setEditingCategory(null);
       reset();
     },
     onError: (_error, _variables, context) => {
-      toast.error('Failed to update category');
+      toast.error('Не удалось обновить категорию');
       // Rollback to previous data
       if (context?.previousCategories) {
         queryClient.setQueryData(['admin-categories'], context.previousCategories);
@@ -181,11 +181,11 @@ function AdminCategoriesPage() {
       return { previousCategories };
     },
     onSuccess: () => {
-      toast.success('Category deleted successfully');
+      toast.success('Категория успешно удалена');
       setDeletingCategoryId(null);
     },
     onError: (_error, _variables, context) => {
-      toast.error('Failed to delete category');
+      toast.error('Не удалось удалить категорию');
       // Rollback to previous data
       if (context?.previousCategories) {
         queryClient.setQueryData(['admin-categories'], context.previousCategories);
@@ -217,7 +217,7 @@ function AdminCategoriesPage() {
 
   const columns: ColumnDef<Category>[] = [
     {
-      header: 'Name',
+      header: 'Название',
       accessorKey: 'name',
       cell: ({ row }: { row: Row<Category> }) => (
         <div className="flex items-center gap-3">
@@ -236,24 +236,24 @@ function AdminCategoriesPage() {
       ),
     },
     {
-      header: 'Products',
+      header: 'Товары',
       accessorKey: 'products_count',
       cell: ({ row }: { row: Row<Category> }) => (
         <span className="text-gray-900 dark:text-white">{row.original.products_count || 0}</span>
       ),
     },
     {
-      header: 'Created',
+      header: 'Создана',
       accessorKey: 'created_at',
       cell: ({ row }: { row: Row<Category> }) => formatDate(row.original.created_at),
     },
     {
-      header: 'Last Updated',
+      header: 'Обновлена',
       accessorKey: 'updated_at',
       cell: ({ row }: { row: Row<Category> }) => formatDate(row.original.updated_at),
     },
     {
-      header: 'Actions',
+      header: 'Действия',
       accessorKey: 'id',
       cell: ({ row }: { row: Row<Category> }) => (
         <div className="flex items-center gap-2">
@@ -285,16 +285,16 @@ function AdminCategoriesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Categories Management
+            Управление категориями
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage product categories for the platform
+            Управление категориями товаров на платформе
           </p>
         </div>
         {categories?.length > 0 && (
           <Button onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Add Category
+            Добавить категорию
           </Button>
         )}
       </div>
@@ -304,10 +304,10 @@ function AdminCategoriesPage() {
         {categories?.length === 0 ? (
           <EmptyState
             icon={<FolderOpen className="w-12 h-12 text-gray-400" />}
-            title="No categories yet"
-            message="Create your first category to organize products"
+            title="Пока нет категорий"
+            message="Создайте первую категорию для организации товаров"
             action={{
-              label: 'Add Category',
+              label: 'Добавить категорию',
               onClick: () => setIsCreateModalOpen(true)
             }}
           />
@@ -320,26 +320,26 @@ function AdminCategoriesPage() {
       <FormModal
         isOpen={isCreateModalOpen || editingCategory !== null}
         onClose={handleCloseModal}
-        title={editingCategory ? 'Edit Category' : 'Create Category'}
+        title={editingCategory ? 'Редактировать категорию' : 'Создать категорию'}
         size="md"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <FormInput
-            label="Category Name"
-            placeholder="e.g., Dresses, Shoes, Accessories"
+            label="Название категории"
+            placeholder="Например: Платья, Обувь, Аксессуары"
             {...register('name')}
             error={errors.name?.message}
           />
           <FormInput
-            label="Slug"
-            placeholder="e.g., dresses, shoes, accessories"
+            label="Слаг"
+            placeholder="например: platya, obuv, aksessuary"
             {...register('slug')}
             error={errors.slug?.message}
-            helperText="Lowercase letters, numbers, and hyphens only"
+            helperText="Только строчные буквы, цифры и дефисы"
           />
           <FormTextarea
-            label="Description (Optional)"
-            placeholder="Brief description of this category"
+            label="Описание (необязательно)"
+            placeholder="Краткое описание категории"
             rows={3}
             {...register('description')}
             error={errors.description?.message}
@@ -351,14 +351,14 @@ function AdminCategoriesPage() {
               onClick={handleCloseModal}
               disabled={createMutation.isPending || updateMutation.isPending}
             >
-              Cancel
+              Отмена
             </Button>
             <Button
               type="submit"
               isLoading={createMutation.isPending || updateMutation.isPending}
               disabled={createMutation.isPending || updateMutation.isPending}
             >
-              {editingCategory ? 'Update Category' : 'Create Category'}
+              {editingCategory ? 'Обновить категорию' : 'Создать категорию'}
             </Button>
           </div>
         </form>
@@ -370,9 +370,9 @@ function AdminCategoriesPage() {
           isOpen={true}
           onClose={() => setDeletingCategoryId(null)}
           onConfirm={() => deleteMutation.mutate(deletingCategoryId)}
-          title="Delete Category"
-          message="Are you sure you want to delete this category? This action cannot be undone. Products in this category will become uncategorized."
-          confirmText="Delete"
+          title="Удалить категорию"
+          message="Вы уверены, что хотите удалить эту категорию? Это действие нельзя отменить. Товары в этой категории станут без категории."
+          confirmText="Удалить"
           loading={deleteMutation.isPending}
         />
       )}

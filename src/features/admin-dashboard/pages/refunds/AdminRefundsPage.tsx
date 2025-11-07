@@ -51,10 +51,10 @@ interface RefundsStats {
 }
 
 const STATUS_CONFIG: Record<RefundStatus, { label: string; color: 'yellow' | 'green' | 'red' | 'blue' }> = {
-  pending: { label: 'Pending', color: 'yellow' },
-  approved: { label: 'Approved', color: 'green' },
-  rejected: { label: 'Rejected', color: 'red' },
-  processed: { label: 'Processed', color: 'blue' },
+  pending: { label: 'Ожидает', color: 'yellow' },
+  approved: { label: 'Одобрен', color: 'green' },
+  rejected: { label: 'Отклонен', color: 'red' },
+  processed: { label: 'Обработан', color: 'blue' },
 };
 
 export default function RefundsPage() {
@@ -93,13 +93,13 @@ export default function RefundsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-refunds'] });
       queryClient.invalidateQueries({ queryKey: ['admin-refunds-stats'] });
-      toast.success('Refund approved and processed successfully');
+      toast.success('Возврат одобрен и обработан успешно');
       setApproveDialogOpen(false);
       setDetailModalOpen(false);
       setSelectedRefund(null);
     },
     onError: () => {
-      toast.error('Failed to approve refund');
+      toast.error('Не удалось одобрить возврат');
     },
   });
 
@@ -114,13 +114,13 @@ export default function RefundsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-refunds'] });
       queryClient.invalidateQueries({ queryKey: ['admin-refunds-stats'] });
-      toast.success('Refund rejected');
+      toast.success('Возврат отклонен');
       setRejectModalOpen(false);
       setDetailModalOpen(false);
       setSelectedRefund(null);
     },
     onError: () => {
-      toast.error('Failed to reject refund');
+      toast.error('Не удалось отклонить возврат');
     },
   });
 
@@ -156,14 +156,14 @@ export default function RefundsPage() {
     () => [
       {
         accessorKey: 'refund_id',
-        header: 'Refund ID',
+        header: 'ID возврата',
         cell: ({ row }) => (
           <span className="font-mono text-sm text-gray-900">{row.original.refund_id}</span>
         ),
       },
       {
         accessorKey: 'user_name',
-        header: 'User',
+        header: 'Пользователь',
         cell: ({ row }) => (
           <div>
             <div className="font-medium text-gray-900">{row.original.user_name}</div>
@@ -173,21 +173,21 @@ export default function RefundsPage() {
       },
       {
         accessorKey: 'order_id',
-        header: 'Order ID',
+        header: 'ID заказа',
         cell: ({ row }) => (
           <span className="font-mono text-sm text-gray-600">{row.original.order_id}</span>
         ),
       },
       {
         accessorKey: 'amount',
-        header: 'Amount',
+        header: 'Сумма',
         cell: ({ row }) => (
           <span className="font-semibold text-gray-900">{formatNumber(row.original.amount)} KZT</span>
         ),
       },
       {
         accessorKey: 'reason',
-        header: 'Reason',
+        header: 'Причина',
         cell: ({ row }) => (
           <span className="text-sm text-gray-600 line-clamp-2 max-w-xs">
             {row.original.reason}
@@ -196,7 +196,7 @@ export default function RefundsPage() {
       },
       {
         accessorKey: 'status',
-        header: 'Status',
+        header: 'Статус',
         cell: ({ row }) => {
           const config = STATUS_CONFIG[row.original.status];
           return <StatusBadge status={row.original.status} customText={config.label} />;
@@ -204,7 +204,7 @@ export default function RefundsPage() {
       },
       {
         accessorKey: 'created_at',
-        header: 'Created',
+        header: 'Создан',
         cell: ({ row }) => (
           <span className="text-sm text-gray-500">
             {new Date(row.original.created_at).toLocaleDateString()}
@@ -213,13 +213,13 @@ export default function RefundsPage() {
       },
       {
         id: 'actions',
-        header: 'Actions',
+        header: 'Действия',
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleViewDetails(row.original)}
               className="text-blue-600 hover:text-blue-700 p-1 hover:bg-blue-50 rounded transition-colors"
-              title="View Details"
+              title="Просмотр деталей"
             >
               <Eye className="w-4 h-4" />
             </button>
@@ -228,14 +228,14 @@ export default function RefundsPage() {
                 <button
                   onClick={() => handleApproveClick(row.original)}
                   className="text-green-600 hover:text-green-700 p-1 hover:bg-green-50 rounded transition-colors"
-                  title="Approve"
+                  title="Одобрить"
                 >
                   <Check className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => handleRejectClick(row.original)}
                   className="text-red-600 hover:text-red-700 p-1 hover:bg-red-50 rounded transition-colors"
-                  title="Reject"
+                  title="Отклонить"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -258,27 +258,27 @@ export default function RefundsPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <RefreshCcw className="w-7 h-7" />
-          Refunds Management
+          Управление возвратами
         </h1>
-        <p className="text-gray-600 mt-1">Process refund requests from customers</p>
+        <p className="text-gray-600 mt-1">Обработка запросов на возврат от клиентов</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="Pending Refunds"
+          title="Ожидающих возвратов"
           value={stats?.pending_count || 0}
         />
         <StatsCard
-          title="Approved This Month"
+          title="Одобрено в этом месяце"
           value={stats?.approved_this_month || 0}
         />
         <StatsCard
-          title="Total Refunded"
+          title="Всего возвращено"
           value={`${(stats?.total_refunded_amount || 0).toLocaleString()} KZT`}
         />
         <StatsCard
-          title="Processing Rate"
+          title="Скорость обработки"
           value={
             stats?.pending_count && stats?.approved_this_month
               ? `${Math.round((stats.approved_this_month / (stats.approved_this_month + stats.pending_count)) * 100)}%`
@@ -290,21 +290,21 @@ export default function RefundsPage() {
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
         <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Filter by status:</label>
+          <label className="text-sm font-medium text-gray-700">Фильтр по статусу:</label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as RefundStatus | 'all')}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="processed">Processed</option>
+            <option value="all">Все статусы</option>
+            <option value="pending">Ожидает</option>
+            <option value="approved">Одобрен</option>
+            <option value="rejected">Отклонен</option>
+            <option value="processed">Обработан</option>
           </select>
           {statusFilter !== 'all' && (
             <Button variant="secondary" size="sm" onClick={() => setStatusFilter('all')}>
-              Clear Filter
+              Очистить фильтр
             </Button>
           )}
         </div>
@@ -321,9 +321,9 @@ export default function RefundsPage() {
         isOpen={approveDialogOpen}
         onClose={() => setApproveDialogOpen(false)}
         onConfirm={handleApproveConfirm}
-        title="Approve Refund"
-        message={`Are you sure you want to approve this refund of ${selectedRefund?.amount.toLocaleString()} KZT? The amount will be returned to the user's balance.`}
-        confirmText="Approve & Process"
+        title="Одобрить возврат"
+        message={`Вы уверены, что хотите одобрить этот возврат на сумму ${selectedRefund?.amount.toLocaleString()} KZT? Сумма будет возвращена на баланс пользователя.`}
+        confirmText="Одобрить и обработать"
         variant="success"
         isLoading={approveMutation.isPending}
       />
@@ -333,8 +333,8 @@ export default function RefundsPage() {
         isOpen={rejectModalOpen}
         onClose={() => setRejectModalOpen(false)}
         onReject={handleRejectConfirm}
-        title="Reject Refund"
-        message="Please provide a reason for rejecting this refund request:"
+        title="Отклонить возврат"
+        message="Пожалуйста, укажите причину отклонения этого запроса на возврат:"
         loading={rejectMutation.isPending}
       />
 
@@ -345,7 +345,7 @@ export default function RefundsPage() {
           setDetailModalOpen(false);
           setSelectedRefund(null);
         }}
-        title="Refund Details"
+        title="Детали возврата"
         size="lg"
         actions={
           selectedRefund?.status === 'pending' ? (
@@ -358,7 +358,7 @@ export default function RefundsPage() {
                 className="flex items-center gap-2"
               >
                 <Check className="w-4 h-4" />
-                Approve
+                Одобрить
               </Button>
               <Button
                 variant="danger"
@@ -369,7 +369,7 @@ export default function RefundsPage() {
                 className="flex items-center gap-2"
               >
                 <X className="w-4 h-4" />
-                Reject
+                Отклонить
               </Button>
             </div>
           ) : undefined
@@ -379,36 +379,36 @@ export default function RefundsPage() {
           <div className="space-y-6">
             {/* Refund Info */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Refund Information</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Информация о возврате</h3>
               <div className="space-y-2">
                 <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Refund ID:</span>
+                  <span className="text-sm text-gray-600">ID возврата:</span>
                   <span className="text-sm font-mono font-medium text-gray-900">
                     {selectedRefund.refund_id}
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Amount:</span>
+                  <span className="text-sm text-gray-600">Сумма:</span>
                   <span className="text-sm font-semibold text-gray-900">
                     {formatNumber(selectedRefund?.amount)} KZT
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Status:</span>
+                  <span className="text-sm text-gray-600">Статус:</span>
                   <StatusBadge
                     status={selectedRefund.status}
                     customText={STATUS_CONFIG[selectedRefund.status].label}
                   />
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Created:</span>
+                  <span className="text-sm text-gray-600">Создан:</span>
                   <span className="text-sm text-gray-900">
                     {new Date(selectedRefund.created_at).toLocaleString()}
                   </span>
                 </div>
                 {selectedRefund.processed_at && (
                   <div className="flex justify-between py-2 border-b border-gray-100">
-                    <span className="text-sm text-gray-600">Processed:</span>
+                    <span className="text-sm text-gray-600">Обработан:</span>
                     <span className="text-sm text-gray-900">
                       {new Date(selectedRefund.processed_at).toLocaleString()}
                     </span>
@@ -419,10 +419,10 @@ export default function RefundsPage() {
 
             {/* User Info */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Customer Information</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Информация о клиенте</h3>
               <div className="space-y-2">
                 <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Name:</span>
+                  <span className="text-sm text-gray-600">Имя:</span>
                   <span className="text-sm text-gray-900">{selectedRefund.user_name}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-100">
@@ -430,7 +430,7 @@ export default function RefundsPage() {
                   <span className="text-sm text-gray-900">{selectedRefund.user_email}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Phone:</span>
+                  <span className="text-sm text-gray-600">Телефон:</span>
                   <span className="text-sm text-gray-900">{selectedRefund.user_phone}</span>
                 </div>
               </div>
@@ -438,14 +438,14 @@ export default function RefundsPage() {
 
             {/* Order Info */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Order Information</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Информация о заказе</h3>
               <div className="space-y-2">
                 <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Order ID:</span>
+                  <span className="text-sm text-gray-600">ID заказа:</span>
                   <span className="text-sm font-mono text-gray-900">{selectedRefund.order_id}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-600">Original Amount:</span>
+                  <span className="text-sm text-gray-600">Исходная сумма:</span>
                   <span className="text-sm text-gray-900">
                     {selectedRefund.order_details.original_amount.toLocaleString()} KZT
                   </span>
@@ -454,7 +454,7 @@ export default function RefundsPage() {
 
               {/* Products */}
               <div className="mt-4">
-                <h4 className="text-xs font-medium text-gray-700 mb-2">Products:</h4>
+                <h4 className="text-xs font-medium text-gray-700 mb-2">Товары:</h4>
                 <div className="space-y-2">
                   {selectedRefund.order_details.products.map((product) => (
                     <div key={product.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded">
@@ -470,7 +470,7 @@ export default function RefundsPage() {
                           {product.name}
                         </div>
                         <div className="text-xs text-gray-500">
-                          Qty: {product.quantity} × {formatNumber(product.price)} KZT
+                          Кол-во: {product.quantity} × {formatNumber(product.price)} KZT
                         </div>
                       </div>
                       <div className="text-sm font-medium text-gray-900">
@@ -484,14 +484,14 @@ export default function RefundsPage() {
 
             {/* Refund Reason */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Refund Reason</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">Причина возврата</h3>
               <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded">{selectedRefund.reason}</p>
             </div>
 
             {/* Rejection Reason */}
             {selectedRefund.status === 'rejected' && selectedRefund.rejection_reason && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">Rejection Reason</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-2">Причина отклонения</h3>
                 <p className="text-sm text-red-700 bg-red-50 p-3 rounded border border-red-200">
                   {selectedRefund.rejection_reason}
                 </p>

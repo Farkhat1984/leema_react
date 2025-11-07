@@ -42,16 +42,27 @@ function LoginPage() {
 
   /**
    * Redirect if already authenticated
+   * Only redirect if we have both isAuthenticated flag AND user data
+   * This prevents premature redirects before auth state is fully loaded
    */
   useEffect(() => {
+    const { shop } = useAuthStore.getState();
+
     logger.debug('[LoginPage] Auth state changed', {
       isAuthenticated,
       userRole: user?.role,
+      hasUser: !!user,
+      hasShop: !!shop,
+      shopApproved: shop?.is_approved,
+      shopActive: shop?.is_active,
       currentPath: window.location.pathname
     });
 
-    if (isAuthenticated && user) {
-      const redirectPath = getRedirectPath(user.role);
+    // Only redirect if BOTH conditions are met:
+    // 1. isAuthenticated flag is true
+    // 2. user object exists with valid data
+    if (isAuthenticated && user?.role) {
+      const redirectPath = getRedirectPath(user.role, shop);
       logger.debug('[LoginPage] User is authenticated, redirecting from login page', {
         userRole: user.role,
         redirectPath,
@@ -62,13 +73,27 @@ function LoginPage() {
   }, [isAuthenticated, user, navigate]);
 
   /**
-   * Get redirect path based on user role
+   * Get redirect path based on user role and shop status
    */
-  const getRedirectPath = (role: string) => {
+  const getRedirectPath = (role: string, shop?: any) => {
     switch (role) {
       case 'admin':
         return ROUTES.ADMIN.DASHBOARD;
       case 'shop_owner':
+        // Check if shop is approved and active
+        const isApproved = shop?.is_approved === true;
+        const isActive = shop?.is_active === true;
+
+        // If shop is not approved or not active, redirect to registration
+        if (!isApproved || !isActive) {
+          logger.debug('[LoginPage] Shop not approved/active, redirecting to registration', {
+            isApproved,
+            isActive,
+            shopId: shop?.id
+          });
+          return ROUTES.SHOP.REGISTER;
+        }
+
         return ROUTES.SHOP.DASHBOARD;
       default:
         return ROUTES.ADMIN.DASHBOARD;
@@ -83,11 +108,14 @@ function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Store requested account type for callback
-      localStorage.setItem('requestedAccountType', accountType);
+      // Store requested login type for callback (admin is treated as user account type)
+      localStorage.setItem('requestedLoginType', accountType);
+
+      // Backend only accepts 'user' or 'shop' account types
+      const backendAccountType = accountType === 'shop' ? 'shop' : 'user';
 
       // Get secure OAuth URL from backend with state and nonce
-      const { authorization_url } = await authService.getGoogleAuthUrl(accountType, 'web');
+      const { authorization_url } = await authService.getGoogleAuthUrl(backendAccountType, 'web');
 
       logger.debug('[LoginPage] Redirecting to Google OAuth', {
         accountType,
@@ -157,7 +185,7 @@ function LoginPage() {
 
           {/* Footer Info */}
           <div className="mt-6 text-center text-sm text-gray-500">
-            <p className="mb-2">Магазины и админы используют Google OAuth</p>
+            <p className="mb-2">Магазины и администраторы используют Google</p>
             <p>Пользователи - скачайте мобильное приложение</p>
           </div>
         </div>

@@ -79,20 +79,20 @@ function AdminAnalyticsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Platform Analytics
+            Аналитика платформы
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Monitor platform-wide metrics and performance
+            Мониторинг показателей и производительности платформы
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => handleExport('csv')}>
             <Download className="w-4 h-4 mr-2" />
-            Export CSV
+            Экспорт CSV
           </Button>
           <Button variant="outline" onClick={() => handleExport('json')}>
             <Download className="w-4 h-4 mr-2" />
-            Export JSON
+            Экспорт JSON
           </Button>
         </div>
       </div>
@@ -102,7 +102,7 @@ function AdminAnalyticsPage() {
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Period
+              Период
             </label>
             <div className="flex gap-2">
               {(['daily', 'weekly', 'monthly'] as Period[]).map((p) => (
@@ -112,21 +112,21 @@ function AdminAnalyticsPage() {
                   onClick={() => setPeriod(p)}
                   className="capitalize"
                 >
-                  {p}
+                  {p === 'daily' ? 'Ежедневно' : p === 'weekly' ? 'Еженедельно' : 'Ежемесячно'}
                 </Button>
               ))}
             </div>
           </div>
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Date Range
+              Диапазон дат
             </label>
             <FormDateRangePicker
               value={dateRange}
               onChange={setDateRange}
               presets={[
                 {
-                  label: 'Last 7 days',
+                  label: 'Последние 7 дней',
                   getValue: () => {
                     const today = new Date();
                     const start = new Date(today);
@@ -135,7 +135,7 @@ function AdminAnalyticsPage() {
                   },
                 },
                 {
-                  label: 'Last 30 days',
+                  label: 'Последние 30 дней',
                   getValue: () => {
                     const today = new Date();
                     const start = new Date(today);
@@ -144,7 +144,7 @@ function AdminAnalyticsPage() {
                   },
                 },
                 {
-                  label: 'Last 90 days',
+                  label: 'Последние 90 дней',
                   getValue: () => {
                     const today = new Date();
                     const start = new Date(today);
@@ -153,7 +153,7 @@ function AdminAnalyticsPage() {
                   },
                 },
                 {
-                  label: 'This year',
+                  label: 'Этот год',
                   getValue: () => {
                     const today = new Date();
                     const start = new Date(today.getFullYear(), 0, 1);
@@ -169,7 +169,7 @@ function AdminAnalyticsPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="Total Revenue"
+          title="Общий доход"
           value={formatCurrency(analytics?.total_revenue || 0)}
           icon={<DollarSign className="w-6 h-6" />}
           trend={
@@ -180,7 +180,7 @@ function AdminAnalyticsPage() {
           variant="success"
         />
         <StatsCard
-          title="Total Users"
+          title="Всего пользователей"
           value={analytics?.total_users || 0}
           icon={<Users className="w-6 h-6" />}
           trend={
@@ -191,7 +191,7 @@ function AdminAnalyticsPage() {
           variant="primary"
         />
         <StatsCard
-          title="Total Shops"
+          title="Всего магазинов"
           value={analytics?.total_shops || 0}
           icon={<ShoppingBag className="w-6 h-6" />}
           trend={
@@ -202,7 +202,7 @@ function AdminAnalyticsPage() {
           variant="primary"
         />
         <StatsCard
-          title="Total Orders"
+          title="Всего заказов"
           value={analytics?.total_orders || 0}
           icon={<TrendingUp className="w-6 h-6" />}
           trend={
@@ -217,11 +217,11 @@ function AdminAnalyticsPage() {
       {/* Revenue Chart */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Revenue Trend
+          Динамика дохода
         </h3>
         <LineChart
           data={analytics?.revenue_chart || []}
-          lines={[{ dataKey: 'value', name: 'Revenue', color: '#10b981' }]}
+          lines={[{ dataKey: 'value', name: 'Доход', color: '#10b981' }]}
           xAxisKey="date"
           height={300}
           showTrend
@@ -233,22 +233,22 @@ function AdminAnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            User Growth
+            Рост пользователей
           </h3>
           <AreaChart
             data={analytics?.users_chart || []}
-            areas={[{ dataKey: 'value', name: 'Users', color: '#6366f1' }]}
+            areas={[{ dataKey: 'value', name: 'Пользователи', color: '#6366f1' }]}
             xAxisKey="date"
             height={250}
           />
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Shop Growth
+            Рост магазинов
           </h3>
           <AreaChart
             data={analytics?.shops_chart || []}
-            areas={[{ dataKey: 'value', name: 'Shops', color: '#8b5cf6' }]}
+            areas={[{ dataKey: 'value', name: 'Магазины', color: '#8b5cf6' }]}
             xAxisKey="date"
             height={250}
           />
@@ -258,11 +258,11 @@ function AdminAnalyticsPage() {
       {/* Orders Chart */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Orders Over Time
+          Заказы по времени
         </h3>
         <BarChart
           data={analytics?.orders_chart || []}
-          bars={[{ dataKey: 'value', name: 'Orders', color: '#ec4899' }]}
+          bars={[{ dataKey: 'value', name: 'Заказы', color: '#ec4899' }]}
           xAxisKey="date"
           height={300}
         />

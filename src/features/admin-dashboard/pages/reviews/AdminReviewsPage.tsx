@@ -81,13 +81,13 @@ function AdminReviewsPage() {
     mutationFn: (reviewId: number) =>
       apiRequest(`${API_ENDPOINTS.REVIEWS.BY_ID(reviewId)}/approve`, 'POST'),
     onSuccess: () => {
-      toast.success('Review approved successfully');
+      toast.success('Отзыв одобрен успешно');
       queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
       queryClient.invalidateQueries({ queryKey: ['admin-reviews-stats'] });
       setApprovingReviewId(null);
     },
     onError: () => {
-      toast.error('Failed to approve review');
+      toast.error('Не удалось одобрить отзыв');
     },
   });
 
@@ -96,13 +96,13 @@ function AdminReviewsPage() {
     mutationFn: ({ reviewId, reason }: { reviewId: number; reason: string }) =>
       apiRequest(`${API_ENDPOINTS.REVIEWS.BY_ID(reviewId)}/reject`, 'POST', { reason }),
     onSuccess: () => {
-      toast.success('Review rejected successfully');
+      toast.success('Отзыв отклонен успешно');
       queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
       queryClient.invalidateQueries({ queryKey: ['admin-reviews-stats'] });
       setRejectingReviewId(null);
     },
     onError: () => {
-      toast.error('Failed to reject review');
+      toast.error('Не удалось отклонить отзыв');
     },
   });
 
@@ -111,13 +111,13 @@ function AdminReviewsPage() {
     mutationFn: (reviewId: number) =>
       apiRequest(API_ENDPOINTS.REVIEWS.DELETE(reviewId), 'DELETE'),
     onSuccess: () => {
-      toast.success('Review deleted successfully');
+      toast.success('Отзыв удален успешно');
       queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
       queryClient.invalidateQueries({ queryKey: ['admin-reviews-stats'] });
       setDeletingReviewId(null);
     },
     onError: () => {
-      toast.error('Failed to delete review');
+      toast.error('Не удалось удалить отзыв');
     },
   });
 
@@ -140,7 +140,7 @@ function AdminReviewsPage() {
 
   const columns = [
     {
-      header: 'User',
+      header: 'Пользователь',
       accessorKey: 'user_name',
       cell: ({ row }: { row: Row<Review> }) => (
         <div className="flex items-center gap-3">
@@ -162,7 +162,7 @@ function AdminReviewsPage() {
       ),
     },
     {
-      header: 'Product',
+      header: 'Товар',
       accessorKey: 'product_name',
       cell: ({ row }: { row: Row<Review> }) => (
         <div className="flex items-center gap-3">
@@ -183,12 +183,12 @@ function AdminReviewsPage() {
       ),
     },
     {
-      header: 'Rating',
+      header: 'Рейтинг',
       accessorKey: 'rating',
       cell: ({ row }: { row: Row<Review> }) => renderStars(row.original.rating),
     },
     {
-      header: 'Comment',
+      header: 'Комментарий',
       accessorKey: 'comment',
       cell: ({ row }: { row: Row<Review> }) => (
         <div className="max-w-xs truncate text-gray-600 dark:text-gray-400">
@@ -197,17 +197,17 @@ function AdminReviewsPage() {
       ),
     },
     {
-      header: 'Status',
+      header: 'Статус',
       accessorKey: 'status',
       cell: ({ row }: { row: Row<Review> }) => <StatusBadge status={row.original.status} />,
     },
     {
-      header: 'Date',
+      header: 'Дата',
       accessorKey: 'created_at',
       cell: ({ row }: { row: Row<Review> }) => formatDate(row.original.created_at),
     },
     {
-      header: 'Actions',
+      header: 'Действия',
       accessorKey: 'id',
       cell: ({ row }: { row: Row<Review> }) => (
         <div className="flex items-center gap-2">
@@ -258,28 +258,28 @@ function AdminReviewsPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Reviews Management
+          Управление отзывами
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Moderate product reviews and manage user feedback
+          Модерация отзывов о товарах и управление отзывами пользователей
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatsCard title="Total Reviews" value={stats?.total || 0} variant="primary" />
+        <StatsCard title="Всего отзывов" value={stats?.total || 0} variant="primary" />
         <StatsCard
-          title="Pending Reviews"
+          title="Ожидающих проверки"
           value={stats?.pending || 0}
           variant="warning"
         />
         <StatsCard
-          title="Approved Reviews"
+          title="Одобрено"
           value={stats?.approved || 0}
           variant="success"
         />
         <StatsCard
-          title="Rejected Reviews"
+          title="Отклонено"
           value={stats?.rejected || 0}
           variant="danger"
         />
@@ -291,21 +291,21 @@ function AdminReviewsPage() {
           <SearchInput
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Search by user, product, or shop..."
+            placeholder="Поиск по пользователю, товару или магазину..."
           />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
-            <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
+            <option value="all">Все статусы</option>
+            <option value="pending">Ожидает</option>
+            <option value="approved">Одобрен</option>
+            <option value="rejected">Отклонен</option>
           </select>
           {(searchQuery || statusFilter !== 'all') && (
             <Button variant="outline" onClick={handleClearFilters}>
-              Clear Filters
+              Очистить фильтры
             </Button>
           )}
         </div>
@@ -325,7 +325,7 @@ function AdminReviewsPage() {
         <DetailModal
           isOpen={true}
           onClose={() => setViewingReview(null)}
-          title="Review Details"
+          title="Детали отзыва"
           size="lg"
         >
           <div className="space-y-6">
@@ -357,7 +357,7 @@ function AdminReviewsPage() {
             {/* Product Info */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Product
+                Товар
               </h4>
               <div className="flex items-center gap-4">
                 {viewingReview.product_image && (
@@ -379,7 +379,7 @@ function AdminReviewsPage() {
             {/* Rating */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Rating
+                Рейтинг
               </h4>
               {renderStars(viewingReview.rating)}
             </div>
@@ -387,7 +387,7 @@ function AdminReviewsPage() {
             {/* Comment */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Comment
+                Комментарий
               </h4>
               <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
                 {viewingReview.comment}
@@ -397,13 +397,13 @@ function AdminReviewsPage() {
             {/* Status */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Status
+                Статус
               </h4>
               <StatusBadge status={viewingReview.status} />
               {viewingReview.rejection_reason && (
                 <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                   <p className="text-sm text-red-800 dark:text-red-200">
-                    <strong>Rejection Reason:</strong> {viewingReview.rejection_reason}
+                    <strong>Причина отклонения:</strong> {viewingReview.rejection_reason}
                   </p>
                 </div>
               )}
@@ -421,7 +421,7 @@ function AdminReviewsPage() {
                   className="text-red-600"
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Reject
+                  Отклонить
                 </Button>
                 <Button
                   onClick={() => {
@@ -431,7 +431,7 @@ function AdminReviewsPage() {
                   className="bg-green-600 hover:bg-green-700"
                 >
                   <Check className="w-4 h-4 mr-2" />
-                  Approve
+                  Одобрить
                 </Button>
               </div>
             )}
@@ -445,9 +445,9 @@ function AdminReviewsPage() {
           isOpen={true}
           onClose={() => setApprovingReviewId(null)}
           onConfirm={() => approveMutation.mutate(approvingReviewId)}
-          title="Approve Review"
-          message="Are you sure you want to approve this review? It will be visible to all users."
-          confirmText="Approve"
+          title="Одобрить отзыв"
+          message="Вы уверены, что хотите одобрить этот отзыв? Он будет виден всем пользователям."
+          confirmText="Одобрить"
           loading={isLoading}
         />
       )}
@@ -458,8 +458,8 @@ function AdminReviewsPage() {
           isOpen={true}
           onClose={() => setRejectingReviewId(null)}
           onConfirm={(reason) => rejectMutation.mutate({ reviewId: rejectingReviewId, reason })}
-          title="Reject Review"
-          message="Please provide a reason for rejecting this review:"
+          title="Отклонить отзыв"
+          message="Пожалуйста, укажите причину отклонения этого отзыва:"
           loading={isLoading}
         />
       )}
@@ -470,9 +470,9 @@ function AdminReviewsPage() {
           isOpen={true}
           onClose={() => setDeletingReviewId(null)}
           onConfirm={() => deleteMutation.mutate(deletingReviewId)}
-          title="Delete Review"
-          message="Are you sure you want to delete this review? This action cannot be undone."
-          confirmText="Delete"
+          title="Удалить отзыв"
+          message="Вы уверены, что хотите удалить этот отзыв? Это действие нельзя отменить."
+          confirmText="Удалить"
           loading={isLoading}
         />
       )}

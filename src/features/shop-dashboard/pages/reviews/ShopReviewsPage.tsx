@@ -110,7 +110,7 @@ function ShopReviewsPage() {
 
   const columns = [
     {
-      header: 'User',
+      header: 'Пользователь',
       accessorKey: 'user_name',
       cell: ({row}: {row: {original: Review}}) => (
         <div className="flex items-center gap-3">
@@ -132,7 +132,7 @@ function ShopReviewsPage() {
       ),
     },
     {
-      header: 'Product',
+      header: 'Товар',
       accessorKey: 'product_name',
       cell: ({row}: {row: {original: Review}}) => (
         <div className="flex items-center gap-3">
@@ -150,12 +150,12 @@ function ShopReviewsPage() {
       ),
     },
     {
-      header: 'Rating',
+      header: 'Рейтинг',
       accessorKey: 'rating',
       cell: ({row}: {row: {original: Review}}) => renderStars(row.original.rating),
     },
     {
-      header: 'Comment',
+      header: 'Комментарий',
       accessorKey: 'comment',
       cell: ({row}: {row: {original: Review}}) => (
         <div className="max-w-md truncate text-gray-600 dark:text-gray-400">
@@ -164,16 +164,16 @@ function ShopReviewsPage() {
       ),
     },
     {
-      header: 'Date',
+      header: 'Дата',
       accessorKey: 'created_at',
       cell: ({row}: {row: {original: Review}}) => formatDate(row.original.created_at),
     },
     {
-      header: 'Actions',
+      header: 'Действия',
       accessorKey: 'id',
       cell: ({row}: {row: {original: Review}}) => (
         <Button size="sm" variant="ghost" onClick={() => setViewingReview(row.original)}>
-          View
+          Просмотр
         </Button>
       ),
     },
@@ -207,30 +207,30 @@ function ShopReviewsPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Product Reviews
+          Отзывы о товарах
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          View and analyze customer reviews for your products
+          Просмотр и анализ отзывов клиентов о ваших товарах
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="Total Reviews"
+          title="Всего отзывов"
           value={stats?.total_reviews || 0}
           icon={<MessageSquare />}
           variant="primary"
         />
         <StatsCard
-          title="Average Rating"
+          title="Средний рейтинг"
           value={stats?.average_rating?.toFixed(1) || '0.0'}
           icon={<Star />}
           variant="warning"
         />
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">
-            Rating Distribution
+            Распределение рейтинга
           </h3>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -268,14 +268,14 @@ function ShopReviewsPage() {
           <SearchInput
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Search reviews..."
+            placeholder="Поиск отзывов..."
           />
           <select
             value={selectedProduct}
             onChange={(e) => setSelectedProduct(e.target.value)}
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
-            <option value="all">All Products</option>
+            <option value="all">Все товары</option>
             {products.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.name}
@@ -284,7 +284,7 @@ function ShopReviewsPage() {
           </select>
           {(searchQuery || selectedProduct !== 'all') && (
             <Button variant="outline" onClick={handleClearFilters}>
-              Clear Filters
+              Очистить фильтры
             </Button>
           )}
         </div>
@@ -295,8 +295,8 @@ function ShopReviewsPage() {
         {!isLoading && (!reviewsData?.data || reviewsData.data.length === 0) ? (
           <EmptyState
             icon={<MessageSquare />}
-            title="No reviews yet"
-            message="Your products don't have any reviews yet. Encourage customers to leave reviews!"
+            title="Пока нет отзывов"
+            message="У ваших товаров пока нет отзывов. Предложите клиентам оставить отзывы!"
           />
         ) : (
           <DataTable
@@ -317,7 +317,7 @@ function ShopReviewsPage() {
         <DetailModal
           isOpen={true}
           onClose={() => setViewingReview(null)}
-          title="Review Details"
+          title="Детали отзыва"
           size="lg"
         >
           <div className="space-y-6">
@@ -349,7 +349,7 @@ function ShopReviewsPage() {
             {/* Product Info */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Product
+                Товар
               </h4>
               <div className="flex items-center gap-4">
                 {viewingReview.product_image && (
@@ -368,7 +368,7 @@ function ShopReviewsPage() {
             {/* Rating */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Rating
+                Рейтинг
               </h4>
               <div className="flex items-center gap-2">
                 {renderStars(viewingReview.rating)}
@@ -381,7 +381,7 @@ function ShopReviewsPage() {
             {/* Comment */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Comment
+                Комментарий
               </h4>
               <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
                 {viewingReview.comment}

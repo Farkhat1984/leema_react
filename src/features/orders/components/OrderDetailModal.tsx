@@ -19,12 +19,12 @@ interface OrderDetailModalProps {
 }
 
 const STATUS_CONFIG = {
-  pending: { label: 'Pending', color: 'gray' as const },
-  paid: { label: 'Paid', color: 'green' as const },
-  shipped: { label: 'Shipped', color: 'blue' as const },
-  completed: { label: 'Completed', color: 'green' as const },
-  cancelled: { label: 'Cancelled', color: 'red' as const },
-  refunded: { label: 'Refunded', color: 'yellow' as const },
+  pending: { label: 'Ожидание', color: 'gray' as const },
+  paid: { label: 'Оплачено', color: 'green' as const },
+  shipped: { label: 'Отправлено', color: 'blue' as const },
+  completed: { label: 'Завершено', color: 'green' as const },
+  cancelled: { label: 'Отменено', color: 'red' as const },
+  refunded: { label: 'Возврат', color: 'yellow' as const },
 }
 
 export function OrderDetailModal({ isOpen, onClose, order }: OrderDetailModalProps) {
@@ -33,34 +33,34 @@ export function OrderDetailModal({ isOpen, onClose, order }: OrderDetailModalPro
   const statusConfig = STATUS_CONFIG[order.status]
 
   return (
-    <DetailModal isOpen={isOpen} onClose={onClose} title="Order Details" size="xl">
+    <DetailModal isOpen={isOpen} onClose={onClose} title="Детали заказа" size="xl">
       <div className="space-y-6">
         {/* Order Info */}
-        <DetailSection title="Order Information" icon={<Package className="w-5 h-5" />}>
+        <DetailSection title="Информация о заказе" icon={<Package className="w-5 h-5" />}>
           <DetailRow
-            label="Order Number"
+            label="Номер заказа"
             value={ordersService.formatOrderNumber(order.order_number)}
           />
           <DetailRow
-            label="Status"
+            label="Статус"
             value={<StatusBadge status={order.status} variant={statusConfig.color} />}
           />
           <DetailRow
-            label="Order Date"
-            value={new Date(order.ordered_at).toLocaleString()}
+            label="Дата заказа"
+            value={new Date(order.ordered_at).toLocaleString('ru-RU')}
           />
-          {order.notes && <DetailRow label="Notes" value={order.notes} />}
+          {order.notes && <DetailRow label="Примечания" value={order.notes} />}
         </DetailSection>
 
         {/* Customer Info */}
-        <DetailSection title="Customer Information" icon={<User className="w-5 h-5" />}>
-          <DetailRow label="Name" value={order.customer.name} />
+        <DetailSection title="Информация о клиенте" icon={<User className="w-5 h-5" />}>
+          <DetailRow label="Имя" value={order.customer.name} />
           <DetailRow label="Email" value={order.customer.email} />
-          <DetailRow label="Phone" value={order.customer.phone} />
+          <DetailRow label="Телефон" value={order.customer.phone} />
         </DetailSection>
 
         {/* Shipping Address */}
-        <DetailSection title="Shipping Address" icon={<MapPin className="w-5 h-5" />}>
+        <DetailSection title="Адрес доставки" icon={<MapPin className="w-5 h-5" />}>
           <div className="text-sm text-gray-900">
             <p>{order.customer.address}</p>
             {order.customer.city && (
@@ -74,7 +74,7 @@ export function OrderDetailModal({ isOpen, onClose, order }: OrderDetailModalPro
         </DetailSection>
 
         {/* Products */}
-        <DetailSection title="Products" icon={<ShoppingBag className="w-5 h-5" />}>
+        <DetailSection title="Товары" icon={<ShoppingBag className="w-5 h-5" />}>
           <div className="space-y-3">
             {order.products.map((product, index) => (
               <div
@@ -92,14 +92,14 @@ export function OrderDetailModal({ isOpen, onClose, order }: OrderDetailModalPro
                   <div className="font-medium text-gray-900">{product.product_name}</div>
                   {(product.size || product.color) && (
                     <div className="text-sm text-gray-600 mt-1">
-                      {product.size && <span>Size: {product.size}</span>}
+                      {product.size && <span>Размер: {product.size}</span>}
                       {product.size && product.color && <span> • </span>}
-                      {product.color && <span>Color: {product.color}</span>}
+                      {product.color && <span>Цвет: {product.color}</span>}
                     </div>
                   )}
                 </div>
                 <div className="text-right">
-                  <div className="text-sm text-gray-600">Qty: {product.quantity}</div>
+                  <div className="text-sm text-gray-600">Кол-во: {product.quantity}</div>
                   <div className="font-medium text-gray-900">
                     {ordersService.formatCurrency(product.price)}
                   </div>
@@ -113,59 +113,59 @@ export function OrderDetailModal({ isOpen, onClose, order }: OrderDetailModalPro
         </DetailSection>
 
         {/* Payment Summary */}
-        <DetailSection title="Payment Summary" icon={<CreditCard className="w-5 h-5" />}>
+        <DetailSection title="Сводка по оплате" icon={<CreditCard className="w-5 h-5" />}>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Subtotal:</span>
+              <span className="text-gray-600">Сумма товаров:</span>
               <span className="text-gray-900">
                 {ordersService.formatCurrency(order.subtotal)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Shipping:</span>
+              <span className="text-gray-600">Доставка:</span>
               <span className="text-gray-900">
                 {ordersService.formatCurrency(order.shipping_cost)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Tax:</span>
+              <span className="text-gray-600">Налог:</span>
               <span className="text-gray-900">{ordersService.formatCurrency(order.tax)}</span>
             </div>
             <div className="flex justify-between text-lg font-semibold border-t border-gray-200 pt-2">
-              <span className="text-gray-900">Total:</span>
+              <span className="text-gray-900">Итого:</span>
               <span className="text-blue-600">{ordersService.formatCurrency(order.total)}</span>
             </div>
           </div>
-          <DetailRow label="Payment Method" value={order.payment_method} />
-          {order.payment_id && <DetailRow label="Payment ID" value={order.payment_id} />}
+          <DetailRow label="Способ оплаты" value={order.payment_method} />
+          {order.payment_id && <DetailRow label="ID платежа" value={order.payment_id} />}
         </DetailSection>
 
         {/* Timeline */}
-        <DetailSection title="Order Timeline" icon={<Calendar className="w-5 h-5" />}>
+        <DetailSection title="Хронология заказа" icon={<Calendar className="w-5 h-5" />}>
           <div className="space-y-3">
             <TimelineItem
-              label="Ordered"
+              label="Заказан"
               date={order.ordered_at}
               completed
             />
             <TimelineItem
-              label="Paid"
+              label="Оплачен"
               date={order.paid_at}
               completed={!!order.paid_at}
             />
             <TimelineItem
-              label="Shipped"
+              label="Отправлен"
               date={order.shipped_at}
               completed={!!order.shipped_at}
             />
             <TimelineItem
-              label="Completed"
+              label="Завершен"
               date={order.completed_at}
               completed={!!order.completed_at}
             />
             {order.cancelled_at && (
               <TimelineItem
-                label="Cancelled"
+                label="Отменен"
                 date={order.cancelled_at}
                 completed
                 cancelled
@@ -176,16 +176,16 @@ export function OrderDetailModal({ isOpen, onClose, order }: OrderDetailModalPro
 
         {/* Admin-only: Platform Fee */}
         {order.platform_fee && order.shop_payout && (
-          <DetailSection title="Platform Details">
+          <DetailSection title="Детали платформы">
             <DetailRow
-              label="Platform Fee"
+              label="Комиссия платформы"
               value={ordersService.formatCurrency(order.platform_fee)}
             />
             <DetailRow
-              label="Shop Payout"
+              label="Выплата магазину"
               value={ordersService.formatCurrency(order.shop_payout)}
             />
-            {order.shop_name && <DetailRow label="Shop" value={order.shop_name} />}
+            {order.shop_name && <DetailRow label="Магазин" value={order.shop_name} />}
           </DetailSection>
         )}
       </div>
@@ -224,7 +224,7 @@ function TimelineItem({ label, date, completed, cancelled = false }: TimelineIte
           {label}
         </div>
         {date && (
-          <div className="text-xs text-gray-500">{new Date(date).toLocaleString()}</div>
+          <div className="text-xs text-gray-500">{new Date(date).toLocaleString('ru-RU')}</div>
         )}
       </div>
     </div>

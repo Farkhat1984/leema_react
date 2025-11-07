@@ -3,7 +3,7 @@
  * Processes the authorization code and redirects to appropriate dashboard
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import authService from '../services/authService';
@@ -21,8 +21,16 @@ function AuthCallbackPage() {
   const navigate = useNavigate();
   const { login } = useAuthStore();
   const [error, setError] = useState<AuthError | null>(null);
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
+    // Prevent double execution (React StrictMode in dev causes double mount)
+    if (hasProcessed.current) {
+      logger.debug('[AuthCallback] Already processed, skipping duplicate call');
+      return;
+    }
+
+    hasProcessed.current = true;
     handleCallback();
   }, []);
 
@@ -31,32 +39,50 @@ function AuthCallbackPage() {
    */
   const handleCallback = async () => {
     try {
+      logger.info('[AuthCallback] Starting callback processing', {
+        url: window.location.href,
+        search: window.location.search
+      });
+
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
 
+      logger.debug('[AuthCallback] Parsed URL params', {
+        hasCode: !!code,
+        codeLength: code?.length
+      });
+
       if (!code) {
+        logger.error('[AuthCallback] No authorization code in URL');
         throw new Error('Отсутствует код авторизации');
       }
 
-      // Get requested account type from localStorage
-      const requestedType = localStorage.getItem('requestedAccountType') || 'user';
+      // Get requested login type from localStorage (admin, shop, or user)
+      const requestedLoginType = localStorage.getItem('requestedLoginType') || 'user';
 
-      // For API: admin -> user, shop -> shop
-      const accountType = requestedType === 'admin' ? 'user' : requestedType;
+      logger.debug('[AuthCallback] Login type', {
+        requestedLoginType,
+        fromLocalStorage: !!localStorage.getItem('requestedLoginType')
+      });
+
+      // Backend only supports 'user' and 'shop' account types
+      // Admin is a user role, not an account type
+      const accountType = requestedLoginType === 'shop' ? 'shop' : 'user';
 
       // Authenticate with backend
-      const response = await authService.loginWithGoogle(code, accountType as 'user' | 'shop');
+      const response = await authService.googleLogin(code, accountType as 'user' | 'shop', 'web');
 
       logger.debug('[AuthCallback] Backend response received', {
         hasUser: !!response.user,
         hasShop: !!response.shop,
         hasAccessToken: !!response.accessToken,
         hasRefreshToken: !!response.refreshToken,
-        accountType
+        accountType,
+        requestedLoginType
       });
 
       // Clear stored data
-      localStorage.removeItem('requestedAccountType');
+      localStorage.removeItem('requestedLoginType');
       localStorage.removeItem('oauth_state');
 
       // Determine final account type and redirect path
@@ -138,7 +164,7 @@ function AuthCallbackPage() {
       }
 
       // Check access permissions
-      if (requestedType === 'admin' && finalAccountType !== 'admin') {
+      if (requestedLoginType === 'admin' && finalAccountType !== 'admin') {
         setError({
           title: 'Нет прав доступа',
           message: 'У вас нет прав администратора. Попробуйте войти как пользователь или владелец магазина.',
@@ -149,7 +175,7 @@ function AuthCallbackPage() {
         return;
       }
 
-      if (requestedType === 'shop' && finalAccountType !== 'shop') {
+      if (requestedLoginType === 'shop' && finalAccountType !== 'shop') {
         setError({
           title: 'Ошибка авторизации',
           message: 'Не удалось войти как владелец магазина. Попробуйте войти как пользователь.',
@@ -161,7 +187,7 @@ function AuthCallbackPage() {
       }
 
       // Success - redirect to dashboard
-      // Small delay to ensure Zustand persist completes
+      // Wait for Zustand persist to complete before navigation
       const currentUser = useAuthStore.getState().user;
       logger.debug('[AuthCallback] Redirecting to dashboard', {
         redirectPath,
@@ -171,12 +197,27 @@ function AuthCallbackPage() {
         hasAccessToken: !!useAuthStore.getState().accessToken
       });
 
+      // Use longer delay to ensure Zustand persist middleware completes
+      // and sessionStorage is fully written before navigation
       setTimeout(() => {
-        logger.debug('[AuthCallback] Executing navigation to', redirectPath);
+        // Verify auth state is still valid before navigation
+        const state = useAuthStore.getState();
+        logger.debug('[AuthCallback] Executing navigation to', {
+          redirectPath,
+          isAuthenticated: state.isAuthenticated,
+          hasUser: !!state.user,
+          hasToken: !!state.accessToken
+        });
+
         navigate(redirectPath, { replace: true });
-      }, 250); // Increased delay to ensure persistence completes
+      }, 500); // Increased delay to 500ms to ensure persistence completes
     } catch (err: any) {
-      logger.error('Auth callback error', err);
+      logger.error('[AuthCallback] Auth callback error', {
+        error: err,
+        message: err.message,
+        stack: err.stack,
+        response: err.response?.data
+      });
       setError({
         title: 'Ошибка авторизации',
         message: err.message || 'Произошла ошибка при авторизации',

@@ -129,7 +129,7 @@ function ShopProductsPage() {
       }
     } catch (error) {
       logger.error('Failed to load products', error);
-      toast.error('Failed to load products');
+      toast.error('Не удалось загрузить товары');
       setProducts([]); // Set empty array on error
     } finally {
       setIsLoading(false);
@@ -247,7 +247,7 @@ function ShopProductsPage() {
         };
 
         await productService.updateProduct(selectedProduct.id, payload);
-        toast.success('Product updated successfully');
+        toast.success('Товар успешно обновлен');
         setShowEditModal(false);
       } else {
         // Create new product first (without images)
@@ -283,14 +283,14 @@ function ShopProductsPage() {
           }
         }
 
-        toast.success('Product created and submitted for approval');
+        toast.success('Товар создан и отправлен на модерацию');
         setShowCreateModal(false);
       }
 
       loadProducts();
     } catch (error: any) {
       logger.error('Failed to save product', error);
-      toast.error(error.message || 'Failed to save product');
+      toast.error(error.message || 'Не удалось сохранить товар');
     } finally {
       setIsSaving(false);
     }
@@ -304,12 +304,12 @@ function ShopProductsPage() {
 
     try {
       await apiRequest(API_ENDPOINTS.PRODUCTS.DELETE(selectedProduct.id), 'DELETE');
-      toast.success('Product deleted successfully');
+      toast.success('Товар успешно удален');
       setShowDeleteDialog(false);
       loadProducts();
     } catch (error: any) {
       logger.error('Failed to delete product', error);
-      toast.error(error.message || 'Failed to delete product');
+      toast.error(error.message || 'Не удалось удалить товар');
     }
   };
 
@@ -348,14 +348,14 @@ function ShopProductsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Products</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Товары</h1>
             <p className="text-gray-600 mt-1">
-              Manage your products ({totalProducts} total)
+              Управление товарами ({totalProducts} всего)
             </p>
           </div>
           <Button onClick={handleCreate} variant="primary" className="flex items-center gap-2">
             <Plus className="w-5 h-5" />
-            Add Product
+            Добавить товар
           </Button>
         </div>
 
@@ -367,7 +367,7 @@ function ShopProductsPage() {
               <SearchInput
                 value={searchTerm}
                 onChange={setSearchTerm}
-                placeholder="Search products..."
+                placeholder="Поиск товаров..."
               />
             </div>
 
@@ -377,7 +377,7 @@ function ShopProductsPage() {
               onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="">All Categories</option>
+              <option value="">Все категории</option>
               {Array.isArray(categories) && categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -391,32 +391,32 @@ function ShopProductsPage() {
               onChange={(e) => setSelectedStatus((e.target.value as ProductStatus) || null)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
+              <option value="">Все статусы</option>
+              <option value="draft">Черновик</option>
+              <option value="pending">На модерации</option>
+              <option value="approved">Одобрено</option>
+              <option value="rejected">Отклонено</option>
             </select>
           </div>
 
           {/* Sort and Clear */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Sort by:</span>
+              <span className="text-sm text-gray-600">Сортировка:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'date' | 'price' | 'name')}
                 className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="date">Date</option>
-                <option value="price">Price</option>
-                <option value="name">Name</option>
+                <option value="date">По дате</option>
+                <option value="price">По цене</option>
+                <option value="name">По названию</option>
               </select>
             </div>
             {(searchTerm || selectedCategory || selectedStatus) && (
               <Button onClick={clearFilters} variant="ghost" size="sm" className="flex items-center gap-1">
                 <X className="w-4 h-4" />
-                Clear Filters
+                Очистить фильтры
               </Button>
             )}
           </div>
@@ -429,8 +429,8 @@ function ShopProductsPage() {
           </div>
         ) : products.length === 0 ? (
           <EmptyState
-            title="No products found"
-            message={searchTerm ? 'Try adjusting your filters' : 'Get started by creating your first product'}
+            title="Товары не найдены"
+            message={searchTerm ? 'Попробуйте изменить фильтры' : 'Начните с создания вашего первого товара'}
           />
         ) : (
           <>
@@ -475,9 +475,9 @@ function ShopProductsPage() {
                     <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
                       <span className="flex items-center gap-1">
                         <Eye className="w-3 h-3" />
-                        {product.views || 0} views
+                        {product.views || 0} просм.
                       </span>
-                      <span>{product.try_ons || 0} try-ons</span>
+                      <span>{product.try_ons || 0} примерок</span>
                     </div>
 
                     {/* Actions */}
@@ -489,7 +489,7 @@ function ShopProductsPage() {
                         className="flex-1"
                       >
                         <Edit className="w-4 h-4 mr-1" />
-                        Edit
+                        Изменить
                       </Button>
                       <Button
                         onClick={() => handleDelete(product)}
@@ -523,32 +523,32 @@ function ShopProductsPage() {
         <FormModal
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
-          title="Create New Product"
+          title="Создать новый товар"
           onSubmit={handleSubmit(onSubmit)}
           isSubmitting={isSaving}
           size="lg"
         >
           <div className="space-y-4">
             <FormInput
-              label="Product Name"
+              label="Название товара"
               {...register('name')}
               error={errors.name?.message}
-              placeholder="e.g., Summer Dress"
+              placeholder="Например, Летнее платье"
               required
             />
 
             <FormTextarea
-              label="Description"
+              label="Описание"
               {...register('description')}
               error={errors.description?.message}
-              placeholder="Describe your product..."
+              placeholder="Опишите ваш товар..."
               rows={3}
               required
             />
 
             <div className="grid grid-cols-2 gap-4">
               <FormInput
-                label="Price (₸)"
+                label="Цена (₸)"
                 type="number"
                 step="0.01"
                 {...register('price', { valueAsNumber: true })}
@@ -559,7 +559,7 @@ function ShopProductsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category <span className="text-red-500">*</span>
+                  Категория <span className="text-red-500">*</span>
                 </label>
                 <select
                   {...register('category_id', { valueAsNumber: true })}
@@ -567,7 +567,7 @@ function ShopProductsPage() {
                     errors.category_id ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
-                  <option value="">Select category</option>
+                  <option value="">Выберите категорию</option>
                   {Array.isArray(categories) && categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name}
@@ -581,33 +581,33 @@ function ShopProductsPage() {
             </div>
 
             <FormInput
-              label="Sizes"
+              label="Размеры"
               {...register('sizes')}
               error={errors.sizes?.message}
-              placeholder="e.g., S, M, L, XL"
-              helperText="Comma-separated list"
+              placeholder="Например, S, M, L, XL"
+              helperText="Список через запятую"
               required
             />
 
             <FormInput
-              label="Colors"
+              label="Цвета"
               {...register('colors')}
               error={errors.colors?.message}
-              placeholder="e.g., Red, Blue, Green"
-              helperText="Comma-separated list"
+              placeholder="Например, Красный, Синий, Зеленый"
+              helperText="Список через запятую"
               required
             />
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Images <span className="text-red-500">*</span>
+                Изображения товара <span className="text-red-500">*</span>
               </label>
               <ImageUploadMultiple
                 value={uploadedImages}
                 onChange={setUploadedImages}
                 maxFiles={5}
                 maxSize={5 * 1024 * 1024}
-                helperText="Upload up to 5 images. First image will be the main product image."
+                helperText="Загрузите до 5 изображений. Первое изображение будет главным."
               />
             </div>
           </div>
@@ -617,21 +617,21 @@ function ShopProductsPage() {
         <FormModal
           isOpen={showEditModal}
           onClose={() => setShowEditModal(false)}
-          title="Edit Product"
+          title="Редактировать товар"
           onSubmit={handleSubmit(onSubmit)}
           isSubmitting={isSaving}
           size="lg"
         >
           <div className="space-y-4">
             <FormInput
-              label="Product Name"
+              label="Название товара"
               {...register('name')}
               error={errors.name?.message}
               required
             />
 
             <FormTextarea
-              label="Description"
+              label="Описание"
               {...register('description')}
               error={errors.description?.message}
               rows={3}
@@ -640,7 +640,7 @@ function ShopProductsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <FormInput
-                label="Price (₸)"
+                label="Цена (₸)"
                 type="number"
                 step="0.01"
                 {...register('price', { valueAsNumber: true })}
@@ -650,7 +650,7 @@ function ShopProductsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category <span className="text-red-500">*</span>
+                  Категория <span className="text-red-500">*</span>
                 </label>
                 <select
                   {...register('category_id', { valueAsNumber: true })}
@@ -658,7 +658,7 @@ function ShopProductsPage() {
                     errors.category_id ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
-                  <option value="">Select category</option>
+                  <option value="">Выберите категорию</option>
                   {Array.isArray(categories) && categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name}
@@ -672,31 +672,31 @@ function ShopProductsPage() {
             </div>
 
             <FormInput
-              label="Sizes"
+              label="Размеры"
               {...register('sizes')}
               error={errors.sizes?.message}
-              helperText="Comma-separated list"
+              helperText="Список через запятую"
               required
             />
 
             <FormInput
-              label="Colors"
+              label="Цвета"
               {...register('colors')}
               error={errors.colors?.message}
-              helperText="Comma-separated list"
+              helperText="Список через запятую"
               required
             />
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Images
+                Изображения товара
               </label>
               <ImageUploadMultiple
                 value={uploadedImages}
                 onChange={setUploadedImages}
                 maxFiles={5}
                 maxSize={5 * 1024 * 1024}
-                helperText="Upload up to 5 images. First image will be the main product image."
+                helperText="Загрузите до 5 изображений. Первое изображение будет главным."
               />
             </div>
           </div>
@@ -707,9 +707,9 @@ function ShopProductsPage() {
           isOpen={showDeleteDialog}
           onClose={() => setShowDeleteDialog(false)}
           onConfirm={confirmDelete}
-          title="Delete Product"
-          message={`Are you sure you want to delete "${selectedProduct?.name}"? This action cannot be undone.`}
-          confirmText="Delete"
+          title="Удалить товар"
+          message={`Вы уверены, что хотите удалить "${selectedProduct?.name}"? Это действие нельзя отменить.`}
+          confirmText="Удалить"
           variant="danger"
         />
       </div>

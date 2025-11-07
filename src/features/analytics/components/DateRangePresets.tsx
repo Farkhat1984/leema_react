@@ -7,10 +7,10 @@ interface DateRangePresetsProps {
 }
 
 const PRESETS = [
-  { label: 'Last 7 days', days: 7 },
-  { label: 'Last 30 days', days: 30 },
-  { label: 'Last 3 months', days: 90 },
-  { label: 'Last year', days: 365 },
+  { label: 'Последние 7 дней', days: 7 },
+  { label: 'Последние 30 дней', days: 30 },
+  { label: 'Последние 3 месяца', days: 90 },
+  { label: 'Последний год', days: 365 },
 ]
 
 export function DateRangePresets({ value, onChange, className = '' }: DateRangePresetsProps) {
@@ -41,7 +41,7 @@ export function DateRangePresets({ value, onChange, className = '' }: DateRangeP
           onClick={() => setIsCustomOpen(!isCustomOpen)}
           className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-300 rounded-md hover:bg-blue-100 transition-colors"
         >
-          Custom
+          Произвольно
         </button>
       </div>
 

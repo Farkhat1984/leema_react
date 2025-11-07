@@ -12,7 +12,7 @@ function PaymentCancelPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const reason = searchParams.get('reason') || 'Payment was cancelled';
+  const reason = searchParams.get('reason') || 'Платеж был отменен';
   const paymentType = searchParams.get('type') || 'topup';
 
   /**
@@ -43,41 +43,41 @@ function PaymentCancelPage() {
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <XCircle className="w-12 h-12 text-red-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Cancelled</h1>
-          <p className="text-gray-600">Your payment was not completed</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Платеж отменен</h1>
+          <p className="text-gray-600">Ваш платеж не был завершен</p>
         </div>
 
         {/* Reason Message */}
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-start space-x-3">
           <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-yellow-900 mb-1">What happened?</p>
+            <p className="text-sm font-medium text-yellow-900 mb-1">Что произошло?</p>
             <p className="text-sm text-yellow-800">{reason}</p>
           </div>
         </div>
 
         {/* Information */}
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold text-gray-900 mb-2">No charges were made</h3>
+          <h3 className="font-semibold text-gray-900 mb-2">Средства не списаны</h3>
           <p className="text-sm text-gray-600 mb-3">
-            Your payment was not processed and no money was deducted from your account.
+            Ваш платеж не был обработан, и деньги не были списаны с вашего счета.
           </p>
           <p className="text-sm text-gray-600">
-            {paymentType === 'topup' && 'Your balance remains unchanged. You can try again or choose a different payment method.'}
-            {paymentType === 'order' && 'Your order was not completed. You can try placing the order again.'}
-            {paymentType === 'rent' && 'Your rental was not activated. You can try again to rent a product slot.'}
+            {paymentType === 'topup' && 'Ваш баланс остался без изменений. Вы можете попробовать снова или выбрать другой способ оплаты.'}
+            {paymentType === 'order' && 'Ваш заказ не был завершен. Вы можете попробовать оформить заказ снова.'}
+            {paymentType === 'rent' && 'Ваша аренда не была активирована. Вы можете попробовать снова арендовать слот для товара.'}
           </p>
         </div>
 
         {/* Common Reasons */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold text-blue-900 mb-2 text-sm">Common reasons for cancellation:</h3>
+          <h3 className="font-semibold text-blue-900 mb-2 text-sm">Частые причины отмены:</h3>
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-            <li>Payment window was closed</li>
-            <li>Insufficient funds in account</li>
-            <li>Payment details were incorrect</li>
-            <li>Transaction timed out</li>
-            <li>User cancelled the payment</li>
+            <li>Окно оплаты было закрыто</li>
+            <li>Недостаточно средств на счете</li>
+            <li>Неверные данные платежа</li>
+            <li>Истекло время транзакции</li>
+            <li>Пользователь отменил платеж</li>
           </ul>
         </div>
 
@@ -88,26 +88,26 @@ function PaymentCancelPage() {
             variant="primary"
             className="w-full"
           >
-            Try Again
+            Попробовать снова
           </Button>
           <Button
             onClick={handleReturnToDashboard}
             variant="outline"
             className="w-full"
           >
-            Return to Dashboard
+            Вернуться на главную
           </Button>
         </div>
 
         {/* Help Footer */}
         <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500 mb-2">Need help with your payment?</p>
+          <p className="text-xs text-gray-500 mb-2">Нужна помощь с платежом?</p>
           <Button
             onClick={() => window.open('mailto:support@leema.kz', '_blank')}
             variant="ghost"
             className="text-sm text-purple-600 hover:text-purple-700"
           >
-            Contact Support
+            Связаться с поддержкой
           </Button>
         </div>
       </div>

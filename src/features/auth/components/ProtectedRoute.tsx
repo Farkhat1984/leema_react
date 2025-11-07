@@ -34,9 +34,12 @@ export const ProtectedRoute = ({
   });
 
   // If not authenticated, redirect to login
-  if (!isAuthenticated) {
+  // But ensure we have a valid access token
+  if (!isAuthenticated || !accessToken) {
     logger.warn('[ProtectedRoute] Not authenticated, redirecting to login', {
-      path: location.pathname
+      path: location.pathname,
+      isAuthenticated,
+      hasAccessToken: !!accessToken
     });
     return <Navigate to={ROUTES.PUBLIC.LOGIN} state={{ from: location }} replace />;
   }
@@ -66,6 +69,7 @@ export const ProtectedRoute = ({
   const isRegistrationPage = location.pathname === ROUTES.SHOP.REGISTER;
 
   // If shop owner trying to access protected routes, check approval status
+  // Exception: Allow access to registration page regardless of approval status
   if (isShopRoute && !isRegistrationPage && user?.role === ROLES.SHOP_OWNER) {
     const isApproved = shop?.is_approved === true;
     const isActive = shop?.is_active === true;
@@ -74,7 +78,8 @@ export const ProtectedRoute = ({
       path: location.pathname,
       isApproved,
       isActive,
-      shopId: shop?.id
+      shopId: shop?.id,
+      isRegistrationPage
     });
 
     // If shop is not approved or not active, redirect to registration page
@@ -87,6 +92,16 @@ export const ProtectedRoute = ({
       });
       return <Navigate to={ROUTES.SHOP.REGISTER} replace />;
     }
+  }
+
+  // Allow shop owners to access registration page even if not approved
+  // This prevents redirect loops for unapproved shops
+  if (isRegistrationPage && user?.role === ROLES.SHOP_OWNER) {
+    logger.debug('[ProtectedRoute] Allowing access to registration page for shop owner', {
+      shopId: shop?.id,
+      isApproved: shop?.is_approved,
+      isActive: shop?.is_active
+    });
   }
 
   logger.debug('[ProtectedRoute] Access granted', {

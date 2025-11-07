@@ -22,9 +22,9 @@ export function BillingPage() {
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Billing & Payments</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Биллинг и платежи</h1>
         <p className="text-gray-600">
-          Manage your shop balance, product rentals, and transaction history
+          Управление балансом магазина, арендой товаров и историей транзакций
         </p>
       </div>
 
@@ -37,7 +37,7 @@ export function BillingPage() {
                 <Wallet className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-blue-100 text-sm">Current Balance</p>
+                <p className="text-blue-100 text-sm">Текущий баланс</p>
                 <h2 className="text-3xl font-bold">
                   {isLoading ? (
                     <div className="animate-pulse bg-white/20 h-9 w-32 rounded" />
@@ -54,18 +54,18 @@ export function BillingPage() {
                 className="bg-white text-blue-600 hover:bg-blue-50 border-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Top Up
+                Пополнить
               </Button>
             </Link>
           </div>
 
           <div className="text-blue-100 text-sm">
-            {balance?.currency || 'KZT'} • Available for use
+            {balance?.currency || 'KZT'} • Доступно для использования
           </div>
         </div>
 
         <StatsCard
-          title="Pending Balance"
+          title="Баланс в ожидании"
           value={`${(balance?.pending_balance ?? 0).toLocaleString()} KZT`}
           icon={<AlertCircle className="w-6 h-6" />}
           variant="warning"
@@ -73,7 +73,7 @@ export function BillingPage() {
         />
 
         <StatsCard
-          title="Active Rentals"
+          title="Активные аренды"
           value={balance?.active_rentals_count || 0}
           icon={<TrendingUp className="w-6 h-6" />}
           variant="info"
@@ -87,7 +87,7 @@ export function BillingPage() {
           <div className="flex items-center gap-3">
             <ArrowUpCircle className="w-8 h-8 text-green-600" />
             <div>
-              <p className="text-sm text-gray-600">Total Earned</p>
+              <p className="text-sm text-gray-600">Всего заработано</p>
               <p className="text-xl font-bold text-gray-900">
                 {isLoading ? (
                   <span className="animate-pulse">...</span>
@@ -103,7 +103,7 @@ export function BillingPage() {
           <div className="flex items-center gap-3">
             <ArrowUpCircle className="w-8 h-8 text-red-600 rotate-180" />
             <div>
-              <p className="text-sm text-gray-600">Total Spent</p>
+              <p className="text-sm text-gray-600">Всего потрачено</p>
               <p className="text-xl font-bold text-gray-900">
                 {isLoading ? (
                   <span className="animate-pulse">...</span>
@@ -128,7 +128,7 @@ export function BillingPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Active Rentals
+              Активные аренды
             </button>
             <button
               onClick={() => setActiveTab('history')}
@@ -138,7 +138,7 @@ export function BillingPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Transaction History
+              История транзакций
             </button>
           </nav>
         </div>

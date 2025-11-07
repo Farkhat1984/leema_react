@@ -69,11 +69,11 @@ export function TopUpPage() {
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Billing
+            Назад к биллингу
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Top Up Balance</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Пополнение баланса</h1>
           <p className="text-gray-600">
-            Add funds to your shop balance to rent product slots and manage your shop
+            Добавьте средства на баланс магазина для аренды слотов товаров и управления магазином
           </p>
         </div>
 
@@ -83,7 +83,7 @@ export function TopUpPage() {
             {/* Amount Selection */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-900 mb-3">
-                Select Amount
+                Выберите сумму
               </label>
 
               {/* Preset Amounts */}
@@ -106,16 +106,16 @@ export function TopUpPage() {
 
               {/* Custom Amount Input */}
               <FormInput
-                label="Or enter custom amount (KZT)"
+                label="Или введите произвольную сумму (KZT)"
                 type="number"
-                placeholder="Enter amount"
+                placeholder="Введите сумму"
                 error={errors.amount?.message}
                 {...register('amount', { valueAsNumber: true })}
               />
 
               {amount && (
                 <div className="mt-2 text-sm text-gray-600">
-                  You will pay: <span className="font-semibold">{formatNumber(amount)} KZT</span>
+                  Вы заплатите: <span className="font-semibold">{formatNumber(amount)} KZT</span>
                 </div>
               )}
             </div>
@@ -123,7 +123,7 @@ export function TopUpPage() {
             {/* Payment Method Selection */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-900 mb-3">
-                Payment Method
+                Способ оплаты
               </label>
 
               <div className="space-y-3">
@@ -150,7 +150,7 @@ export function TopUpPage() {
                     <div>
                       <div className="font-medium text-gray-900">PayPal</div>
                       <div className="text-sm text-gray-500">
-                        Safe and secure payment via PayPal
+                        Безопасная оплата через PayPal
                       </div>
                     </div>
                   </div>
@@ -172,8 +172,8 @@ export function TopUpPage() {
                   <div className="flex items-center gap-3 flex-1">
                     <CreditCard className="w-8 h-8 text-gray-400" />
                     <div>
-                      <div className="font-medium text-gray-600">Credit/Debit Card</div>
-                      <div className="text-sm text-gray-500">Coming soon</div>
+                      <div className="font-medium text-gray-600">Кредитная/дебетовая карта</div>
+                      <div className="text-sm text-gray-500">Скоро будет доступно</div>
                     </div>
                   </div>
                 </label>
@@ -185,12 +185,12 @@ export function TopUpPage() {
               <div className="flex gap-3">
                 <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-blue-900">
-                  <p className="font-medium mb-1">Payment Information</p>
+                  <p className="font-medium mb-1">Информация об оплате</p>
                   <ul className="list-disc list-inside space-y-1 text-blue-800">
-                    <li>You will be redirected to PayPal to complete the payment</li>
-                    <li>Funds will be added to your balance immediately after payment</li>
-                    <li>All transactions are secure and encrypted</li>
-                    <li>Minimum top-up amount: 100 KZT</li>
+                    <li>Вы будете перенаправлены на PayPal для завершения платежа</li>
+                    <li>Средства будут добавлены на ваш баланс сразу после оплаты</li>
+                    <li>Все транзакции безопасны и зашифрованы</li>
+                    <li>Минимальная сумма пополнения: 100 KZT</li>
                   </ul>
                 </div>
               </div>
@@ -204,14 +204,14 @@ export function TopUpPage() {
               disabled={!amount || initiateMutation.isPending}
               isLoading={initiateMutation.isPending}
             >
-              {initiateMutation.isPending ? 'Redirecting to PayPal...' : 'Proceed to Payment'}
+              {initiateMutation.isPending ? 'Перенаправление на PayPal...' : 'Перейти к оплате'}
             </Button>
           </form>
         </div>
 
         {/* Security Note */}
         <div className="mt-6 text-center text-sm text-gray-500">
-          <p>🔒 Secure payment powered by PayPal</p>
+          <p>🔒 Безопасные платежи через PayPal</p>
         </div>
       </div>
     </div>

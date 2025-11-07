@@ -48,10 +48,10 @@ export default function ShopAnalyticsPage() {
       const timestamp = new Date().toISOString().split('T')[0]
       const filename = `analytics_${period}_${timestamp}.${format}`
       analyticsService.downloadExport(blob, filename)
-      toast.success(`Analytics exported as ${format.toUpperCase()}`)
+      toast.success(`Аналитика экспортирована как ${format.toUpperCase()}`)
       setShowExportMenu(false)
     } catch (error) {
-      toast.error('Failed to export analytics')
+      toast.error('Не удалось экспортировать аналитику')
     }
   }
 
@@ -59,7 +59,7 @@ export default function ShopAnalyticsPage() {
   const topProductsColumns: ColumnDef<TopProduct>[] = [
     {
       accessorKey: 'name',
-      header: 'Product',
+      header: 'Товар',
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
           {row.original.image_url && (
@@ -78,7 +78,7 @@ export default function ShopAnalyticsPage() {
     },
     {
       accessorKey: 'sales_count',
-      header: 'Sales',
+      header: 'Продажи',
       cell: ({ row }) => (
         <div className="text-center font-medium text-gray-900">
           {row.original.sales_count}
@@ -87,7 +87,7 @@ export default function ShopAnalyticsPage() {
     },
     {
       accessorKey: 'revenue',
-      header: 'Revenue',
+      header: 'Доход',
       cell: ({ row }) => (
         <div className="text-right font-semibold text-gray-900">
           {analyticsService.formatCurrency(row.original.revenue)}
@@ -100,9 +100,9 @@ export default function ShopAnalyticsPage() {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Панель аналитики</h1>
         <p className="text-gray-600 mt-2">
-          Track your shop's performance and gain insights
+          Отслеживайте производительность магазина и получайте инсайты
         </p>
       </div>
 
@@ -112,7 +112,7 @@ export default function ShopAnalyticsPage() {
           {/* Period Selector */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Time Period
+              Временной период
             </label>
             <PeriodSelector value={period} onChange={setPeriod} />
           </div>
@@ -120,7 +120,7 @@ export default function ShopAnalyticsPage() {
           {/* Date Range */}
           <div className="flex-1 max-w-md">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Custom Date Range
+              Произвольный диапазон дат
             </label>
             <DateRangePresets value={dateRange} onChange={setDateRange} />
           </div>
@@ -128,7 +128,7 @@ export default function ShopAnalyticsPage() {
           {/* Export Button */}
           <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-2 invisible">
-              Actions
+              Действия
             </label>
             <div className="relative">
               <Button
@@ -136,7 +136,7 @@ export default function ShopAnalyticsPage() {
                 onClick={() => setShowExportMenu(!showExportMenu)}
               >
                 <Download className="w-4 h-4 mr-2" />
-                Export
+                Экспорт
                 <ChevronDown className="w-4 h-4 ml-1" />
               </Button>
               {showExportMenu && (
@@ -145,13 +145,13 @@ export default function ShopAnalyticsPage() {
                     onClick={() => handleExport('csv')}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg"
                   >
-                    Export as CSV
+                    Экспорт в CSV
                   </button>
                   <button
                     onClick={() => handleExport('json')}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-b-lg"
                   >
-                    Export as JSON
+                    Экспорт в JSON
                   </button>
                 </div>
               )}
@@ -163,14 +163,14 @@ export default function ShopAnalyticsPage() {
       {isLoading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Loading analytics...</p>
+          <p className="text-gray-500 mt-4">Загрузка аналитики...</p>
         </div>
       ) : data && data.metrics ? (
         <div className="space-y-8">
           {/* Metrics Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatsCard
-              title="Total Revenue"
+              title="Общий доход"
               value={analyticsService.formatCurrency(data.metrics.total_revenue || 0)}
               icon={<DollarSign className="w-5 h-5" />}
               variant="success"
@@ -181,7 +181,7 @@ export default function ShopAnalyticsPage() {
               }
             />
             <StatsCard
-              title="Total Orders"
+              title="Всего заказов"
               value={data.metrics.total_orders || 0}
               icon={<ShoppingCart className="w-5 h-5" />}
               variant="primary"
@@ -192,14 +192,14 @@ export default function ShopAnalyticsPage() {
               }
             />
             <StatsCard
-              title="Avg Order Value"
+              title="Средний чек"
               value={analyticsService.formatCurrency(data.metrics.average_order_value || 0)}
               icon={<TrendingUp className="w-5 h-5" />}
               variant="info"
             />
             <StatsCard
-              title="Top Category"
-              value={data.metrics.top_category?.name || 'N/A'}
+              title="Топ категория"
+              value={data.metrics.top_category?.name || 'Н/Д'}
               icon={<Tag className="w-5 h-5" />}
               variant="warning"
             />
@@ -207,13 +207,13 @@ export default function ShopAnalyticsPage() {
 
           {/* Charts Row 1: Revenue Line Chart */}
           <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Trend</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Тренд дохода</h3>
             <LineChart
               data={Array.isArray(data.revenue_data) ? data.revenue_data.map((d) => ({
                 date: d.label,
                 revenue: d.revenue,
               })) : []}
-              lines={[{ dataKey: 'revenue', name: 'Revenue', color: '#10b981' }]}
+              lines={[{ dataKey: 'revenue', name: 'Доход', color: '#10b981' }]}
               xAxisKey="date"
               height={300}
               curved
@@ -229,24 +229,24 @@ export default function ShopAnalyticsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Orders Bar Chart */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Orders Over Time</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Заказы за период</h3>
               <BarChart
                 data={Array.isArray(data.orders_data) ? data.orders_data.map((d) => ({
                   date: d.label,
                   orders: d.orders,
                 })) : []}
-                bars={[{ dataKey: 'orders', name: 'Orders', color: '#6366f1' }]}
+                bars={[{ dataKey: 'orders', name: 'Заказы', color: '#6366f1' }]}
                 xAxisKey="date"
                 height={300}
                 radius={[8, 8, 0, 0]}
-                formatTooltip={(value) => `${value} orders`}
+                formatTooltip={(value) => `${value} заказов`}
               />
             </div>
 
             {/* Category Doughnut Chart */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Revenue by Category
+                Доход по категориям
               </h3>
               <PieChart
                 data={Array.isArray(data.category_breakdown) ? data.category_breakdown : []}
@@ -254,7 +254,7 @@ export default function ShopAnalyticsPage() {
                 doughnut
                 showPercentage
                 showLegend
-                centerLabel="Total"
+                centerLabel="Всего"
                 centerValue={analyticsService.formatCurrency(data.metrics.total_revenue || 0)}
                 formatValue={(value) => analyticsService.formatCurrency(value)}
                 hoverable
@@ -265,22 +265,22 @@ export default function ShopAnalyticsPage() {
           {/* Top Products Table */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Top 10 Products</h3>
-              <p className="text-sm text-gray-600 mt-1">Best performing products by revenue</p>
+              <h3 className="text-lg font-semibold text-gray-900">Топ-10 товаров</h3>
+              <p className="text-sm text-gray-600 mt-1">Лучшие товары по доходу</p>
             </div>
             <DataTable
               columns={topProductsColumns}
               data={Array.isArray(data.top_products) ? data.top_products.slice(0, 10) : []}
               loading={isLoading}
               showPagination={false}
-              emptyMessage="No products data available"
+              emptyMessage="Нет данных о товарах"
             />
           </div>
         </div>
       ) : (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
           <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">No analytics data available</p>
+          <p className="text-gray-500">Нет данных аналитики</p>
         </div>
       )}
     </div>

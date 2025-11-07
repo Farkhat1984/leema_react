@@ -90,11 +90,11 @@ function AdminUserProfilePage() {
   const deleteMutation = useMutation({
     mutationFn: () => apiRequest(API_ENDPOINTS.ADMIN.USER_DELETE(userId!), 'DELETE'),
     onSuccess: () => {
-      toast.success('User deleted successfully');
+      toast.success('Пользователь успешно удален');
       navigate('/admin/users');
     },
     onError: () => {
-      toast.error('Failed to delete user');
+      toast.error('Не удалось удалить пользователя');
     },
   });
 
@@ -103,12 +103,12 @@ function AdminUserProfilePage() {
     mutationFn: () =>
       apiRequest(`${API_ENDPOINTS.ADMIN.USER_BY_ID(userId!)}/suspend`, 'POST'),
     onSuccess: () => {
-      toast.success('User suspended successfully');
+      toast.success('Пользователь успешно приостановлен');
       queryClient.invalidateQueries({ queryKey: ['admin-user', userId] });
       setShowSuspendDialog(false);
     },
     onError: () => {
-      toast.error('Failed to suspend user');
+      toast.error('Не удалось приостановить пользователя');
     },
   });
 
@@ -117,11 +117,11 @@ function AdminUserProfilePage() {
     mutationFn: () =>
       apiRequest(`${API_ENDPOINTS.ADMIN.USER_BY_ID(userId!)}/activate`, 'POST'),
     onSuccess: () => {
-      toast.success('User activated successfully');
+      toast.success('Пользователь успешно активирован');
       queryClient.invalidateQueries({ queryKey: ['admin-user', userId] });
     },
     onError: () => {
-      toast.error('Failed to activate user');
+      toast.error('Не удалось активировать пользователя');
     },
   });
 
@@ -132,9 +132,9 @@ function AdminUserProfilePage() {
   if (!user) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600 dark:text-gray-400">User not found</p>
+        <p className="text-gray-600 dark:text-gray-400">Пользователь не найден</p>
         <Button onClick={() => navigate('/admin/users')} className="mt-4">
-          Back to Users
+          Назад к пользователям
         </Button>
       </div>
     );
@@ -142,25 +142,25 @@ function AdminUserProfilePage() {
 
   const orderColumns = [
     {
-      header: 'Order ID',
+      header: 'ID заказа',
       accessorKey: 'order_id',
     },
     {
-      header: 'Shop',
+      header: 'Магазин',
       accessorKey: 'shop_name',
     },
     {
-      header: 'Total',
+      header: 'Сумма',
       accessorKey: 'total',
       cell: ({ row }: { row: Row<Order> }) => formatCurrency(row.original.total),
     },
     {
-      header: 'Status',
+      header: 'Статус',
       accessorKey: 'status',
       cell: ({ row }: { row: Row<Order> }) => <StatusBadge status={row.original.status as 'active' | 'inactive' | 'pending' | 'completed' | 'cancelled'} />,
     },
     {
-      header: 'Date',
+      header: 'Дата',
       accessorKey: 'created_at',
       cell: ({ row }: { row: Row<Order> }) => formatDate(row.original.created_at),
     },
@@ -168,7 +168,7 @@ function AdminUserProfilePage() {
 
   const wardrobeColumns = [
     {
-      header: 'Product',
+      header: 'Товар',
       accessorKey: 'product_name',
       cell: ({ row }: { row: Row<WardrobeItem> }) => (
         <div className="flex items-center gap-3">
@@ -184,11 +184,11 @@ function AdminUserProfilePage() {
       ),
     },
     {
-      header: 'Shop',
+      header: 'Магазин',
       accessorKey: 'shop_name',
     },
     {
-      header: 'Added',
+      header: 'Добавлено',
       accessorKey: 'added_at',
       cell: ({ row }: { row: Row<WardrobeItem> }) => formatDate(row.original.added_at),
     },
@@ -203,9 +203,9 @@ function AdminUserProfilePage() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">User Profile</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Профиль пользователя</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              View and manage user details
+              Просмотр и управление данными пользователя
             </p>
           </div>
         </div>
@@ -217,7 +217,7 @@ function AdminUserProfilePage() {
               className="bg-green-600 hover:bg-green-700"
             >
               <UserCheck className="w-4 h-4 mr-2" />
-              Activate User
+              Активировать
             </Button>
           ) : (
             <Button
@@ -226,7 +226,7 @@ function AdminUserProfilePage() {
               className="text-orange-600 hover:text-orange-700"
             >
               <UserX className="w-4 h-4 mr-2" />
-              Suspend User
+              Приостановить
             </Button>
           )}
           <Button
@@ -235,7 +235,7 @@ function AdminUserProfilePage() {
             className="text-red-600 hover:text-red-700"
           >
             <Trash2 className="w-4 h-4 mr-2" />
-            Delete User
+            Удалить
           </Button>
         </div>
       </div>
@@ -278,12 +278,12 @@ function AdminUserProfilePage() {
               )}
               <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                 <Calendar className="w-4 h-4" />
-                <span>Joined {formatDate(user.created_at)}</span>
+                <span>Зарегистрирован {formatDate(user.created_at)}</span>
               </div>
               {user.last_login && (
                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                   <Clock className="w-4 h-4" />
-                  <span>Last login {formatDate(user.last_login)}</span>
+                  <span>Последний вход {formatDate(user.last_login)}</span>
                 </div>
               )}
             </div>
@@ -294,19 +294,19 @@ function AdminUserProfilePage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatsCard
-          title="Total Orders"
+          title="Всего заказов"
           value={user.orders_count}
           icon={<ShoppingBag className="w-6 h-6" />}
           variant="primary"
         />
         <StatsCard
-          title="Wardrobe Items"
+          title="Товары в гардеробе"
           value={user.wardrobe_count}
           icon={<Shirt className="w-6 h-6" />}
           variant="primary"
         />
         <StatsCard
-          title="Total Spent"
+          title="Всего потрачено"
           value={formatCurrency(user.total_spent)}
           variant="success"
         />
@@ -316,13 +316,13 @@ function AdminUserProfilePage() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Order History
+            История заказов
           </h3>
         </div>
         <DataTable
           columns={orderColumns}
           data={orders || []}
-          emptyMessage="No orders yet"
+          emptyMessage="Пока нет заказов"
         />
       </div>
 
@@ -330,13 +330,13 @@ function AdminUserProfilePage() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Wardrobe Items
+            Гардероб
           </h3>
         </div>
         <DataTable
           columns={wardrobeColumns}
           data={wardrobeItems || []}
-          emptyMessage="No wardrobe items"
+          emptyMessage="Гардероб пуст"
         />
       </div>
 
@@ -345,9 +345,9 @@ function AdminUserProfilePage() {
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={() => deleteMutation.mutate()}
-        title="Delete User"
-        message={`Are you sure you want to delete ${user.name}? This action cannot be undone and will permanently remove all user data including orders and wardrobe items.`}
-        confirmText="Delete User"
+        title="Удалить пользователя"
+        message={`Вы уверены, что хотите удалить ${user.name}? Это действие необратимо и приведёт к полному удалению всех данных пользователя, включая заказы и гардероб.`}
+        confirmText="Удалить пользователя"
         loading={isLoading}
       />
 
@@ -356,9 +356,9 @@ function AdminUserProfilePage() {
         isOpen={showSuspendDialog}
         onClose={() => setShowSuspendDialog(false)}
         onConfirm={() => suspendMutation.mutate()}
-        title="Suspend User"
-        message={`Are you sure you want to suspend ${user.name}? They will not be able to access their account until reactivated.`}
-        confirmText="Suspend User"
+        title="Приостановить пользователя"
+        message={`Вы уверены, что хотите приостановить ${user.name}? Пользователь не сможет войти в свой аккаунт до повторной активации.`}
+        confirmText="Приостановить"
         loading={isLoading}
       />
     </div>

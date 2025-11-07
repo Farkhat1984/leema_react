@@ -14,11 +14,11 @@ import type { ColumnDef } from '@tanstack/react-table';
 import type { Transaction, TransactionType, TransactionStatus } from '../types';
 
 const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
-  'top-up': 'Top Up',
-  rent: 'Rent Slot',
-  refund: 'Refund',
-  withdrawal: 'Withdrawal',
-  purchase: 'Purchase',
+  'top-up': 'Пополнение',
+  rent: 'Аренда слота',
+  refund: 'Возврат',
+  withdrawal: 'Вывод средств',
+  purchase: 'Покупка',
 };
 
 const TRANSACTION_STATUS_COLORS: Record<
@@ -44,10 +44,10 @@ export function TransactionHistory() {
   const columns: ColumnDef<Transaction>[] = [
     {
       accessorKey: 'created_at',
-      header: 'Date',
+      header: 'Дата',
       cell: ({ row }) => (
         <div className="text-sm text-gray-900">
-          {new Date(row.original.created_at).toLocaleDateString('en-US', {
+          {new Date(row.original.created_at).toLocaleDateString('ru-RU', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
@@ -59,7 +59,7 @@ export function TransactionHistory() {
     },
     {
       accessorKey: 'type',
-      header: 'Type',
+      header: 'Тип',
       cell: ({ row }) => {
         const isPositive = ['top-up', 'refund'].includes(row.original.type);
         return (
@@ -78,7 +78,7 @@ export function TransactionHistory() {
     },
     {
       accessorKey: 'description',
-      header: 'Description',
+      header: 'Описание',
       cell: ({ row }) => (
         <div className="max-w-xs text-sm text-gray-600 truncate">
           {row.original.description}
@@ -87,7 +87,7 @@ export function TransactionHistory() {
     },
     {
       accessorKey: 'amount',
-      header: 'Amount',
+      header: 'Сумма',
       cell: ({ row }) => {
         const isPositive = ['top-up', 'refund'].includes(row.original.type);
         return (
@@ -104,7 +104,7 @@ export function TransactionHistory() {
     },
     {
       accessorKey: 'balance_after',
-      header: 'Balance After',
+      header: 'Баланс после',
       cell: ({ row }) => (
         <div className="text-sm text-gray-700 font-medium">
           {formatNumber(row.original.balance_after)} KZT
@@ -113,7 +113,7 @@ export function TransactionHistory() {
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: 'Статус',
       cell: ({ row }) => (
         <StatusBadge
           status={row.original.status}
@@ -136,7 +136,7 @@ export function TransactionHistory() {
           }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="">All Types</option>
+          <option value="">Все типы</option>
           {Object.entries(TRANSACTION_TYPE_LABELS).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
@@ -152,7 +152,7 @@ export function TransactionHistory() {
             }}
             className="text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
-            Clear Filter
+            Очистить фильтр
           </button>
         )}
       </div>

@@ -14,12 +14,12 @@ import type { Order, OrderStatus } from '../types/order.types'
 import toast from 'react-hot-toast'
 
 const STATUS_CONFIG = {
-  pending: { label: 'Pending', color: 'gray' as const },
-  paid: { label: 'Paid', color: 'green' as const },
-  shipped: { label: 'Shipped', color: 'blue' as const },
-  completed: { label: 'Completed', color: 'green' as const },
-  cancelled: { label: 'Cancelled', color: 'red' as const },
-  refunded: { label: 'Refunded', color: 'yellow' as const },
+  pending: { label: 'Ожидание', color: 'gray' as const },
+  paid: { label: 'Оплачен', color: 'green' as const },
+  shipped: { label: 'Отправлен', color: 'blue' as const },
+  completed: { label: 'Завершен', color: 'green' as const },
+  cancelled: { label: 'Отменен', color: 'red' as const },
+  refunded: { label: 'Возврат', color: 'yellow' as const },
 }
 
 export default function AdminOrdersPage() {
@@ -52,13 +52,13 @@ export default function AdminOrdersPage() {
     mutationFn: ({ id, status, notes }: { id: number; status: OrderStatus; notes?: string }) =>
       ordersService.updateOrderStatus(id, { status, notes }),
     onSuccess: () => {
-      toast.success('Order status updated successfully')
+      toast.success('Статус заказа успешно обновлен')
       setUpdatingOrder(null)
       setNotes('')
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to update order status')
+      toast.error(error.message || 'Не удалось обновить статус заказа')
     },
   })
 
@@ -75,7 +75,7 @@ export default function AdminOrdersPage() {
   const columns: ColumnDef<Order>[] = [
     {
       accessorKey: 'order_number',
-      header: 'Order #',
+      header: 'Заказ №',
       cell: ({ row }) => (
         <div className="font-medium text-blue-600">
           {ordersService.formatOrderNumber(row.original.order_number)}
@@ -84,17 +84,17 @@ export default function AdminOrdersPage() {
     },
     {
       accessorKey: 'shop_name',
-      header: 'Shop',
+      header: 'Магазин',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Store className="w-4 h-4 text-gray-400" />
-          <span className="text-gray-900">{row.original.shop_name || 'N/A'}</span>
+          <span className="text-gray-900">{row.original.shop_name || 'Н/Д'}</span>
         </div>
       ),
     },
     {
       accessorKey: 'customer',
-      header: 'Customer',
+      header: 'Клиент',
       cell: ({ row }) => (
         <div>
           <div className="font-medium text-gray-900">{row.original.customer.name}</div>
@@ -104,7 +104,7 @@ export default function AdminOrdersPage() {
     },
     {
       accessorKey: 'total',
-      header: 'Total',
+      header: 'Сумма',
       cell: ({ row }) => (
         <div className="font-semibold text-gray-900">
           {ordersService.formatCurrency(row.original.total)}
@@ -113,7 +113,7 @@ export default function AdminOrdersPage() {
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: 'Статус',
       cell: ({ row }) => {
         const config = STATUS_CONFIG[row.original.status]
         return <StatusBadge status={row.original.status} variant={config.color} />
@@ -121,16 +121,16 @@ export default function AdminOrdersPage() {
     },
     {
       accessorKey: 'ordered_at',
-      header: 'Date',
+      header: 'Дата',
       cell: ({ row }) => (
         <div className="text-gray-600 text-sm">
-          {new Date(row.original.ordered_at).toLocaleDateString()}
+          {new Date(row.original.ordered_at).toLocaleDateString('ru-RU')}
         </div>
       ),
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: 'Действия',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Button
@@ -139,7 +139,7 @@ export default function AdminOrdersPage() {
             onClick={() => setViewingOrder(row.original)}
           >
             <Eye className="w-4 h-4 mr-1.5" />
-            View
+            Просмотр
           </Button>
           <Button
             variant="ghost"
@@ -151,7 +151,7 @@ export default function AdminOrdersPage() {
             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
           >
             <Edit className="w-4 h-4 mr-1.5" />
-            Update Status
+            Изменить статус
           </Button>
         </div>
       ),
@@ -162,8 +162,8 @@ export default function AdminOrdersPage() {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">All Orders</h1>
-        <p className="text-gray-600 mt-2">Manage orders across all shops</p>
+        <h1 className="text-3xl font-bold text-gray-900">Все заказы</h1>
+        <p className="text-gray-600 mt-2">Управление заказами во всех магазинах</p>
       </div>
 
       {/* Filters */}
@@ -172,7 +172,7 @@ export default function AdminOrdersPage() {
           <SearchInput
             value={search}
             onChange={setSearch}
-            placeholder="Search by order # or customer..."
+            placeholder="Поиск по номеру заказа или клиенту..."
           />
 
           <select
@@ -180,13 +180,13 @@ export default function AdminOrdersPage() {
             onChange={(e) => setStatusFilter(e.target.value as OrderStatus | 'all')}
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="shipped">Shipped</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="refunded">Refunded</option>
+            <option value="all">Все статусы</option>
+            <option value="pending">Ожидание</option>
+            <option value="paid">Оплачен</option>
+            <option value="shipped">Отправлен</option>
+            <option value="completed">Завершен</option>
+            <option value="cancelled">Отменен</option>
+            <option value="refunded">Возврат</option>
           </select>
         </div>
       </div>
@@ -203,7 +203,7 @@ export default function AdminOrdersPage() {
           totalRows={data?.total || 0}
           onPaginationChange={(pageIndex) => setPage(pageIndex + 1)}
           manualPagination
-          emptyMessage="No orders found"
+          emptyMessage="Заказы не найдены"
         />
       </div>
 
@@ -222,25 +222,25 @@ export default function AdminOrdersPage() {
             setUpdatingOrder(null)
             setNotes('')
           }}
-          title="Update Order Status"
+          title="Изменить статус заказа"
           onSubmit={handleStatusUpdate}
           isSubmitting={updateStatusMutation.isPending}
-          submitText="Update Status"
+          submitText="Обновить статус"
           size="md"
         >
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Order: {ordersService.formatOrderNumber(updatingOrder.order_number)}
+                Заказ: {ordersService.formatOrderNumber(updatingOrder.order_number)}
               </label>
               <div className="text-sm text-gray-600">
-                Customer: {updatingOrder.customer.name}
+                Клиент: {updatingOrder.customer.name}
               </div>
             </div>
 
             <div>
               <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                New Status <span className="text-red-500">*</span>
+                Новый статус <span className="text-red-500">*</span>
               </label>
               <select
                 id="status"
@@ -248,24 +248,24 @@ export default function AdminOrdersPage() {
                 onChange={(e) => setNewStatus(e.target.value as OrderStatus)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="pending">Pending</option>
-                <option value="paid">Paid</option>
-                <option value="shipped">Shipped</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="refunded">Refunded</option>
+                <option value="pending">Ожидание</option>
+                <option value="paid">Оплачен</option>
+                <option value="shipped">Отправлен</option>
+                <option value="completed">Завершен</option>
+                <option value="cancelled">Отменен</option>
+                <option value="refunded">Возврат</option>
               </select>
             </div>
 
             <div>
               <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-                Notes (optional)
+                Примечания (необязательно)
               </label>
               <textarea
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any notes about this status change..."
+                placeholder="Добавьте примечание к изменению статуса..."
                 rows={3}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />

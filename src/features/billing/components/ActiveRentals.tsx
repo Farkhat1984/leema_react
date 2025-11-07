@@ -27,8 +27,8 @@ export function ActiveRentals() {
     return (
       <EmptyState
         icon={<Package className="w-6 h-6" />}
-        title="No active rentals"
-        description="You haven't rented any product slots yet. Rent slots to display more products in your shop."
+        title="Нет активных аренд"
+        description="Вы еще не арендовали ни одного слота для товаров. Арендуйте слоты, чтобы отображать больше товаров в вашем магазине."
       />
     );
   }
@@ -67,11 +67,11 @@ export function ActiveRentals() {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center gap-2 text-gray-600">
                     <Calendar className="w-4 h-4" />
-                    <span>Started: {new Date(rental.start_date).toLocaleDateString()}</span>
+                    <span>Начало: {new Date(rental.start_date).toLocaleDateString('ru-RU')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <Clock className="w-4 h-4" />
-                    <span>Expires: {new Date(rental.expiration_date).toLocaleDateString()}</span>
+                    <span>Истекает: {new Date(rental.expiration_date).toLocaleDateString('ru-RU')}</span>
                   </div>
                 </div>
 
@@ -84,9 +84,9 @@ export function ActiveRentals() {
                     <AlertCircle className="w-4 h-4" />
                     <span>
                       {isExpired
-                        ? 'Rental expired!'
-                        : `Expires in ${rental.days_remaining} ${
-                            rental.days_remaining === 1 ? 'day' : 'days'
+                        ? 'Аренда истекла!'
+                        : `Истекает через ${rental.days_remaining} ${
+                            rental.days_remaining === 1 ? 'день' : rental.days_remaining < 5 ? 'дня' : 'дней'
                           }`}
                     </span>
                   </div>
@@ -99,7 +99,7 @@ export function ActiveRentals() {
                     size="sm"
                     variant={isExpired || isExpiringSoon ? 'primary' : 'outline'}
                   >
-                    Extend
+                    Продлить
                   </Button>
                 </Link>
               </div>

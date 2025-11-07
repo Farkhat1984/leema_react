@@ -11,6 +11,13 @@ import { logger } from '@/shared/lib/utils/logger';
 export const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initializeAuth = () => {
+      // Skip initialization if on auth callback page - let callback handle it
+      const isAuthCallbackPage = window.location.pathname === '/auth/callback';
+      if (isAuthCallbackPage) {
+        logger.debug('Skipping auth initialization on callback page');
+        return;
+      }
+
       const tokenInSessionStorage = getAccessToken();
       const { isAuthenticated, user, accessToken } = useAuthStore.getState();
 
@@ -19,6 +26,7 @@ export const AuthInitializer = ({ children }: { children: React.ReactNode }) => 
         hasTokenInStore: !!accessToken,
         isAuthenticated,
         hasUser: !!user,
+        currentPath: window.location.pathname
       });
 
       // Determine which token to use (prefer store token from Zustand persist)
@@ -51,12 +59,21 @@ export const AuthInitializer = ({ children }: { children: React.ReactNode }) => 
         useAuthStore.getState().logout();
       }
       // Case 4: Token exists in sessionStorage but user not authenticated in store
+      // This can happen after Zustand persist rehydration, but give it a moment
       else if (tokenInSessionStorage && !isAuthenticated) {
-        // Clear orphaned token
-        logger.warn('Orphaned token in sessionStorage - clearing', {
-          fromPath: window.location.pathname
-        });
-        useAuthStore.getState().logout();
+        // Wait a bit for Zustand persist to rehydrate before clearing
+        setTimeout(() => {
+          const state = useAuthStore.getState();
+          if (!state.isAuthenticated && !state.user) {
+            // Still no user data - clear orphaned token
+            logger.warn('Orphaned token in sessionStorage - clearing after delay', {
+              fromPath: window.location.pathname
+            });
+            useAuthStore.getState().logout();
+          } else {
+            logger.debug('User data loaded after delay - keeping token');
+          }
+        }, 100);
       }
     };
 

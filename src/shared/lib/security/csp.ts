@@ -51,8 +51,8 @@ const baseDirectives: CSPDirectives = {
   // Images: Allow self, data URIs, and HTTPS sources (for product images from API)
   'img-src': ["'self'", 'data:', 'https:', 'blob:'],
 
-  // API and WebSocket connections
-  'connect-src': ["'self'"],
+  // API and WebSocket connections (blob: needed for image upload previews)
+  'connect-src': ["'self'", 'blob:'],
 
   // Fonts: Allow self + Google Fonts
   'font-src': ["'self'", 'https://fonts.gstatic.com'],
@@ -90,6 +90,7 @@ const developmentOverrides: Partial<CSPDirectives> = {
   ],
   'connect-src': [
     "'self'",
+    'blob:', // Image upload previews
     'ws://localhost:5173', // Vite HMR WebSocket
     'http://localhost:5173', // Vite dev server
     'ws://localhost:*', // Allow any local WebSocket port
@@ -103,6 +104,7 @@ const developmentOverrides: Partial<CSPDirectives> = {
 const productionOverrides: Partial<CSPDirectives> = {
   'connect-src': [
     "'self'",
+    'blob:', // Image upload previews
     CONFIG.API_URL,
     CONFIG.WS_URL,
   ],

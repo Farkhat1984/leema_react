@@ -9,9 +9,9 @@ interface PeriodSelectorProps {
 }
 
 const PERIODS: { value: TimePeriod; label: string; icon: typeof Calendar }[] = [
-  { value: 'daily', label: 'Daily', icon: Calendar },
-  { value: 'weekly', label: 'Weekly', icon: TrendingUp },
-  { value: 'monthly', label: 'Monthly', icon: BarChart3 },
+  { value: 'daily', label: 'Ежедневно', icon: Calendar },
+  { value: 'weekly', label: 'Еженедельно', icon: TrendingUp },
+  { value: 'monthly', label: 'Ежемесячно', icon: BarChart3 },
 ]
 
 export function PeriodSelector({ value, onChange, className = '' }: PeriodSelectorProps) {
