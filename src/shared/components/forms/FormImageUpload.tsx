@@ -61,7 +61,7 @@ export const FormImageUpload = forwardRef<
         // Validate file type
         if (!acceptedFormats.includes(file.type)) {
           setLocalError(
-            `Invalid file format. Accepted formats: ${acceptedFormats
+            `Неверный формат файла. Допустимые форматы: ${acceptedFormats
               .map((f) => f.split('/')[1])
               .join(', ')}`
           );
@@ -73,7 +73,7 @@ export const FormImageUpload = forwardRef<
         const fileSizeMB = file.size / 1024 / 1024;
         if (fileSizeMB > maxSizeMB) {
           setLocalError(
-            `File size exceeds ${maxSizeMB}MB. Please choose a smaller file.`
+            `Размер файла превышает ${maxSizeMB}МБ. Пожалуйста, выберите меньший файл.`
           );
           e.target.value = '';
           return;
@@ -149,7 +149,7 @@ export const FormImageUpload = forwardRef<
               <div className="relative mx-auto w-fit">
                 <img
                   src={preview}
-                  alt="Upload preview"
+                  alt="Предпросмотр загрузки"
                   className="max-h-64 rounded-lg object-contain"
                 />
                 <Button
@@ -196,11 +196,11 @@ export const FormImageUpload = forwardRef<
               </svg>
               <div className="text-center">
                 <p className="text-sm font-medium text-gray-700">
-                  Click to upload or drag and drop
+                  Нажмите для загрузки или перетащите файл
                 </p>
                 <p className="text-xs text-gray-500">
-                  {acceptedFormats.map((f) => f.split('/')[1].toUpperCase()).join(', ')} up to{' '}
-                  {maxSizeMB}MB
+                  {acceptedFormats.map((f) => f.split('/')[1].toUpperCase()).join(', ')} до{' '}
+                  {maxSizeMB}МБ
                 </p>
               </div>
             </label>

@@ -3,13 +3,13 @@ import { z } from 'zod'
 export const contactSchema = z.object({
   name: z
     .string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(100, 'Name is too long'),
+    .min(2, 'Имя должно быть не менее 2 символов')
+    .max(100, 'Имя слишком длинное'),
   phone: z
     .string()
-    .min(10, 'Phone number must be at least 10 digits')
-    .max(20, 'Phone number is too long')
-    .regex(/^[\d\s\-\+\(\)]+$/, 'Invalid phone number format'),
+    .min(10, 'Номер телефона должен содержать не менее 10 цифр')
+    .max(20, 'Номер телефона слишком длинный')
+    .regex(/^[\d\s\-\+\(\)]+$/, 'Неверный формат номера телефона'),
   has_whatsapp: z.boolean().default(false),
 })
 
@@ -18,13 +18,13 @@ export type ContactFormData = z.infer<typeof contactSchema>
 export const newsletterSchema = z.object({
   title: z
     .string()
-    .min(3, 'Title must be at least 3 characters')
-    .max(200, 'Title is too long'),
-  description: z.string().max(500, 'Description is too long').optional(),
+    .min(3, 'Название должно быть не менее 3 символов')
+    .max(200, 'Название слишком длинное'),
+  description: z.string().max(500, 'Описание слишком длинное').optional(),
   texts: z
     .array(
       z.object({
-        content: z.string().min(1, 'Text content cannot be empty'),
+        content: z.string().min(1, 'Содержимое текста не может быть пусто'),
         order: z.number(),
       })
     )
@@ -37,7 +37,7 @@ export const newsletterSchema = z.object({
   .refine(
     (data) => data.texts.length > 0 || data.images.length > 0,
     {
-      message: 'Newsletter must have at least one text message or image',
+      message: 'Рассылка должна содержать хотя бы одно текстовое сообщение или изображение',
       path: ['texts'],
     }
   )
@@ -49,7 +49,7 @@ export const newsletterSchema = z.object({
       return true
     },
     {
-      message: 'Please select at least one contact',
+      message: 'Выберите хотя бы один контакт',
       path: ['recipient_ids'],
     }
   )
