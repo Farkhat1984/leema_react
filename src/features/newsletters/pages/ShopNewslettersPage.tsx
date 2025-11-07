@@ -20,9 +20,9 @@ export default function ShopNewslettersPage() {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Newsletter Management</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Управление рассылками</h1>
         <p className="text-gray-600 mt-2">
-          Manage your contacts, create newsletters, and track campaign performance
+          Управляйте контактами, создавайте рассылки и отслеживайте эффективность кампаний
         </p>
       </div>
 
@@ -31,15 +31,15 @@ export default function ShopNewslettersPage() {
         <TabsList className="mb-6">
           <TabsTrigger value="contacts">
             <Users className="w-4 h-4 mr-2" />
-            Contacts
+            Контакты
           </TabsTrigger>
           <TabsTrigger value="create">
             <Plus className="w-4 h-4 mr-2" />
-            Create Newsletter
+            Создать рассылку
           </TabsTrigger>
           <TabsTrigger value="history">
             <History className="w-4 h-4 mr-2" />
-            Newsletter History
+            История рассылок
           </TabsTrigger>
         </TabsList>
 

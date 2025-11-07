@@ -55,12 +55,12 @@ export function ContactsTab() {
   const createMutation = useMutation({
     mutationFn: (data: ContactFormData) => contactsService.createContact(data),
     onSuccess: () => {
-      toast.success('Contact added successfully')
+      toast.success('Контакт добавлен успешно')
       setIsAddModalOpen(false)
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to add contact')
+      toast.error(error.message || 'Ошибка при добавлении контакта')
     },
   })
 
@@ -69,12 +69,12 @@ export function ContactsTab() {
     mutationFn: ({ id, data }: { id: number; data: ContactFormData }) =>
       contactsService.updateContact(id, { ...data, id }),
     onSuccess: () => {
-      toast.success('Contact updated successfully')
+      toast.success('Контакт обновлен успешно')
       setEditingContact(null)
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to update contact')
+      toast.error(error.message || 'Ошибка при обновлении контакта')
     },
   })
 
@@ -82,12 +82,12 @@ export function ContactsTab() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => contactsService.deleteContact(id),
     onSuccess: () => {
-      toast.success('Contact deleted successfully')
+      toast.success('Контакт удален успешно')
       setDeletingContact(null)
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to delete contact')
+      toast.error(error.message || 'Ошибка при удалении контакта')
     },
   })
 
@@ -95,12 +95,12 @@ export function ContactsTab() {
   const bulkDeleteMutation = useMutation({
     mutationFn: (ids: number[]) => contactsService.bulkDeleteContacts(ids),
     onSuccess: () => {
-      toast.success(`${selectedIds.length} contacts deleted successfully`)
+      toast.success(`${selectedIds.length} контакт(ов) удалено успешно`)
       setRowSelection({})
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to delete contacts')
+      toast.error(error.message || 'Ошибка при удалении контактов')
     },
   })
 
@@ -116,14 +116,14 @@ export function ContactsTab() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `contacts_${new Date().toISOString().split('T')[0]}.xlsx`
+      a.download = `контакты_${new Date().toISOString().split('T')[0]}.xlsx`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
-      toast.success('Contacts exported successfully')
+      toast.success('Контакты экспортированы успешно')
     } catch (error) {
-      toast.error('Failed to export contacts')
+      toast.error('Ошибка при экспорте контактов')
     }
   }
 
@@ -134,14 +134,14 @@ export function ContactsTab() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'contacts_template.xlsx'
+      a.download = 'шаблон_контактов.xlsx'
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
-      toast.success('Template downloaded successfully')
+      toast.success('Шаблон загружен успешно')
     } catch (error) {
-      toast.error('Failed to download template')
+      toast.error('Ошибка при загрузке шаблона')
     }
   }
 
@@ -169,14 +169,14 @@ export function ContactsTab() {
     },
     {
       accessorKey: 'full_name',
-      header: 'Name',
+      header: 'Имя',
       cell: ({ row }) => (
         <div className="font-medium text-gray-900">{row.original.full_name}</div>
       ),
     },
     {
       accessorKey: 'whatsapp_number',
-      header: 'WhatsApp Number',
+      header: 'Номер WhatsApp',
       cell: ({ row }) => (
         <div className="flex items-center gap-2 text-gray-700">
           <MessageSquare className="w-4 h-4 text-green-600" />
@@ -186,18 +186,18 @@ export function ContactsTab() {
     },
     {
       accessorKey: 'is_active',
-      header: 'Status',
+      header: 'Статус',
       cell: ({ row }) => (
         <div className="flex items-center justify-center">
           {row.original.is_active ? (
             <div className="flex items-center gap-1 text-green-600">
               <Check className="w-4 h-4" />
-              <span className="text-sm">Active</span>
+              <span className="text-sm">Активный</span>
             </div>
           ) : (
             <div className="flex items-center gap-1 text-gray-400">
               <X className="w-4 h-4" />
-              <span className="text-sm">Inactive</span>
+              <span className="text-sm">Неактивный</span>
             </div>
           )}
         </div>
@@ -205,7 +205,7 @@ export function ContactsTab() {
     },
     {
       accessorKey: 'created_at',
-      header: 'Added Date',
+      header: 'Дата добавления',
       cell: ({ row }) => (
         <div className="text-gray-600 text-sm">
           {new Date(row.original.created_at).toLocaleDateString()}
@@ -214,7 +214,7 @@ export function ContactsTab() {
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: 'Действия',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Button
@@ -223,7 +223,7 @@ export function ContactsTab() {
             onClick={() => setEditingContact(row.original)}
           >
             <Edit className="w-4 h-4 mr-2" />
-            Edit
+            Редактировать
           </Button>
           <Button
             variant="ghost"
@@ -232,7 +232,7 @@ export function ContactsTab() {
             className="text-red-600 hover:text-red-700 hover:bg-red-50"
           >
             <Trash2 className="w-4 h-4 mr-2" />
-            Delete
+            Удалить
           </Button>
         </div>
       ),
@@ -246,7 +246,7 @@ export function ContactsTab() {
         <SearchInput
           value={search}
           onChange={setSearch}
-          placeholder="Search contacts..."
+          placeholder="Поиск контактов..."
           className="w-full sm:w-80"
         />
 
@@ -256,14 +256,14 @@ export function ContactsTab() {
             onClick={handleDownloadTemplate}
           >
             <FileSpreadsheet className="w-4 h-4 mr-2" />
-            Template
+            Шаблон
           </Button>
           <Button
             variant="outline"
             onClick={() => setIsImportModalOpen(true)}
           >
             <Upload className="w-4 h-4 mr-2" />
-            Import Excel
+            Импорт Excel
           </Button>
           <Button
             variant="outline"
@@ -271,13 +271,13 @@ export function ContactsTab() {
             disabled={!data?.data || !Array.isArray(data.data) || data.data.length === 0}
           >
             <Download className="w-4 h-4 mr-2" />
-            Export Excel
+            Экспорт Excel
           </Button>
           <Button
             onClick={() => setIsAddModalOpen(true)}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Contact
+            Добавить контакт
           </Button>
         </div>
       </div>
@@ -286,7 +286,7 @@ export function ContactsTab() {
       {selectedIds.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
           <span className="text-sm font-medium text-blue-900">
-            {selectedIds.length} contact{selectedIds.length > 1 ? 's' : ''} selected
+            {selectedIds.length} контакт(ов) выбрано
           </span>
           <Button
             variant="danger"
@@ -295,7 +295,7 @@ export function ContactsTab() {
             isLoading={isLoading}
           >
             <Trash2 className="w-4 h-4 mr-2" />
-            Delete Selected
+            Удалить выбранные
           </Button>
         </div>
       )}
@@ -315,7 +315,7 @@ export function ContactsTab() {
         totalRows={data?.total || 0}
         onPaginationChange={(pageIndex) => setPage(pageIndex + 1)}
         manualPagination
-        emptyMessage="No contacts found. Add your first contact!"
+        emptyMessage="Контакты не найдены. Добавьте первый контакт!"
       />
 
       {/* Add/Edit Modal */}
@@ -357,9 +357,9 @@ export function ContactsTab() {
             deleteMutation.mutate(deletingContact.id);
           }
         }}
-        title="Delete Contact"
-        description={`Are you sure you want to delete "${deletingContact?.full_name}"? This action cannot be undone.`}
-        confirmText="Delete"
+        title="Удалить контакт"
+        description={`Вы уверены, что хотите удалить "${deletingContact?.full_name}"? Это действие невозможно отменить.`}
+        confirmText="Удалить"
         variant="danger"
         isLoading={deleteMutation.isPending}
       />

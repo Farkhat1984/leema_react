@@ -16,13 +16,13 @@ import type { Newsletter, NewsletterStatus } from '../types/newsletter.types'
 import toast from 'react-hot-toast'
 
 const STATUS_CONFIG = {
-  draft: { label: 'Draft', color: 'gray' as const },
-  pending: { label: 'Pending', color: 'yellow' as const },
-  approved: { label: 'Approved', color: 'green' as const },
-  rejected: { label: 'Rejected', color: 'red' as const },
-  sending: { label: 'Sending', color: 'blue' as const },
-  completed: { label: 'Completed', color: 'green' as const },
-  failed: { label: 'Failed', color: 'red' as const },
+  draft: { label: 'Черновик', color: 'gray' as const },
+  pending: { label: 'Ожидает', color: 'yellow' as const },
+  approved: { label: 'Одобрено', color: 'green' as const },
+  rejected: { label: 'Отклонено', color: 'red' as const },
+  sending: { label: 'Отправляется', color: 'blue' as const },
+  completed: { label: 'Завершено', color: 'green' as const },
+  failed: { label: 'Ошибка', color: 'red' as const },
 }
 
 export default function AdminNewslettersPage() {
@@ -59,13 +59,13 @@ export default function AdminNewslettersPage() {
   const approveMutation = useMutation({
     mutationFn: (id: number) => newslettersService.approveNewsletter(id),
     onSuccess: () => {
-      toast.success('Newsletter approved successfully')
+      toast.success('Рассылка успешно одобрена')
       setApprovingNewsletter(null)
       refetch()
       queryClient.invalidateQueries({ queryKey: ['newsletter-stats'] })
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to approve newsletter')
+      toast.error(error.message || 'Не удалось одобрить рассылку')
     },
   })
 
@@ -74,13 +74,13 @@ export default function AdminNewslettersPage() {
     mutationFn: ({ id, reason }: { id: number; reason: string }) =>
       newslettersService.rejectNewsletter(id, reason),
     onSuccess: () => {
-      toast.success('Newsletter rejected successfully')
+      toast.success('Рассылка успешно отклонена')
       setRejectingNewsletter(null)
       refetch()
       queryClient.invalidateQueries({ queryKey: ['newsletter-stats'] })
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to reject newsletter')
+      toast.error(error.message || 'Не удалось отклонить рассылку')
     },
   })
 
@@ -95,19 +95,19 @@ export default function AdminNewslettersPage() {
   const columns: ColumnDef<Newsletter>[] = [
     {
       accessorKey: 'shop_name',
-      header: 'Shop',
+      header: 'Магазин',
       cell: ({ row }) => (
         <div className="flex items-center gap-2 min-w-[150px]">
           <Store className="w-4 h-4 text-gray-400" />
           <span className="font-medium text-gray-900">
-            {row.original.shop_name || 'Unknown Shop'}
+            {row.original.shop_name || 'Неизвестный магазин'}
           </span>
         </div>
       ),
     },
     {
       accessorKey: 'title',
-      header: 'Title',
+      header: 'Заголовок',
       cell: ({ row }) => (
         <div className="min-w-[200px]">
           <div className="font-medium text-gray-900">{row.original.title}</div>
@@ -121,7 +121,7 @@ export default function AdminNewslettersPage() {
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: 'Статус',
       cell: ({ row }) => {
         const config = STATUS_CONFIG[row.original.status]
         return <StatusBadge status={row.original.status} variant={config.color} />
@@ -129,16 +129,16 @@ export default function AdminNewslettersPage() {
     },
     {
       accessorKey: 'created_at',
-      header: 'Created Date',
+      header: 'Дата создания',
       cell: ({ row }) => (
         <div className="text-gray-600 text-sm">
-          {new Date(row.original.created_at).toLocaleDateString()}
+          {new Date(row.original.created_at).toLocaleDateString('ru-RU')}
         </div>
       ),
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: 'Действия',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Button
@@ -147,7 +147,7 @@ export default function AdminNewslettersPage() {
             onClick={() => setViewingNewsletter(row.original)}
           >
             <Eye className="w-4 h-4 mr-1.5" />
-            View
+            Просмотр
           </Button>
           {row.original.status === 'pending' && (
             <>
@@ -159,7 +159,7 @@ export default function AdminNewslettersPage() {
                 disabled={approveMutation.isPending || rejectMutation.isPending}
               >
                 <CheckCircle className="w-4 h-4 mr-1.5" />
-                Approve
+                Одобрить
               </Button>
               <Button
                 variant="ghost"
@@ -169,7 +169,7 @@ export default function AdminNewslettersPage() {
                 disabled={approveMutation.isPending || rejectMutation.isPending}
               >
                 <XCircle className="w-4 h-4 mr-1.5" />
-                Reject
+                Отклонить
               </Button>
             </>
           )}
@@ -182,9 +182,9 @@ export default function AdminNewslettersPage() {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Newsletter Moderation</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Модерация рассылок</h1>
         <p className="text-gray-600 mt-2">
-          Review and approve newsletters submitted by shops
+          Проверка и одобрение рассылок, отправленных магазинами
         </p>
       </div>
 
@@ -192,25 +192,25 @@ export default function AdminNewslettersPage() {
       {stats && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
-            title="Pending Approval"
+            title="Ожидают одобрения"
             value={stats.pending}
             icon={<Calendar className="w-5 h-5" />}
             variant="warning"
           />
           <StatsCard
-            title="Approved"
+            title="Одобрено"
             value={stats.approved}
             icon={<CheckCircle className="w-5 h-5" />}
             variant="success"
           />
           <StatsCard
-            title="Rejected"
+            title="Отклонено"
             value={stats.rejected}
             icon={<XCircle className="w-5 h-5" />}
             variant="danger"
           />
           <StatsCard
-            title="Completed"
+            title="Завершено"
             value={stats.completed}
             icon={<CheckCircle className="w-5 h-5" />}
             variant="success"
@@ -225,7 +225,7 @@ export default function AdminNewslettersPage() {
             <SearchInput
               value={search}
               onChange={setSearch}
-              placeholder="Search by title..."
+              placeholder="Поиск по заголовку..."
             />
           </div>
 
@@ -234,17 +234,17 @@ export default function AdminNewslettersPage() {
             onChange={(e) => setStatusFilter(e.target.value as NewsletterStatus | 'all')}
             className="w-full sm:w-56 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="sending">Sending</option>
-            <option value="completed">Completed</option>
+            <option value="all">Все статусы</option>
+            <option value="pending">Ожидает</option>
+            <option value="approved">Одобрено</option>
+            <option value="rejected">Отклонено</option>
+            <option value="sending">Отправляется</option>
+            <option value="completed">Завершено</option>
           </select>
 
           {hasFilters && (
             <Button variant="outline" size="sm" onClick={clearFilters} className="sm:ml-auto">
-              Clear Filters
+              Очистить фильтры
             </Button>
           )}
         </div>
@@ -262,7 +262,7 @@ export default function AdminNewslettersPage() {
           totalRows={data?.total || 0}
           onPaginationChange={(pageIndex) => setPage(pageIndex + 1)}
           manualPagination
-          emptyMessage="No newsletters found"
+          emptyMessage="Рассылки не найдены"
         />
       </div>
 
@@ -286,7 +286,7 @@ export default function AdminNewslettersPage() {
                 isLoading={approveMutation.isPending}
               >
                 <CheckCircle className="w-5 h-5 mr-2" />
-                Approve Newsletter
+                Одобрить рассылку
               </Button>
               <Button
                 variant="danger"
@@ -298,7 +298,7 @@ export default function AdminNewslettersPage() {
                 isLoading={rejectMutation.isPending}
               >
                 <XCircle className="w-5 h-5 mr-2" />
-                Reject Newsletter
+                Отклонить рассылку
               </Button>
             </div>
           )}
@@ -312,9 +312,9 @@ export default function AdminNewslettersPage() {
         onConfirm={() =>
           approvingNewsletter ? approveMutation.mutate(approvingNewsletter.id) : Promise.resolve()
         }
-        title="Approve Newsletter"
-        description={`Are you sure you want to approve "${approvingNewsletter?.title}"? The newsletter will be sent to recipients.`}
-        confirmText="Approve"
+        title="Одобрить рассылку"
+        description={`Вы уверены, что хотите одобрить "${approvingNewsletter?.title}"? Рассылка будет отправлена получателям.`}
+        confirmText="Одобрить"
         variant="success"
         isLoading={approveMutation.isPending}
       />
@@ -331,8 +331,8 @@ export default function AdminNewslettersPage() {
             })
           }
         }}
-        title="Reject Newsletter"
-        description={`Please provide a reason for rejecting "${rejectingNewsletter?.title}". The shop owner will be notified.`}
+        title="Отклонить рассылку"
+        description={`Пожалуйста, укажите причину отклонения "${rejectingNewsletter?.title}". Владелец магазина будет уведомлен.`}
         loading={rejectMutation.isPending}
       />
     </div>

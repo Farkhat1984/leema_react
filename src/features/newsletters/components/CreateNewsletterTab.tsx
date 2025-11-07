@@ -83,7 +83,7 @@ export function CreateNewsletterTab() {
     mutationFn: async (data: NewsletterFormData) => {
       // Show uploading toast if there are images
       if (data.images.length > 0) {
-        toast.loading(`Uploading ${data.images.length} image(s)...`, { id: 'upload' })
+        toast.loading(`Загрузка ${data.images.length} изображения(й)...`, { id: 'upload' })
       }
 
       try {
@@ -96,7 +96,7 @@ export function CreateNewsletterTab() {
       }
     },
     onSuccess: () => {
-      toast.success('Newsletter created successfully! Waiting for admin approval.')
+      toast.success('Рассылка создана успешно! Ожидание одобрения администратора.')
       reset()
       queryClient.invalidateQueries({ queryKey: ['newsletters'] })
       // Switch to history tab or navigate
@@ -105,7 +105,7 @@ export function CreateNewsletterTab() {
       }, 1500)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to create newsletter')
+      toast.error(error.message || 'Ошибка при создании рассылки')
     },
   })
 
@@ -150,17 +150,17 @@ export function CreateNewsletterTab() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Basic Info */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">Newsletter Details</h3>
+        <h3 className="text-lg font-semibold text-gray-900">Детали рассылки</h3>
 
         {/* Title */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Title <span className="text-red-500">*</span>
+            Название <span className="text-red-500">*</span>
           </label>
           <Input
             id="title"
             type="text"
-            placeholder="Enter newsletter title"
+            placeholder="Введите название рассылки"
             {...register('title')}
             error={errors.title?.message}
           />
@@ -172,11 +172,11 @@ export function CreateNewsletterTab() {
             htmlFor="description"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Description (optional)
+            Описание (необязательно)
           </label>
           <Textarea
             id="description"
-            placeholder="Brief description of this newsletter"
+            placeholder="Краткое описание этой рассылки"
             rows={2}
             {...register('description')}
             error={errors.description?.message}
@@ -189,7 +189,7 @@ export function CreateNewsletterTab() {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            Text Messages
+            Текстовые сообщения
           </h3>
           <Button
             type="button"
@@ -198,14 +198,14 @@ export function CreateNewsletterTab() {
             onClick={() => append({ content: '', order: fields.length })}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Text Block
+            Добавить блок текста
           </Button>
         </div>
 
         {fields.length === 0 ? (
           <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
             <MessageSquare className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-            <p>No text messages yet. Add a text block to start.</p>
+            <p>Текстовых сообщений еще нет. Добавьте блок текста для начала.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -213,7 +213,7 @@ export function CreateNewsletterTab() {
               <div key={field.id} className="flex gap-2">
                 <div className="flex-1">
                   <Textarea
-                    placeholder={`Text message ${index + 1}`}
+                    placeholder={`Текстовое сообщение ${index + 1}`}
                     rows={3}
                     {...register(`texts.${index}.content`)}
                     error={errors.texts?.[index]?.content?.message}
@@ -238,7 +238,7 @@ export function CreateNewsletterTab() {
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <ImageIcon className="w-5 h-5" />
-          Images
+          Изображения
         </h3>
 
         <ImageUploadMultiple
@@ -250,7 +250,7 @@ export function CreateNewsletterTab() {
         />
 
         <p className="text-sm text-gray-500">
-          Upload up to 5 images. Supported formats: JPG, PNG, WebP. Max size: 5MB per image.
+          Загрузите до 5 изображений. Поддерживаемые форматы: JPG, PNG, WebP. Максимальный размер: 5MB за изображение.
         </p>
 
         {errors.images && (
@@ -262,7 +262,7 @@ export function CreateNewsletterTab() {
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <Users className="w-5 h-5" />
-          Recipients
+          Получатели
         </h3>
 
         {/* Recipient Type Selection */}
@@ -275,7 +275,7 @@ export function CreateNewsletterTab() {
               className="w-4 h-4 text-blue-600 focus:ring-blue-500"
             />
             <span className="text-sm font-medium text-gray-700">
-              Send to all contacts
+              Отправить всем контактам
             </span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
@@ -286,7 +286,7 @@ export function CreateNewsletterTab() {
               className="w-4 h-4 text-blue-600 focus:ring-blue-500"
             />
             <span className="text-sm font-medium text-gray-700">
-              Send to selected contacts
+              Отправить выбранным контактам
             </span>
           </label>
         </div>
@@ -298,7 +298,7 @@ export function CreateNewsletterTab() {
               <SearchInput
                 value={contactSearch}
                 onChange={setContactSearch}
-                placeholder="Search contacts..."
+                placeholder="Поиск контактов..."
                 className="w-80"
               />
               <div className="flex gap-2">
@@ -308,7 +308,7 @@ export function CreateNewsletterTab() {
                   size="sm"
                   onClick={handleSelectAllRecipients}
                 >
-                  Select All
+                  Выбрать все
                 </Button>
                 <Button
                   type="button"
@@ -316,7 +316,7 @@ export function CreateNewsletterTab() {
                   size="sm"
                   onClick={handleClearAllRecipients}
                 >
-                  Clear All
+                  Очистить все
                 </Button>
               </div>
             </div>
@@ -345,14 +345,14 @@ export function CreateNewsletterTab() {
                 ))
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  No contacts found. Add contacts first.
+                  Контакты не найдены. Добавьте контакты сначала.
                 </div>
               )}
             </div>
 
             {selectedRecipientIds && selectedRecipientIds.length > 0 && (
               <div className="text-sm text-gray-600">
-                {selectedRecipientIds.length} contact(s) selected
+                {selectedRecipientIds.length} контакт(ов) выбрано
               </div>
             )}
 
@@ -367,7 +367,7 @@ export function CreateNewsletterTab() {
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <Calendar className="w-5 h-5" />
-          Scheduling
+          Планирование
         </h3>
 
         <div className="space-y-2">
@@ -382,7 +382,7 @@ export function CreateNewsletterTab() {
               className="w-4 h-4 text-blue-600 focus:ring-blue-500"
             />
             <span className="text-sm font-medium text-gray-700">
-              Submit for approval now (will send after admin approval)
+              Отправить на одобрение сейчас (отправится после одобрения администратором)
             </span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
@@ -393,7 +393,7 @@ export function CreateNewsletterTab() {
               className="w-4 h-4 text-blue-600 focus:ring-blue-500"
             />
             <span className="text-sm font-medium text-gray-700">
-              Schedule for later (after approval)
+              Запланировать на позже (после одобрения)
             </span>
           </label>
         </div>
@@ -404,7 +404,7 @@ export function CreateNewsletterTab() {
               htmlFor="scheduled_at"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Scheduled Date & Time
+              Дата и время отправки
             </label>
             <Input
               id="scheduled_at"
@@ -414,7 +414,7 @@ export function CreateNewsletterTab() {
               min={new Date().toISOString().slice(0, 16)}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Newsletter will be sent automatically after admin approval and scheduled time
+              Рассылка будет отправлена автоматически после одобрения администратором и в назначенное время
             </p>
           </div>
         )}
@@ -423,11 +423,11 @@ export function CreateNewsletterTab() {
       {/* Submit Button */}
       <div className="flex items-center justify-between gap-4 bg-gray-50 p-6 rounded-lg border border-gray-200">
         <div className="text-sm text-gray-600">
-          <p className="font-medium">Before submitting:</p>
+          <p className="font-medium">Перед отправкой:</p>
           <ul className="list-disc list-inside mt-1 space-y-1">
-            <li>Add at least one text message or image</li>
-            <li>Select recipients (all or specific contacts)</li>
-            <li>Your newsletter will be reviewed by admin before sending</li>
+            <li>Добавьте как минимум одно текстовое сообщение или изображение</li>
+            <li>Выберите получателей (всех или конкретные контакты)</li>
+            <li>Ваша рассылка будет проверена администратором перед отправкой</li>
           </ul>
         </div>
         <Button
@@ -437,7 +437,7 @@ export function CreateNewsletterTab() {
           disabled={isSubmitting || createMutation.isPending}
         >
           <Send className="w-5 h-5 mr-2" />
-          Submit for Approval
+          Отправить на одобрение
         </Button>
       </div>
 
@@ -451,14 +451,14 @@ export function CreateNewsletterTab() {
       {/* Display all form errors for debugging */}
       {Object.keys(errors).length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">
-          <p className="font-semibold mb-2">Please fix the following errors:</p>
+          <p className="font-semibold mb-2">Пожалуйста, исправьте следующие ошибки:</p>
           <ul className="list-disc list-inside space-y-1">
-            {errors.title && <li>Title: {errors.title.message}</li>}
-            {errors.description && <li>Description: {errors.description.message}</li>}
+            {errors.title && <li>Название: {errors.title.message}</li>}
+            {errors.description && <li>Описание: {errors.description.message}</li>}
             {errors.texts && typeof errors.texts.message === 'string' && <li>{errors.texts.message}</li>}
-            {errors.images && <li>Images: {errors.images.message as string}</li>}
-            {errors.recipient_ids && <li>Recipients: {errors.recipient_ids.message}</li>}
-            {errors.scheduled_at && <li>Schedule: {errors.scheduled_at.message}</li>}
+            {errors.images && <li>Изображения: {errors.images.message as string}</li>}
+            {errors.recipient_ids && <li>Получатели: {errors.recipient_ids.message}</li>}
+            {errors.scheduled_at && <li>Планирование: {errors.scheduled_at.message}</li>}
           </ul>
         </div>
       )}

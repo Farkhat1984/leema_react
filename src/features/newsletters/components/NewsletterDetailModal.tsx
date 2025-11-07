@@ -10,13 +10,13 @@ interface NewsletterDetailModalProps {
 }
 
 const STATUS_CONFIG = {
-  draft: { label: 'Draft', color: 'gray' as const },
-  pending: { label: 'Pending Approval', color: 'yellow' as const },
-  approved: { label: 'Approved', color: 'green' as const },
-  rejected: { label: 'Rejected', color: 'red' as const },
-  sending: { label: 'Sending', color: 'blue' as const },
-  completed: { label: 'Completed', color: 'green' as const },
-  failed: { label: 'Failed', color: 'red' as const },
+  draft: { label: 'Черновик', color: 'gray' as const },
+  pending: { label: 'Ожидание одобрения', color: 'yellow' as const },
+  approved: { label: 'Одобрено', color: 'green' as const },
+  rejected: { label: 'Отклонено', color: 'red' as const },
+  sending: { label: 'Отправляется', color: 'blue' as const },
+  completed: { label: 'Завершено', color: 'green' as const },
+  failed: { label: 'Ошибка', color: 'red' as const },
 }
 
 export function NewsletterDetailModal({
@@ -43,18 +43,18 @@ export function NewsletterDetailModal({
     <DetailModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Newsletter Details"
+      title="Детали рассылки"
       size="lg"
     >
       <div className="space-y-6">
         {/* Basic Info */}
-        <DetailSection title="Basic Information">
-          <DetailRow label="Title" value={newsletter.title} />
+        <DetailSection title="Основная информация">
+          <DetailRow label="Название" value={newsletter.title} />
           {newsletter.description && (
-            <DetailRow label="Description" value={newsletter.description} />
+            <DetailRow label="Описание" value={newsletter.description} />
           )}
           <DetailRow
-            label="Status"
+            label="Статус"
             value={
               <StatusBadge
                 status={newsletter.status}
@@ -64,7 +64,7 @@ export function NewsletterDetailModal({
           />
           {newsletter.rejection_reason && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-red-900 mb-1">Rejection Reason:</h4>
+              <h4 className="text-sm font-medium text-red-900 mb-1">Причина отклонения:</h4>
               <p className="text-sm text-red-800">{newsletter.rejection_reason}</p>
             </div>
           )}
@@ -73,7 +73,7 @@ export function NewsletterDetailModal({
         {/* Text Messages */}
         {/* @ts-ignore - backend returns creative_texts */}
         {newsletter.creative_texts && newsletter.creative_texts.length > 0 && (
-          <DetailSection title="Text Messages" icon={<MessageSquare className="w-5 h-5" />}>
+          <DetailSection title="Текстовые сообщения" icon={<MessageSquare className="w-5 h-5" />}>
             <div className="space-y-3">
               {/* @ts-ignore */}
               {newsletter.creative_texts.map((text: string, index: number) => (
@@ -81,7 +81,7 @@ export function NewsletterDetailModal({
                   key={index}
                   className="bg-gray-50 border border-gray-200 rounded-lg p-4"
                 >
-                  <div className="text-xs text-gray-500 mb-1">Message {index + 1}</div>
+                  <div className="text-xs text-gray-500 mb-1">Сообщение {index + 1}</div>
                   <div className="text-sm text-gray-900 whitespace-pre-wrap">
                     {text}
                   </div>
@@ -93,13 +93,13 @@ export function NewsletterDetailModal({
 
         {/* Images */}
         {fullImageUrls.length > 0 && (
-          <DetailSection title="Images" icon={<ImageIcon className="w-5 h-5" />}>
+          <DetailSection title="Изображения" icon={<ImageIcon className="w-5 h-5" />}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {fullImageUrls.map((imageUrl, index) => (
                 <div key={index} className="rounded-lg border border-gray-200 overflow-hidden h-48">
                   <img
                     src={imageUrl}
-                    alt={`Newsletter image ${index + 1}`}
+                    alt={`Изображение рассылки ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -109,36 +109,36 @@ export function NewsletterDetailModal({
         )}
 
         {/* Recipients */}
-        <DetailSection title="Recipients" icon={<Users className="w-5 h-5" />}>
+        <DetailSection title="Получатели" icon={<Users className="w-5 h-5" />}>
           <DetailRow
-            label="Recipient Type"
+            label="Тип получателей"
             value={
               newsletter.recipient_type === 'all'
-                ? 'All Contacts'
-                : `Selected Contacts (${newsletter.recipient_ids?.length || 0})`
+                ? 'Все контакты'
+                : `Выбранные контакты (${newsletter.recipient_ids?.length || 0})`
             }
           />
           <DetailRow
-            label="Total Recipients"
+            label="Всего получателей"
             value={newsletter.total_recipients?.toString() || '0'}
           />
         </DetailSection>
 
         {/* Dates */}
-        <DetailSection title="Timeline" icon={<Calendar className="w-5 h-5" />}>
+        <DetailSection title="График" icon={<Calendar className="w-5 h-5" />}>
           <DetailRow
-            label="Created"
+            label="Создано"
             value={new Date(newsletter.created_at).toLocaleString()}
           />
           {newsletter.scheduled_at && (
             <DetailRow
-              label="Scheduled For"
+              label="Запланировано"
               value={new Date(newsletter.scheduled_at).toLocaleString()}
             />
           )}
           {newsletter.sent_at && (
             <DetailRow
-              label="Sent At"
+              label="Отправлено"
               value={new Date(newsletter.sent_at).toLocaleString()}
             />
           )}
@@ -146,19 +146,19 @@ export function NewsletterDetailModal({
 
         {/* Metrics (for sent newsletters) */}
         {newsletter.status === 'completed' && (
-          <DetailSection title="Performance" icon={<TrendingUp className="w-5 h-5" />}>
+          <DetailSection title="Производительность" icon={<TrendingUp className="w-5 h-5" />}>
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-blue-900">
                   {newsletter.sent_count}
                 </div>
-                <div className="text-xs text-blue-700 mt-1">Sent</div>
+                <div className="text-xs text-blue-700 mt-1">Отправлено</div>
               </div>
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-green-900">
                   {newsletter.opened_count || 0}
                 </div>
-                <div className="text-xs text-green-700 mt-1">Opened</div>
+                <div className="text-xs text-green-700 mt-1">Открыто</div>
                 {newsletter.sent_count > 0 && (
                   <div className="text-xs text-gray-500 mt-1">
                     {((newsletter.opened_count || 0) / newsletter.sent_count * 100).toFixed(1)}%
@@ -169,7 +169,7 @@ export function NewsletterDetailModal({
                 <div className="text-2xl font-bold text-purple-900">
                   {newsletter.clicked_count || 0}
                 </div>
-                <div className="text-xs text-purple-700 mt-1">Clicked</div>
+                <div className="text-xs text-purple-700 mt-1">Клики</div>
                 {newsletter.sent_count > 0 && (
                   <div className="text-xs text-gray-500 mt-1">
                     {((newsletter.clicked_count || 0) / newsletter.sent_count * 100).toFixed(1)}%

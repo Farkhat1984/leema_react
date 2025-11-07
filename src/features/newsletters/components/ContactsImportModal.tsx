@@ -74,27 +74,27 @@ export function ContactsImportModal({
     <FormModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Import Contacts from Excel"
+      title="Импорт контактов из Excel"
       size="lg"
     >
       <div className="space-y-4">
         {/* Instructions */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h4 className="text-sm font-medium text-blue-900 mb-2">
-            📋 Import Instructions:
+            📋 Инструкции по импорту:
           </h4>
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-            <li>Download the template to see the correct format</li>
+            <li>Загрузите шаблон, чтобы увидеть правильный формат</li>
             <li>
-              Required columns: <code className="bg-blue-100 px-1 rounded">name</code>,{' '}
+              Обязательные столбцы: <code className="bg-blue-100 px-1 rounded">name</code>,{' '}
               <code className="bg-blue-100 px-1 rounded">phone</code>
             </li>
             <li>
-              Optional columns: <code className="bg-blue-100 px-1 rounded">has_whatsapp</code>{' '}
-              (true/false or yes/no)
+              Дополнительные столбцы: <code className="bg-blue-100 px-1 rounded">has_whatsapp</code>{' '}
+              (true/false или yes/no)
             </li>
-            <li>Phone numbers should include country code (e.g., +7 123 456 7890)</li>
-            <li>Supported formats: XLSX, XLS, CSV</li>
+            <li>Номера телефонов должны включать код страны (например, +7 123 456 7890)</li>
+            <li>Поддерживаемые форматы: XLSX, XLS, CSV</li>
           </ul>
         </div>
 
@@ -116,7 +116,7 @@ export function ContactsImportModal({
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <h4 className="text-sm font-medium text-red-900 mb-1">
-                  Validation Errors:
+                  Ошибки валидации:
                 </h4>
                 <ul className="text-sm text-red-800 space-y-1">
                   {validationErrors.map((error, index) => (
@@ -149,21 +149,21 @@ export function ContactsImportModal({
                     result.failed_count === 0 ? 'text-green-900' : 'text-yellow-900'
                   }`}
                 >
-                  Import Result:
+                  Результат импорта:
                 </h4>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600">Total:</span>
+                    <span className="text-gray-600">Всего:</span>
                     <span className="ml-2 font-semibold">{result.total}</span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Success:</span>
+                    <span className="text-gray-600">Успешно:</span>
                     <span className="ml-2 font-semibold text-green-600">
                       {result.success_count}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Failed:</span>
+                    <span className="text-gray-600">Ошибок:</span>
                     <span className="ml-2 font-semibold text-red-600">
                       {result.failed_count}
                     </span>
@@ -173,19 +173,19 @@ export function ContactsImportModal({
                 {/* Show errors if any */}
                 {result.errors && result.errors.length > 0 && (
                   <div className="mt-3">
-                    <h5 className="text-xs font-medium text-gray-700 mb-1">Errors:</h5>
+                    <h5 className="text-xs font-medium text-gray-700 mb-1">Ошибки:</h5>
                     <div className="max-h-40 overflow-y-auto space-y-1">
                       {result.errors.slice(0, 10).map((err, index) => (
                         <div
                           key={index}
                           className="text-xs text-gray-600 bg-white rounded px-2 py-1"
                         >
-                          Row {err.row}: {err.error}
+                          Строка {err.row}: {err.error}
                         </div>
                       ))}
                       {result.errors.length > 10 && (
                         <p className="text-xs text-gray-500 italic">
-                          ... and {result.errors.length - 10} more errors
+                          ... и еще {result.errors.length - 10} ошибок
                         </p>
                       )}
                     </div>
@@ -220,11 +220,11 @@ export function ContactsImportModal({
             onClick={onDownloadTemplate}
           >
             <Download className="w-4 h-4 mr-2" />
-            Download Template
+            Загрузить шаблон
           </Button>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleClose}>
-              Cancel
+              Отмена
             </Button>
             <Button
               onClick={handleImport}
@@ -232,7 +232,7 @@ export function ContactsImportModal({
               isLoading={isUploading}
             >
               <Upload className="w-4 h-4 mr-2" />
-              Import
+              Импорт
             </Button>
           </div>
         </div>

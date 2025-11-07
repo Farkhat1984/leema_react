@@ -46,7 +46,7 @@ export function ContactFormModal({
     <FormModal
       isOpen={isOpen}
       onClose={onClose}
-      title={title || (contact ? 'Edit Contact' : 'Add Contact')}
+      title={title || (contact ? 'Редактировать контакт' : 'Добавить контакт')}
       onSubmit={handleSubmit(onSubmit as any)}
       isSubmitting={isSubmitting}
       size="md"
@@ -55,12 +55,12 @@ export function ContactFormModal({
         {/* Name */}
         <div>
           <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">
-            Full Name <span className="text-red-500">*</span>
+            Полное имя <span className="text-red-500">*</span>
           </label>
           <Input
             id="full_name"
             type="text"
-            placeholder="Enter contact full name"
+            placeholder="Введите полное имя контакта"
             {...register('full_name')}
             error={errors.full_name?.message}
           />
@@ -69,16 +69,16 @@ export function ContactFormModal({
         {/* Phone */}
         <div>
           <label htmlFor="whatsapp_number" className="block text-sm font-medium text-gray-700 mb-1">
-            WhatsApp Number <span className="text-red-500">*</span>
+            Номер WhatsApp <span className="text-red-500">*</span>
           </label>
           <PhoneInput
             value={phoneValue}
             onChange={(value) => setValue('whatsapp_number', value)}
-            placeholder="Enter WhatsApp number"
+            placeholder="Введите номер WhatsApp"
             error={errors.whatsapp_number?.message}
           />
           <p className="text-xs text-gray-500 mt-1">
-            Include country code (e.g., +7 or +1)
+            Включите код страны (например, +7 или +1)
           </p>
         </div>
       </div>
