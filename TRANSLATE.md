@@ -222,12 +222,12 @@
 ## Progress Summary
 
 **Total Files Identified**: ~130 файлов
-**Completed**: 57 файлов ✅
+**Completed**: 59 файлов ✅
 **In Progress**: 0 файлов 🔄
-**Pending**: ~73 файлов ⏳
+**Pending**: ~71 файлов ⏳
 **Skipped**: ~20 файлов (без пользовательских текстов)
 
-**Current Progress**: ~44%
+**Current Progress**: ~48%
 
 ---
 
@@ -334,6 +334,20 @@
 - Enum values (pending, paid, shipped, cancelled)
 - Icon names (Wallet, CreditCard, Package, MapPin)
 - Component names (Button, FormInput, DetailModal, StatsCard)
+
+### Session 2024-11-07 (Continuation - Part 5 - Form Components & Newsletter Validation)
+
+**Files Translated (Batch - Form Components & Feature Validation):**
+1. ✅ `src/features/newsletters/lib/validation.ts` - validation schemas for contacts and newsletters
+2. ✅ `src/shared/components/forms/FormImageUpload.tsx` - file validation messages and upload prompts
+
+**Batch 5 Completed:** 2 файлов
+
+**Key Translations (Part 5):**
+- Newsletter and contact form validation messages
+- File format and size validation error messages
+- Image upload prompts and helper text
+- Natural Russian phrasing with proper grammar
 
 ### Session 2024-11-07 (Continuation - Part 4 - UI Components & Validation)
 
