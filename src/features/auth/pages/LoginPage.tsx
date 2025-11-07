@@ -48,26 +48,11 @@ function LoginPage() {
   useEffect(() => {
     const { shop } = useAuthStore.getState();
 
-    logger.debug('[LoginPage] Auth state changed', {
-      isAuthenticated,
-      userRole: user?.role,
-      hasUser: !!user,
-      hasShop: !!shop,
-      shopApproved: shop?.is_approved,
-      shopActive: shop?.is_active,
-      currentPath: window.location.pathname
-    });
-
     // Only redirect if BOTH conditions are met:
     // 1. isAuthenticated flag is true
     // 2. user object exists with valid data
     if (isAuthenticated && user?.role) {
       const redirectPath = getRedirectPath(user.role, shop);
-      logger.debug('[LoginPage] User is authenticated, redirecting from login page', {
-        userRole: user.role,
-        redirectPath,
-        currentPath: window.location.pathname
-      });
       navigate(redirectPath, { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
@@ -86,11 +71,6 @@ function LoginPage() {
 
         // If shop is not approved or not active, redirect to registration
         if (!isApproved || !isActive) {
-          logger.debug('[LoginPage] Shop not approved/active, redirecting to registration', {
-            isApproved,
-            isActive,
-            shopId: shop?.id
-          });
           return ROUTES.SHOP.REGISTER;
         }
 
@@ -116,11 +96,6 @@ function LoginPage() {
 
       // Get secure OAuth URL from backend with state and nonce
       const { authorization_url } = await authService.getGoogleAuthUrl(backendAccountType, 'web');
-
-      logger.debug('[LoginPage] Redirecting to Google OAuth', {
-        accountType,
-        url: authorization_url.substring(0, 100) + '...'
-      });
 
       // Redirect to Google OAuth
       window.location.href = authorization_url;

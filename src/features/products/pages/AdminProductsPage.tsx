@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { logger } from '@/shared/lib/utils/logger';
 import { formatNumber } from '@/shared/lib/utils';
 import toast from 'react-hot-toast';
-import { CheckCircle, XCircle, Eye, X } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, X, Box, Clock } from 'lucide-react';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { Button } from '@/shared/components/ui/Button';
@@ -389,25 +389,25 @@ function AdminProductsPage() {
           <StatsCard
             title="Всего товаров"
             value={stats.total}
-            icon="box"
+            icon={<Box className="w-6 h-6" />}
             variant="primary"
           />
           <StatsCard
             title="На модерации"
             value={stats.pending}
-            icon="clock"
+            icon={<Clock className="w-6 h-6" />}
             variant="warning"
           />
           <StatsCard
             title="Одобрено"
             value={stats.approved}
-            icon="check-circle"
+            icon={<CheckCircle className="w-6 h-6" />}
             variant="success"
           />
           <StatsCard
             title="Отклонено"
             value={stats.rejected}
-            icon="x-circle"
+            icon={<XCircle className="w-6 h-6" />}
             variant="danger"
           />
         </div>

@@ -71,7 +71,7 @@ export const newslettersService = {
           )
           imageUrls.push(response.image_url || response.url)
         } catch (error) {
-          console.error('Failed to upload image:', error)
+          // Error already logged by API client
           throw new Error('Failed to upload newsletter image')
         }
       } else if (image.url && !image.url.startsWith('blob:')) {

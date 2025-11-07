@@ -3,24 +3,34 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: production
+      target: development
       args:
         VITE_API_URL: https://api.leema.kz
         VITE_WS_URL: wss://api.leema.kz/ws
         VITE_GOOGLE_CLIENT_ID: 236011762515-q48adtqtgd72na7lp861339offh3b9k3.apps.googleusercontent.com
-        VITE_ENV: production
+        VITE_ENV: development
     container_name: leema_frontend
     restart: unless-stopped
     ports:
-      - "3000:80"
-      - "3443:443"
+      - "3000:5173"
     volumes:
       # SSL certificates
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      # Hot-reload volumes
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./index.html:/app/index.html
+      - ./vite.config.ts:/app/vite.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.app.json:/app/tsconfig.app.json
+      - ./tsconfig.node.json:/app/tsconfig.node.json
+      - ./.env:/app/.env
+      # Exclude node_modules (prevent host override)
+      - /app/node_modules
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173/@vite/client"]
       interval: 30s
       timeout: 3s
       retries: 3

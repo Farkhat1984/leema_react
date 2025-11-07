@@ -228,7 +228,15 @@ export function initializeWebVitals(): void {
     onLCP(handleMetric, reportOpts);
 
     // Track Interaction to Next Paint (interactivity metric, replaces deprecated FID)
-    onINP(handleMetric, reportOpts);
+    // Wrap in try-catch in case of compatibility issues
+    try {
+      onINP(handleMetric, reportOpts);
+    } catch (inpError) {
+      // INP metric might not be supported in all browsers
+      if (CONFIG.IS_DEV) {
+        logger.debug('INP metric not supported', { error: inpError });
+      }
+    }
 
     // Track Cumulative Layout Shift (visual stability)
     onCLS(handleMetric, reportOpts);
@@ -259,12 +267,23 @@ export async function getWebVitalsSummary(): Promise<Record<string, EnrichedMetr
     metrics[metric.name] = enrichMetric(metric);
   };
 
-  // Collect all current metrics
-  onLCP(collectMetric, { reportAllChanges: true });
-  onINP(collectMetric, { reportAllChanges: true });
-  onCLS(collectMetric, { reportAllChanges: true });
-  onFCP(collectMetric, { reportAllChanges: true });
-  onTTFB(collectMetric, { reportAllChanges: true });
+  try {
+    // Collect all current metrics
+    onLCP(collectMetric, { reportAllChanges: true });
+
+    // INP might have compatibility issues
+    try {
+      onINP(collectMetric, { reportAllChanges: true });
+    } catch (e) {
+      // Skip INP if not supported
+    }
+
+    onCLS(collectMetric, { reportAllChanges: true });
+    onFCP(collectMetric, { reportAllChanges: true });
+    onTTFB(collectMetric, { reportAllChanges: true });
+  } catch (error) {
+    logger.error('Error collecting web vitals', error);
+  }
 
   // Wait a bit for metrics to be collected
   await new Promise((resolve) => setTimeout(resolve, 100));

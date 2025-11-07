@@ -188,11 +188,13 @@ export const useWebSocketStore = create<WSState>((set, get) => ({
         set({ isConnecting: false });
 
         // Don't show toast on first attempt - it usually succeeds on retry
-        // Only log the error for debugging
-        handleError(createError.websocket.connectionError(), {
-          showToast: false,  // Changed: don't show toast, reconnect usually works
-          logError: true,
-        });
+        // Only log in development mode
+        if (CONFIG.IS_DEV) {
+          handleError(createError.websocket.connectionError(), {
+            showToast: false,
+            logError: true,
+          });
+        }
       };
 
       set({ socket });

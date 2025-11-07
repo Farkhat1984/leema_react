@@ -75,6 +75,14 @@ if (import.meta.env.VITE_ENABLE_WEB_VITALS !== 'false') {
   initializeWebVitals();
 }
 
+// Suppress React DevTools message in production
+if (import.meta.env.PROD && typeof window !== 'undefined') {
+  // @ts-expect-error - Suppress React DevTools message
+  if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+    window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject = function () {};
+  }
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>

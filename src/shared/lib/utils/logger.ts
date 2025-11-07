@@ -35,13 +35,13 @@ class Logger {
   private config: LoggerConfig;
 
   constructor() {
-    // In production, only show WARN and ERROR
+    // In production, only show ERROR (suppress all other logs)
     // In development, show all logs
     const isDevelopment = import.meta.env.DEV;
     const isTest = import.meta.env.MODE === 'test';
 
     this.config = {
-      level: isDevelopment || isTest ? LogLevel.DEBUG : LogLevel.WARN,
+      level: isDevelopment || isTest ? LogLevel.DEBUG : LogLevel.ERROR,
       enableConsole: !isTest, // Disable console in tests
       enableSentry: !isDevelopment && !isTest, // Enable Sentry in production only
     };
