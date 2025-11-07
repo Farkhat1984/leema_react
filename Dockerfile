@@ -40,6 +40,18 @@ CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 # Builder stage (for production build)
 FROM base AS builder
 
+# Define build arguments for environment variables
+ARG VITE_API_URL=https://api.leema.kz
+ARG VITE_WS_URL=wss://api.leema.kz/ws
+ARG VITE_GOOGLE_CLIENT_ID
+ARG VITE_ENV=production
+
+# Set environment variables from build args
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_WS_URL=$VITE_WS_URL
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+ENV VITE_ENV=$VITE_ENV
+
 # Copy source code
 COPY . .
 

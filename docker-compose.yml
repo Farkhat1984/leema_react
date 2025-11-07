@@ -4,6 +4,11 @@ services:
       context: .
       dockerfile: Dockerfile
       target: production
+      args:
+        VITE_API_URL: https://api.leema.kz
+        VITE_WS_URL: wss://api.leema.kz/ws
+        VITE_GOOGLE_CLIENT_ID: 236011762515-q48adtqtgd72na7lp861339offh3b9k3.apps.googleusercontent.com
+        VITE_ENV: production
     container_name: leema_frontend
     restart: unless-stopped
     ports:

@@ -342,26 +342,28 @@ export function setTag(key: string, value: string): void {
 }
 
 /**
- * Start a new transaction for performance monitoring
+ * Start a new span for performance monitoring
  *
- * @param name - Transaction name
+ * @param name - Span name
  * @param op - Operation name
- * @returns Transaction
+ * @param callback - Function to execute within the span
+ * @returns Result of callback
  */
-export function startTransaction(
+export function startSpan<T>(
   name: string,
-  op: string
-): Sentry.Transaction | undefined {
+  op: string,
+  callback: () => T
+): T | undefined {
   const config = getSentryConfig();
 
   if (!config.enabled) {
-    return undefined;
+    return callback();
   }
 
   try {
-    return Sentry.startTransaction({ name, op });
+    return Sentry.startSpan({ name, op }, callback);
   } catch (err) {
-    logger.error('[Sentry] Failed to start transaction', err);
+    logger.error('[Sentry] Failed to start span', err);
     return undefined;
   }
 }

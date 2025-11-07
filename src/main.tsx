@@ -1,6 +1,7 @@
 /**
  * Application Entry Point
  * Sets up React Query and renders the app
+ * Version: 2.0.0 - Russian UI
  */
 
 import { StrictMode } from 'react';

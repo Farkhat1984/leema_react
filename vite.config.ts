@@ -89,6 +89,10 @@ export default defineConfig({
         manualChunks(id) {
           // Vendor chunks
           if (id.includes('node_modules')) {
+            // Lucide icons (must come before React check)
+            if (id.includes('lucide-react')) {
+              return 'ui-vendor';
+            }
             // React ecosystem
             if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
               return 'react-vendor';
