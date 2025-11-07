@@ -6,6 +6,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import type { UserRole } from '../types';
+import { ROLES } from '@/constants/roles';
 import { ROUTES } from '@/shared/constants/config';
 import { logger } from '@/shared/lib/utils/logger';
 
@@ -44,9 +45,9 @@ export const ProtectedRoute = ({
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
     // Redirect based on user role
     const redirectPath =
-      user.role === 'admin'
+      user.role === ROLES.ADMIN
         ? ROUTES.ADMIN.DASHBOARD
-        : user.role === 'shop_owner'
+        : user.role === ROLES.SHOP_OWNER
           ? ROUTES.SHOP.DASHBOARD
           : ROUTES.PUBLIC.LOGIN; // Regular users redirected to login (which redirects to mobile app)
 
@@ -61,11 +62,11 @@ export const ProtectedRoute = ({
   }
 
   // Check if this is a shop route (not the registration page itself)
-  const isShopRoute = allowedRoles?.includes('shop_owner');
+  const isShopRoute = allowedRoles?.includes(ROLES.SHOP_OWNER);
   const isRegistrationPage = location.pathname === ROUTES.SHOP.REGISTER;
 
   // If shop owner trying to access protected routes, check approval status
-  if (isShopRoute && !isRegistrationPage && user?.role === 'shop_owner') {
+  if (isShopRoute && !isRegistrationPage && user?.role === ROLES.SHOP_OWNER) {
     const isApproved = shop?.is_approved === true;
     const isActive = shop?.is_active === true;
 

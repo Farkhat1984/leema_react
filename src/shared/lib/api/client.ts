@@ -15,6 +15,59 @@ import { SECURITY_HEADERS } from '../security';
 import { logger } from '../utils/logger';
 import { handleError, ErrorCode, createError, type AppError } from '../utils/error-handler';
 
+// Retry configuration
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+const MAX_RETRY_DELAY_MS = 30000;
+
+/**
+ * Sleep utility for retry delays
+ */
+const sleep = (ms: number): Promise<void> =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Calculate exponential backoff delay with jitter
+ */
+const calculateRetryDelay = (attempt: number): number => {
+  const exponentialDelay = RETRY_DELAY_MS * Math.pow(2, attempt);
+  const cappedDelay = Math.min(exponentialDelay, MAX_RETRY_DELAY_MS);
+  // Add jitter (0-1000ms) to prevent thundering herd
+  const jitter = Math.random() * 1000;
+  return cappedDelay + jitter;
+};
+
+/**
+ * Determine if request should be retried
+ */
+const shouldRetryRequest = (error: AxiosError, attempt: number): boolean => {
+  if (attempt >= MAX_RETRIES) return false;
+
+  const status = error.response?.status;
+
+  // Don't retry if no response (handled separately as network error)
+  if (!error.response && error.request) {
+    // Network error - retry
+    return true;
+  }
+
+  // Don't retry auth errors or client errors (except rate limiting)
+  if (status && status < 500 && status !== 429 && status !== 408) {
+    return false;
+  }
+
+  // Retry on 5xx errors
+  if (status && status >= 500) return true;
+
+  // Retry on rate limiting (429)
+  if (status === 429) return true;
+
+  // Retry on request timeout (408)
+  if (status === 408) return true;
+
+  return false;
+};
+
 // Create axios instance
 export const apiClient = axios.create({
   baseURL: CONFIG.API_URL,
@@ -101,16 +154,59 @@ apiClient.interceptors.request.use(
 );
 
 /**
- * Response interceptor: Handle 401 errors and token refresh
+ * Response interceptor: Handle 401 errors, token refresh, and retries
  */
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
+      _retryCount?: number;
     };
 
-    // Use centralized error handler for non-401 errors
+    // Initialize retry count if not set
+    if (!originalRequest._retryCount) {
+      originalRequest._retryCount = 0;
+    }
+
+    // Check if we should retry this request
+    if (
+      error.response?.status !== 401 &&
+      shouldRetryRequest(error, originalRequest._retryCount)
+    ) {
+      originalRequest._retryCount += 1;
+      const delay = calculateRetryDelay(originalRequest._retryCount - 1);
+
+      // Get retry-after header if present (for 429 responses)
+      const retryAfter = error.response?.headers['retry-after'];
+      const retryDelay = retryAfter
+        ? parseInt(retryAfter, 10) * 1000
+        : delay;
+
+      logger.info(
+        `[API] Retrying request (attempt ${originalRequest._retryCount}/${MAX_RETRIES})`,
+        {
+          url: originalRequest?.url,
+          method: originalRequest?.method,
+          status: error.response?.status,
+          delay: retryDelay,
+        }
+      );
+
+      // Show toast for rate limiting
+      if (error.response?.status === 429) {
+        toast.loading(`Rate limit reached. Retrying in ${Math.ceil(retryDelay / 1000)}s...`, {
+          duration: retryDelay,
+        });
+      }
+
+      await sleep(retryDelay);
+
+      // Retry the request
+      return apiClient(originalRequest);
+    }
+
+    // Use centralized error handler for non-401 errors that won't be retried
     if (error.response?.status !== 401) {
       // Handle error with centralized handler
       handleError(error, {
@@ -119,6 +215,7 @@ apiClient.interceptors.response.use(
         context: {
           url: originalRequest?.url,
           method: originalRequest?.method,
+          retryCount: originalRequest._retryCount,
         },
         reportToService: error.response?.status ? error.response.status >= 500 : false,
       });

@@ -30,7 +30,7 @@ export function useShopEvents() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard'] });
 
       // Show toast notification
-      toast.info(`Новый магазин зарегистрирован: ${event.shop_name}`, {
+      toast.success(`Новый магазин зарегистрирован: ${event.data.shop_name}`, {
         icon: '🏪',
         duration: 4000,
       });
@@ -45,7 +45,7 @@ export function useShopEvents() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shops'] });
 
       // Show toast notification
-      toast.info(`Магазин обновлен: ${event.shop_name}`, {
+      toast.success(`Магазин обновлен: ${event.data.shop_name}`, {
         icon: '✏️',
         duration: 3000,
       });
@@ -60,7 +60,7 @@ export function useShopEvents() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard'] });
 
       // Show toast notification
-      toast.error(`Магазин удален: ${event.shop_name}`, {
+      toast.error(`Магазин удален: ${event.data.shop_name}`, {
         icon: '🗑️',
         duration: 3000,
       });
@@ -76,7 +76,7 @@ export function useShopEvents() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard'] });
 
       // Show toast notification
-      toast.success(`Магазин "${event.shop_name}" одобрен! 🎉`, {
+      toast.success(`Магазин "${event.data.shop_name}" одобрен! 🎉`, {
         icon: '✅',
         duration: 5000,
       });
@@ -92,8 +92,8 @@ export function useShopEvents() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard'] });
 
       // Show toast notification with reason
-      const reason = event.rejection_reason || 'Не указана причина';
-      toast.error(`Магазин "${event.shop_name}" отклонен`, {
+      const reason = event.data.rejection_reason || 'Не указана причина';
+      toast.error(`Магазин "${event.data.shop_name}" отклонен`, {
         icon: '❌',
         duration: 6000,
       });
@@ -115,7 +115,7 @@ export function useShopEvents() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shops'] });
 
       // Show toast notification
-      toast.success(`Магазин "${event.shop_name}" активирован`, {
+      toast.success(`Магазин "${event.data.shop_name}" активирован`, {
         icon: '✅',
         duration: 4000,
       });
@@ -130,8 +130,8 @@ export function useShopEvents() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shops'] });
 
       // Show toast notification with reason
-      const reason = event.deactivation_reason || 'Не указана причина';
-      toast.warning(`Магазин "${event.shop_name}" деактивирован`, {
+      const reason = event.data.deactivation_reason || 'Не указана причина';
+      toast.error(`Магазин "${event.data.shop_name}" деактивирован`, {
         icon: '⚠️',
         duration: 6000,
       });

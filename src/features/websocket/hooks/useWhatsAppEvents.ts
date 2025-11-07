@@ -36,91 +36,46 @@ export function useWhatsAppEvents() {
         duration: 5000,
       };
 
-      switch (event.status) {
+      switch (event.data.status) {
         case 'connected':
-          toast.success('WhatsApp подключен', {
+          toast.success(`WhatsApp подключен ${event.data.phone_number ? `(${event.data.phone_number})` : ''}`, {
             ...toastConfig,
             icon: '📱',
-            description: event.phone_number
-              ? `Номер: ${event.phone_number}`
-              : 'Подключение успешно установлено',
           });
           break;
 
         case 'disconnected':
-          // Check if disconnection was due to number change
-          const reason = (event as any).reason;
-          if (reason === 'whatsapp_number_changed') {
-            toast.warning('WhatsApp отключен', {
-              ...toastConfig,
-              duration: 8000,
-              icon: '🔄',
-              description: (event as any).message || 'Номер WhatsApp был изменен. Пожалуйста, подключите новый номер.',
-            });
-          } else {
-            toast.error('WhatsApp отключен', {
-              ...toastConfig,
-              icon: '📵',
-              description: 'Необходимо повторное подключение через QR-код',
-            });
-          }
-          break;
-
-        case 'phone_mismatch':
-          toast.error('Номер WhatsApp не совпадает!', {
+          toast.error('WhatsApp отключен - необходимо повторное подключение через QR-код', {
             ...toastConfig,
-            duration: 10000,
-            icon: '⚠️',
-            description: (event as any).message || 'Номер WhatsApp не совпадает с номером в профиле. Пожалуйста, отсканируйте QR код с правильным номером.',
+            icon: '📵',
           });
           break;
 
         case 'connecting':
-          toast.loading('Подключение WhatsApp...', {
+          toast('Подключение WhatsApp... Отсканируйте QR-код в мобильном приложении WhatsApp', {
             ...toastConfig,
             icon: '⏳',
-            description: 'Отсканируйте QR-код в мобильном приложении WhatsApp',
           });
           break;
 
         case 'error':
-          toast.error('Ошибка подключения WhatsApp', {
+          toast.error('Ошибка подключения WhatsApp - попробуйте переподключиться через настройки', {
             ...toastConfig,
             icon: '❌',
-            description: 'Попробуйте переподключиться через настройки',
           });
           break;
 
         default:
-          toast.info('Статус WhatsApp изменен', {
+          toast(`Статус WhatsApp изменен: ${event.data.status}`, {
             ...toastConfig,
             icon: '📱',
-            description: `Новый статус: ${event.status}`,
           });
       }
-    });
-
-    // WhatsApp disconnected event (for profile updates)
-    const unsubscribeWhatsAppDisconnected = subscribe('whatsapp_disconnected', (data: unknown) => {
-      const event = data as any;
-
-      // Invalidate WhatsApp-related queries
-      queryClient.invalidateQueries({ queryKey: ['shop', 'whatsapp'] });
-      queryClient.invalidateQueries({ queryKey: ['shop', 'whatsapp', 'status'] });
-      queryClient.invalidateQueries({ queryKey: ['shop', 'whatsapp', 'qr'] });
-
-      // Show notification
-      toast.warning('WhatsApp отключен', {
-        duration: 8000,
-        icon: '🔄',
-        description: event.message || 'Номер WhatsApp был изменен. Пожалуйста, подключите новый номер.',
-      });
     });
 
     // Cleanup subscriptions
     return () => {
       unsubscribeWhatsAppStatus();
-      unsubscribeWhatsAppDisconnected();
     };
   }, [isConnected, subscribe, queryClient]);
 }

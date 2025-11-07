@@ -6,7 +6,7 @@ import { Button } from './Button';
 import { logger } from '@/shared/lib/utils/logger';
 
 export interface ExcelRow {
-  [key: string]: any;
+  [key: string]: unknown;
   _rowNumber: number;
   _isValid: boolean;
   _errors?: string[];
@@ -27,7 +27,7 @@ interface ExcelUploadProps {
   onDataParsed: (data: ExcelData) => void;
   onRemove?: () => void;
   requiredColumns?: string[];
-  validateRow?: (row: any, rowNumber: number) => { isValid: boolean; errors?: string[] };
+  validateRow?: (row: Record<string, unknown>, rowNumber: number) => { isValid: boolean; errors?: string[] };
   maxRows?: number;
   maxSize?: number; // in bytes
   disabled?: boolean;
@@ -40,7 +40,7 @@ interface ExcelUploadProps {
   helperText?: string;
 }
 
-export const ExcelUpload: React.FC<ExcelUploadProps> = ({
+export function ExcelUpload({
   onDataParsed,
   onRemove,
   requiredColumns = [],
@@ -55,7 +55,7 @@ export const ExcelUpload: React.FC<ExcelUploadProps> = ({
   previewRows = 5,
   templateDownloadUrl,
   helperText,
-}) => {
+}: ExcelUploadProps) {
   const [parsedData, setParsedData] = useState<ExcelData | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -73,7 +73,7 @@ export const ExcelUpload: React.FC<ExcelUploadProps> = ({
       const worksheet = workbook.Sheets[firstSheetName];
 
       // Convert to JSON
-      const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet, {
+      const jsonData: Record<string, unknown>[] = XLSX.utils.sheet_to_json(worksheet, {
         defval: '',
         raw: false,
       });

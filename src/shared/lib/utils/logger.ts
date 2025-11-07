@@ -21,11 +21,11 @@ export enum LogLevel {
   ERROR = 3,
 }
 
-interface LogContext {
+export interface LogContext {
   [key: string]: unknown;
 }
 
-interface LoggerConfig {
+export interface LoggerConfig {
   level: LogLevel;
   enableConsole: boolean;
   enableSentry: boolean;
@@ -218,6 +218,3 @@ class Logger {
 
 // Export singleton instance
 export const logger = new Logger();
-
-// Export type for external configuration
-export type { LoggerConfig };

@@ -6,6 +6,12 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Content Security Policy - XSS Protection -->
+    <!-- Note: CSP is also set via HTTP headers in nginx for defense in depth -->
+    <!-- Development: Relaxed for Vite HMR. Production: Strict policy. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.leema.kz wss://api.leema.kz ws://localhost:* http://localhost:*; font-src 'self' https://fonts.gstatic.com; object-src 'none'; media-src 'self'; frame-src https://accounts.google.com; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
+
     <title>Leema Fashion AI - Shop Management</title>
   </head>
   <body>

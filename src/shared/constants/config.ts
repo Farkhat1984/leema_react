@@ -20,7 +20,7 @@ const envSchema = z.object({
     .min(1, 'VITE_GOOGLE_CLIENT_ID is required for Google OAuth')
     .regex(/\.apps\.googleusercontent\.com$/, 'VITE_GOOGLE_CLIENT_ID must be a valid Google Client ID'),
   VITE_ENV: z
-    .enum(['development', 'staging', 'production'], {
+    .enum(['development', 'staging', 'production'] as const, {
       errorMap: () => ({ message: 'VITE_ENV must be one of: development, staging, production' }),
     })
     .default('development'),
@@ -66,6 +66,11 @@ export const CONFIG = {
   ENV: validatedEnv.VITE_ENV,
   IS_DEV: validatedEnv.DEV,
   IS_PROD: validatedEnv.PROD,
+
+  // Monitoring & Performance
+  ENABLE_WEB_VITALS: true, // Track Core Web Vitals
+  ENABLE_CSP: true, // Enable Content Security Policy
+  ENABLE_PERFORMANCE_MONITORING: validatedEnv.PROD, // Performance monitoring in production only
 } as const;
 
 export const ROUTES = {

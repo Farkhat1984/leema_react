@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import authService from '../services/authService';
 import { ROUTES } from '@/shared/constants/config';
+import { ROLES } from '@/constants/roles';
 import { Spinner } from '@/shared/components/feedback/Spinner';
 import { logger } from '@/shared/lib/utils/logger';
 
@@ -91,7 +92,7 @@ function AuthCallbackPage() {
           email: shopData.email || '',
           name: shopData.shop_name || shopData.name || 'Shop Owner',
           phone: shopData.phone || shopData.whatsapp_phone || undefined,
-          role: 'shop_owner' as const,
+          role: ROLES.SHOP_OWNER,
           accountType: 'shop' as const,
           avatar: shopData.avatar_url || shopData.logo || undefined,
           createdAt: shopData.created_at || shopData.createdAt || new Date().toISOString(),

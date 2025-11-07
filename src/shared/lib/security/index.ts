@@ -41,6 +41,17 @@ export {
   isTokenExpired,
 } from './storage';
 
+// Content Security Policy (CSP)
+export {
+  getCSPDirectives,
+  generateCSPHeader,
+  generateCSPMetaContent,
+  validateCSP,
+  setupCSPViolationReporting,
+  initializeCSP,
+} from './csp';
+export type { CSPDirectives } from './csp';
+
 // Security constants
 export const SECURITY_HEADERS = {
   CSRF_HEADER: 'X-CSRF-Token',

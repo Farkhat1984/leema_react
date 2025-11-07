@@ -4,11 +4,11 @@ import * as XLSX from 'xlsx';
 import { Button } from './Button';
 import { logger } from '@/shared/lib/utils/logger';
 
-interface ExcelExportProps {
-  data: any[];
+interface ExcelExportProps<T = Record<string, unknown>> {
+  data: T[];
   fileName?: string;
   sheetName?: string;
-  columns?: { key: string; label: string }[];
+  columns?: { key: keyof T | string; label: string }[];
   disabled?: boolean;
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
@@ -19,7 +19,7 @@ interface ExcelExportProps {
   onExportError?: (error: Error) => void;
 }
 
-export const ExcelExport: React.FC<ExcelExportProps> = ({
+export function ExcelExport<T = Record<string, unknown>>({
   data,
   fileName = 'export',
   sheetName = 'Sheet1',
@@ -32,7 +32,7 @@ export const ExcelExport: React.FC<ExcelExportProps> = ({
   onExportStart,
   onExportComplete,
   onExportError,
-}) => {
+}: ExcelExportProps<T>) {
   const handleExport = () => {
     try {
       onExportStart?.();
@@ -42,13 +42,14 @@ export const ExcelExport: React.FC<ExcelExportProps> = ({
       }
 
       // Transform data based on columns config
-      let exportData = data;
+      let exportData: Record<string, unknown>[] = data as Record<string, unknown>[];
 
       if (columns && columns.length > 0) {
         exportData = data.map((row) => {
-          const transformedRow: any = {};
+          const transformedRow: Record<string, unknown> = {};
           columns.forEach((col) => {
-            transformedRow[col.label] = row[col.key] ?? '';
+            const key = col.key as keyof T;
+            transformedRow[col.label] = (row as Record<string, unknown>)[key as string] ?? '';
           });
           return transformedRow;
         });
@@ -114,15 +115,15 @@ export const ExcelExport: React.FC<ExcelExportProps> = ({
       {buttonText}
     </Button>
   );
-};
+}
 
 // Utility function for exporting data directly
-export const exportToExcel = (
-  data: any[],
+export const exportToExcel = <T = Record<string, unknown>>(
+  data: T[],
   options?: {
     fileName?: string;
     sheetName?: string;
-    columns?: { key: string; label: string }[];
+    columns?: { key: keyof T | string; label: string }[];
   }
 ) => {
   const {
@@ -136,13 +137,14 @@ export const exportToExcel = (
     return;
   }
 
-  let exportData = data;
+  let exportData: Record<string, unknown>[] = data as Record<string, unknown>[];
 
   if (columns && columns.length > 0) {
     exportData = data.map((row) => {
-      const transformedRow: any = {};
+      const transformedRow: Record<string, unknown> = {};
       columns.forEach((col) => {
-        transformedRow[col.label] = row[col.key] ?? '';
+        const key = col.key as keyof T;
+        transformedRow[col.label] = (row as Record<string, unknown>)[key as string] ?? '';
       });
       return transformedRow;
     });
@@ -159,18 +161,18 @@ export const exportToExcel = (
 };
 
 // Component for creating Excel template
-interface ExcelTemplateDownloadProps {
+interface ExcelTemplateDownloadProps<T = Record<string, unknown>> {
   columns: { key: string; label: string }[];
   fileName?: string;
   sheetName?: string;
-  sampleData?: any[];
+  sampleData?: T[];
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   buttonText?: string;
 }
 
-export const ExcelTemplateDownload: React.FC<ExcelTemplateDownloadProps> = ({
+export function ExcelTemplateDownload<T = Record<string, unknown>>({
   columns,
   fileName = 'template',
   sheetName = 'Sheet1',
@@ -179,16 +181,16 @@ export const ExcelTemplateDownload: React.FC<ExcelTemplateDownloadProps> = ({
   size = 'sm',
   className = '',
   buttonText = 'Download Template',
-}) => {
+}: ExcelTemplateDownloadProps<T>) {
   const handleDownload = () => {
     // Create header row
-    const headers: any = {};
+    const headers: Record<string, string> = {};
     columns.forEach((col) => {
       headers[col.label] = '';
     });
 
     // Combine with sample data if provided
-    const templateData = sampleData.length > 0 ? sampleData : [headers];
+    const templateData: (T | Record<string, string>)[] = sampleData.length > 0 ? sampleData : [headers];
 
     const worksheet = XLSX.utils.json_to_sheet(templateData);
 

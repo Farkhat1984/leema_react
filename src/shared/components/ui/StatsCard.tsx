@@ -62,7 +62,7 @@ export const StatsCard = ({
   className,
   loading = false,
 }: StatsCardProps) => {
-  const colors = variantStyles[variant];
+  const colors = variantStyles[variant] || variantStyles.primary;
 
   if (loading) {
     return (

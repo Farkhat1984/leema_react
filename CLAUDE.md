@@ -33,6 +33,8 @@ npm run lint                   # Check for linting errors
 npm run lint:fix               # Auto-fix linting errors
 npm run format                 # Format code with Prettier
 npm run format:check           # Check code formatting
+npm run size                   # Check bundle size limits
+npm run size:why               # Analyze why bundle is so large
 ```
 
 ### Docker
@@ -97,18 +99,23 @@ src/
 
 3. **API Client (src/shared/lib/api/client.ts)**
    - Centralized axios instance with interceptors
-   - Automatic token injection and refresh
-   - CSRF protection for state-changing requests
-   - XSS sanitization of request bodies
+   - Automatic token injection and refresh with queue management
+   - CSRF protection for state-changing requests (POST, PUT, PATCH, DELETE)
+   - XSS sanitization of request bodies using DOMPurify
    - Centralized error handling with toast notifications
    - Request/response logging in development
+   - Exponential backoff retry logic (max 3 retries for 5xx, 429, 408 errors)
+   - 15-second default timeout
+   - withCredentials: true for HttpOnly cookies
 
 4. **WebSocket Manager (src/features/websocket/WebSocketManager.ts)**
    - Real-time connection for notifications, orders, and updates
-   - Automatic reconnection with exponential backoff
-   - Client type-based connection (shop/admin)
-   - Event subscription system for components
-   - Heartbeat mechanism to keep connection alive
+   - Managed by Zustand store (useWebSocketStore)
+   - Automatic reconnection with exponential backoff (max 5 attempts)
+   - Client type-based connection (user/shop/admin)
+   - Type-safe event subscription system with Zod validation
+   - Heartbeat mechanism every 30 seconds to keep connection alive
+   - Connection URL format: `wss://api.leema.kz/ws?token=<jwt>&client_type=<type>&platform=web`
 
 5. **Security**
    - CSRF tokens for all mutations
@@ -148,7 +155,7 @@ These are configured in:
 
 ## Environment Configuration
 
-Required environment variables (validated at startup with Zod):
+Required environment variables (validated at startup with Zod in src/shared/constants/config.ts):
 
 ```bash
 VITE_API_URL=https://api.leema.kz                    # Backend API URL
@@ -157,7 +164,15 @@ VITE_GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com # Google OAuth Client ID
 VITE_ENV=development|staging|production              # Environment
 ```
 
-Copy `.env.example` to `.env` and fill in values. Missing or invalid variables will cause immediate startup failure.
+Optional variables:
+```bash
+VITE_SENTRY_DSN=                                     # Error tracking (production)
+VITE_APP_VERSION=1.0.0                               # Release version
+VITE_ENABLE_CSP=true                                 # Content Security Policy
+VITE_ENABLE_WEB_VITALS=true                          # Performance monitoring
+```
+
+Copy `.env.example` to `.env` and fill in values. Missing or invalid required variables will cause immediate startup failure with detailed error messages.
 
 ## Important Conventions
 
@@ -225,6 +240,13 @@ export { ShopProductsPage } from './pages/products/ShopProductsPage';
 - **Coverage Target**: 80% for branches, functions, lines, statements
 - **Mock Service Worker (MSW)**: For API mocking in tests
 
+### Running Specific Tests
+```bash
+npm run test -- <pattern>        # Run tests matching pattern
+npm run test -- src/features/auth  # Run tests in specific directory
+npm run test:run -- --reporter=verbose  # Single run with verbose output
+```
+
 ## Production Build
 
 The production build process:
@@ -274,12 +296,15 @@ Logging levels are automatically adjusted based on `VITE_ENV`.
 
 ## Key Files to Understand
 
-- **src/app/router.tsx**: All route definitions and lazy loading
-- **src/shared/lib/api/client.ts**: API client with auth interceptors
-- **src/features/auth/store/authStore.ts**: Authentication state management
-- **src/features/websocket/WebSocketManager.ts**: Real-time connection handling
-- **src/shared/constants/config.ts**: Environment config and route constants
-- **src/shared/lib/utils/error-handler.ts**: Centralized error handling
+- **src/app/router.tsx**: All route definitions with lazy loading and role-based protection
+- **src/shared/lib/api/client.ts**: API client with auth interceptors, token refresh, retry logic
+- **src/features/auth/store/authStore.ts**: Authentication state management with Zustand
+- **src/features/websocket/WebSocketManager.ts**: Real-time WebSocket connection with Zustand store
+- **src/shared/constants/config.ts**: Environment config validation and route constants
+- **src/shared/constants/api-endpoints.ts**: All API endpoint definitions
+- **src/shared/lib/utils/error-handler.ts**: Centralized error handling with typed error codes
+- **src/shared/lib/utils/logger.ts**: Centralized logging with environment-based levels
+- **src/shared/lib/security/**: Security utilities (CSRF, XSS sanitization, JWT validation)
 - **vite.config.ts**: Build configuration and code splitting strategy
 
 ## Development Workflow

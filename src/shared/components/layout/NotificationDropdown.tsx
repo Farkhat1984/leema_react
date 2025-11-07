@@ -276,7 +276,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                 onClick={() => {
                   setIsOpen(false);
                   // TODO: Navigate to notifications page when implemented
-                  toast.info('Страница всех уведомлений в разработке');
+                  toast('Страница всех уведомлений в разработке');
                 }}
                 className="text-xs text-purple-600 hover:text-purple-700 font-medium w-full text-center"
               >

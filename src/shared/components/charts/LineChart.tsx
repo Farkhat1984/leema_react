@@ -67,7 +67,7 @@ const CustomTooltip: React.FC<
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
       <p className="text-sm font-medium text-gray-900 mb-2">{label}</p>
-      {payload.map((entry, index: number) => (
+      {payload.map((entry: { value?: number; name?: string; color?: string }, index: number) => (
         <div key={index} className="flex items-center justify-between space-x-4 text-sm">
           <div className="flex items-center space-x-2">
             <div
@@ -77,7 +77,7 @@ const CustomTooltip: React.FC<
             <span className="text-gray-600">{entry.name}:</span>
             </div>
             <span className="font-medium text-gray-900">
-              {formatTooltip ? formatTooltip(entry.value, entry.name) : entry.value}
+              {formatTooltip && entry.value !== undefined && entry.name ? formatTooltip(entry.value, entry.name) : entry.value}
             </span>
           </div>
         ))}

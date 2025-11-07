@@ -2,8 +2,13 @@
  * Authentication types
  */
 
-export type UserRole = 'user' | 'shop_owner' | 'admin';
+import { ROLES, type UserRole as RoleType } from '@/constants/roles';
+
+export type UserRole = RoleType;
 export type AccountType = 'user' | 'shop' | 'admin';
+
+// Export ROLES for convenience
+export { ROLES };
 
 export interface User {
   id: string;
@@ -17,6 +22,8 @@ export interface User {
   updatedAt?: string;
 }
 
+export type ShopStatus = 'pending' | 'approved' | 'rejected' | 'deactivated';
+
 export interface Shop {
   id: string;
   name: string;
@@ -26,7 +33,7 @@ export interface Shop {
   whatsapp_phone?: string;
   ownerId: string;
   balance: number;
-  status: 'active' | 'suspended' | 'pending';
+  status: ShopStatus; // Computed field from backend
   is_approved: boolean;
   is_active: boolean;
   rejection_reason?: string;

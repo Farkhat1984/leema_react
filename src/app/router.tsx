@@ -8,6 +8,7 @@ import { lazy, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import type { UserRole } from '@/features/auth/types';
+import { ROLES } from '@/constants/roles';
 import { PageLoader } from '@/shared/components/feedback/PageLoader';
 import { ROUTES } from '@/shared/constants/config';
 
@@ -149,43 +150,43 @@ export const router = createBrowserRouter([
   // Shop routes
   {
     path: ROUTES.SHOP.DASHBOARD,
-    element: withErrorBoundary(<ShopDashboard />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopDashboard />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.REGISTER,
-    element: withErrorBoundary(<ShopRegistration />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopRegistration />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.PRODUCTS,
-    element: withErrorBoundary(<ShopProducts />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopProducts />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.NEWSLETTER,
-    element: withErrorBoundary(<ShopNewsletters />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopNewsletters />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.ANALYTICS,
-    element: withErrorBoundary(<ShopAnalytics />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopAnalytics />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.ORDERS,
-    element: withErrorBoundary(<ShopOrders />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopOrders />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.BILLING,
-    element: withErrorBoundary(<ShopBilling />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopBilling />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.BILLING_TOPUP,
-    element: withErrorBoundary(<ShopTopUp />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopTopUp />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.CUSTOMERS,
-    element: withErrorBoundary(<ShopCustomers />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopCustomers />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.WHATSAPP,
-    element: withErrorBoundary(<UnifiedWhatsApp />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<UnifiedWhatsApp />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.WHATSAPP_QR,
@@ -193,93 +194,93 @@ export const router = createBrowserRouter([
   },
   {
     path: ROUTES.SHOP.PROFILE,
-    element: withErrorBoundary(<ShopProfile />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopProfile />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.REPORTS,
-    element: withErrorBoundary(<ShopReports />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopReports />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.NOTIFICATIONS,
-    element: withErrorBoundary(<ShopNotifications />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopNotifications />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
   {
     path: ROUTES.SHOP.REVIEWS,
-    element: withErrorBoundary(<ShopReviews />, { allowedRoles: ['shop_owner'] }),
+    element: withErrorBoundary(<ShopReviews />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
 
   // Admin routes
   {
     path: ROUTES.ADMIN.DASHBOARD,
-    element: withErrorBoundary(<AdminDashboard />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminDashboard />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.PRODUCTS,
-    element: withErrorBoundary(<AdminProducts />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminProducts />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.SHOPS,
-    element: withErrorBoundary(<AdminShops />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminShops />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.NEWSLETTER,
-    element: withErrorBoundary(<AdminNewsletters />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminNewsletters />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.ORDERS,
-    element: withErrorBoundary(<AdminOrders />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminOrders />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.SETTINGS,
-    element: withErrorBoundary(<AdminSettings />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminSettings />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.REFUNDS,
-    element: withErrorBoundary(<AdminRefunds />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminRefunds />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.WARDROBES,
-    element: withErrorBoundary(<AdminWardrobes />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminWardrobes />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: '/admin/wardrobes/user/:userId',
-    element: withErrorBoundary(<AdminUserWardrobe />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminUserWardrobe />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.NOTIFICATIONS,
-    element: withErrorBoundary(<AdminNotifications />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminNotifications />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.SHOPS_PENDING,
-    element: withErrorBoundary(<AdminShopsPending />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminShopsPending />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: '/admin/shops/:shopId',
-    element: withErrorBoundary(<AdminShopProfile />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminShopProfile />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.USERS,
-    element: withErrorBoundary(<AdminUsers />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminUsers />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: '/admin/users/:userId',
-    element: withErrorBoundary(<AdminUserProfile />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminUserProfile />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.REVIEWS,
-    element: withErrorBoundary(<AdminReviews />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminReviews />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.CATEGORIES,
-    element: withErrorBoundary(<AdminCategories />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminCategories />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.LOGS,
-    element: withErrorBoundary(<AdminLogs />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminLogs />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.REPORTS,
-    element: withErrorBoundary(<AdminReports />, { allowedRoles: ['admin'] }),
+    element: withErrorBoundary(<AdminReports />, { allowedRoles: [ROLES.ADMIN] }),
   },
 
   // User routes - REMOVED (users use mobile app only)

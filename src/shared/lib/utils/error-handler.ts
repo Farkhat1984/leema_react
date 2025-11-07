@@ -14,8 +14,6 @@ import { logger } from './logger';
 import {
   getErrorMessage,
   getErrorStatus,
-  isClientError,
-  isServerError,
   type ApiErrorResponse
 } from '@/shared/types/errors';
 
@@ -351,26 +349,61 @@ export function handleError(
 }
 
 /**
- * Report error to external monitoring service
- * Currently a placeholder for Sentry/LogRocket integration
+ * Report error to external monitoring service (Sentry)
+ * Integrated as part of Phase 2 improvements (2025-11-06)
  */
 function reportErrorToService(error: AppError): void {
-  // TODO: Integrate with Sentry or LogRocket
-  // Example with Sentry:
-  // Sentry.captureException(error.originalError || error, {
-  //   level: error.severity,
-  //   tags: {
-  //     errorCode: error.code,
-  //     statusCode: error.statusCode?.toString(),
-  //   },
-  //   extra: error.context,
-  // });
+  try {
+    // Dynamically import Sentry to avoid circular dependencies
+    import('@/shared/lib/monitoring/sentry').then(({ captureException }) => {
+      captureException(error.originalError || error, {
+        level: mapSeverityToSentryLevel(error.severity),
+        tags: {
+          errorCode: error.code,
+          statusCode: error.statusCode?.toString() || 'unknown',
+          source: 'error-handler',
+        },
+        extra: {
+          userMessage: error.userMessage,
+          context: error.context,
+          timestamp: error.timestamp.toISOString(),
+        },
+      });
+
+      logger.debug('[ErrorHandler] Error reported to Sentry', {
+        code: error.code,
+        severity: error.severity,
+      });
+    }).catch((err) => {
+      logger.warn('[ErrorHandler] Failed to report error to Sentry', err);
+    });
+  } catch (err) {
+    logger.warn('[ErrorHandler] Exception while reporting to Sentry', err);
+  }
 
   logger.debug('Error ready for external service reporting', {
     code: error.code,
     severity: error.severity,
     message: error.message,
   });
+}
+
+/**
+ * Map application error severity to Sentry severity level
+ */
+function mapSeverityToSentryLevel(severity: ErrorSeverity): 'fatal' | 'error' | 'warning' | 'info' {
+  switch (severity) {
+    case ErrorSeverity.CRITICAL:
+      return 'fatal';
+    case ErrorSeverity.HIGH:
+      return 'error';
+    case ErrorSeverity.MEDIUM:
+      return 'warning';
+    case ErrorSeverity.LOW:
+      return 'info';
+    default:
+      return 'error';
+  }
 }
 
 /**

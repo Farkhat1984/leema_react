@@ -102,6 +102,8 @@ const renderCustomLabel = ({
   percent: number;
   name: string;
   showPercentage?: boolean;
+  // Additional props that may be passed by recharts
+  [key: string]: unknown;
 }) => {
   const RADIAN = Math.PI / 180;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
@@ -254,8 +256,8 @@ export const PieChart: React.FC<PieChartProps> = ({
               labelLine={false}
               label={
                 showLabels
-                  ? (props) =>
-                      renderCustomLabel({ ...props, showPercentage, formatLabel })
+                  ? (props: unknown) =>
+                      renderCustomLabel({ ...props as Record<string, unknown>, showPercentage } as Parameters<typeof renderCustomLabel>[0])
                   : false
               }
               outerRadius={outerRadius}

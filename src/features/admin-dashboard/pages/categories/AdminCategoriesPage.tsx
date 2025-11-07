@@ -74,6 +74,7 @@ function AdminCategoriesPage() {
         const optimisticCategory: Category = {
           id: Date.now(), // Temporary ID
           name: newCategory.name,
+          slug: newCategory.slug,
           description: newCategory.description,
           products_count: 0,
           created_at: new Date().toISOString(),
@@ -129,6 +130,7 @@ function AdminCategoriesPage() {
               ? {
                   ...cat,
                   name: updatedData.name,
+                  slug: updatedData.slug,
                   description: updatedData.description,
                   updated_at: new Date().toISOString(),
                 }
@@ -289,10 +291,12 @@ function AdminCategoriesPage() {
             Manage product categories for the platform
           </p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Category
-        </Button>
+        {categories?.length > 0 && (
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Category
+          </Button>
+        )}
       </div>
 
       {/* Categories Table */}

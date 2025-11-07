@@ -11,6 +11,16 @@ import { logger } from '@/shared/lib/utils/logger';
 // Re-export new type-safe types for backwards compatibility
 export * from '../types/events';
 
+// Import types for use in this file
+import type {
+  ProductEvent,
+  OrderEvent,
+  BalanceEvent,
+  NotificationEvent,
+  ShopEvent,
+  ModerationQueueEvent,
+} from '../types/events';
+
 // Additional helper function for financial events (not in types/events.ts)
 export const isFinancialEvent = (event: string): boolean => {
   return event.startsWith('balance.') || event.startsWith('transaction.');

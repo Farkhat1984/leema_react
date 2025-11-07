@@ -198,10 +198,15 @@ export const moderationService = {
   /**
    * Approve shop
    * @param id - Shop ID
+   * @param notes - Optional approval notes
    * @returns Success message
    */
-  approveShop: async (id: number): Promise<{ message: string }> => {
-    return apiRequest<{ message: string }>(API_ENDPOINTS.ADMIN.SHOP_APPROVE(id), 'POST')
+  approveShop: async (id: number, notes?: string): Promise<{ message: string }> => {
+    return apiRequest<{ message: string }>(
+      API_ENDPOINTS.ADMIN.SHOP_APPROVE(id),
+      'POST',
+      { notes: notes || 'Магазин одобрен администратором' }
+    )
   },
 
   /**

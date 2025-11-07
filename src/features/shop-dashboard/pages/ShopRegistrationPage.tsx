@@ -11,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import type { ShopStatus } from '@/features/auth/types';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { ROUTES } from '@/shared/constants/config';
@@ -22,20 +23,18 @@ import { logger } from '@/shared/lib/utils/logger';
 import { StatusBadge } from '@/shared/components/ui/StatusBadge';
 import { ImageUploadSingle } from '@/shared/components/ui/ImageUploadSingle';
 import { PhoneInput } from '@/shared/components/forms/PhoneInput';
-import { AlertCircle, Store, CheckCircle } from 'lucide-react';
+import { AlertCircle, Store, CheckCircle, Clock, XCircle, Ban } from 'lucide-react';
 
 // Validation schema
 const shopSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  contact_phone: z.string().min(10, 'Please enter a valid phone number'),
+  name: z.string().min(2, 'Название должно содержать минимум 2 символа'),
+  description: z.string().min(10, 'Описание должно содержать минимум 10 символов'),
+  contact_phone: z.string().min(10, 'Пожалуйста, введите корректный номер телефона'),
   whatsapp_phone: z.string().optional(),
-  address: z.string().min(5, 'Please enter a valid address'),
+  address: z.string().min(5, 'Пожалуйста, введите корректный адрес'),
 });
 
 type ShopFormData = z.infer<typeof shopSchema>;
-
-type ShopStatus = 'pending' | 'approved' | 'rejected' | 'deactivated';
 
 interface Shop {
   id: number;
@@ -46,7 +45,10 @@ interface Shop {
   address: string;
   avatar?: string;
   status: ShopStatus;
+  is_approved: boolean;
+  is_active: boolean;
   rejection_reason?: string;
+  deactivation_reason?: string;
 }
 
 function ShopRegistrationPage() {
@@ -101,7 +103,7 @@ function ShopRegistrationPage() {
       const status = error.response?.status;
       if (status !== 404 && status !== 403) {
         logger.error('Failed to load shop data', error);
-        toast.error('Failed to load shop information');
+        toast.error('Не удалось загрузить информацию о магазине');
       }
     } finally {
       setIsLoading(false);
@@ -128,13 +130,19 @@ function ShopRegistrationPage() {
    * Submit registration form
    */
   const onSubmit = async (data: ShopFormData) => {
+    // Block submission if status is pending
+    if (shopData?.status === 'pending') {
+      toast.error('Ваша заявка уже на рассмотрении. Дождитесь ответа от администратора.');
+      return;
+    }
+
     setIsSaving(true);
     try {
       // Upload avatar if changed
       let avatarUrl = shopData?.avatar;
       if (avatarFile) {
         const formData = new FormData();
-        formData.append('avatar', avatarFile);
+        formData.append('file', avatarFile);
 
         const uploadResponse = await apiRequest<{ url: string }>(
           API_ENDPOINTS.SHOPS.UPLOAD_AVATAR,
@@ -160,19 +168,24 @@ function ShopRegistrationPage() {
       updateShop(response as any);
       setShopData(response);
 
-      toast.success(
-        shopData
-          ? 'Shop information updated successfully'
-          : 'Shop registration submitted for approval'
-      );
+      // Show appropriate success message
+      if (shopData?.status === 'rejected') {
+        toast.success('Заявка отправлена повторно на рассмотрение администратора');
+      } else if (!shopData) {
+        toast.success('Заявка на регистрацию магазина отправлена на утверждение');
+      } else {
+        toast.success('Информация о магазине успешно обновлена');
+      }
 
-      // If approved and active, redirect to dashboard
-      if (response.is_approved && response.is_active) {
+      // If was just approved, redirect to dashboard
+      const wasJustApproved = !shopData?.is_approved && response.is_approved;
+      if (wasJustApproved && response.is_active) {
+        toast.success('Ваш магазин одобрен! Переход в панель управления...');
         setTimeout(() => navigate(ROUTES.SHOP.DASHBOARD), 1500);
       }
     } catch (error: any) {
       logger.error('Failed to save shop', error);
-      toast.error(error.message || 'Failed to save shop information');
+      toast.error(error.message || 'Не удалось сохранить информацию о магазине');
     } finally {
       setIsSaving(false);
     }
@@ -199,18 +212,38 @@ function ShopRegistrationPage() {
   /**
    * Get status message
    */
-  const getStatusMessage = (status: ShopStatus) => {
+  const getStatusMessage = (status: ShopStatus, shop?: Shop) => {
     switch (status) {
       case 'pending':
-        return 'Your shop registration is pending approval from our admin team.';
+        return 'Ваша заявка на рассмотрении у администратора. Редактирование заблокировано до получения ответа. Это может занять 1-2 дня.';
       case 'approved':
-        return 'Your shop has been approved and is active!';
+        return 'Ваш магазин одобрен и активен! Вы можете управлять товарами и заказами.';
       case 'rejected':
-        return 'Your shop registration was rejected. Please review the reason below and resubmit.';
+        return 'Ваша заявка была отклонена. Пожалуйста, ознакомьтесь с причиной ниже, исправьте данные и отправьте заявку повторно.';
       case 'deactivated':
-        return 'Your shop has been deactivated. Contact support for more information.';
+        return shop?.deactivation_reason
+          ? `Ваш магазин деактивирован. Причина: ${shop.deactivation_reason}. Обратитесь к администратору для получения дополнительной информации.`
+          : 'Ваш магазин был деактивирован. Обратитесь к администратору для получения дополнительной информации.';
       default:
         return '';
+    }
+  };
+
+  /**
+   * Get status icon
+   */
+  const getStatusIcon = (status: ShopStatus) => {
+    switch (status) {
+      case 'pending':
+        return Clock;
+      case 'approved':
+        return CheckCircle;
+      case 'rejected':
+        return XCircle;
+      case 'deactivated':
+        return Ban;
+      default:
+        return AlertCircle;
     }
   };
 
@@ -226,13 +259,13 @@ function ShopRegistrationPage() {
           <div className="flex items-center mb-2">
             <Store className="w-8 h-8 text-purple-600 mr-3" />
             <h1 className="text-3xl font-bold text-gray-900">
-              {shopData ? 'Edit Shop Information' : 'Register Your Shop'}
+              {shopData ? 'Редактировать информацию магазина' : 'Регистрация магазина'}
             </h1>
           </div>
           <p className="text-gray-600">
             {shopData
-              ? 'Update your shop details and settings'
-              : 'Fill in your shop information to get started on the platform'}
+              ? 'Обновите информацию и настройки вашего магазина'
+              : 'Заполните информацию о вашем магазине для начала работы на платформе'}
           </p>
         </div>
 
@@ -242,21 +275,63 @@ function ShopRegistrationPage() {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700 mr-3">Status:</span>
+                  <span className="text-sm font-medium text-gray-700 mr-3">Статус:</span>
                   <StatusBadge
                     status={shopData.status}
                     variant={getStatusVariant(shopData.status)}
                   />
                 </div>
-                <p className="text-sm text-gray-600 mb-3">{getStatusMessage(shopData.status)}</p>
+                <p className="text-sm text-gray-600 mb-3">{getStatusMessage(shopData.status, shopData)}</p>
+
+                {/* Pending Message */}
+                {shopData.status === 'pending' && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start space-x-3">
+                    <Clock className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-yellow-900 mb-1">
+                        Заявка на рассмотрении
+                      </p>
+                      <p className="text-sm text-yellow-800">
+                        Спасибо за регистрацию! Администратор рассмотрит вашу заявку в течение 1-2 дней.
+                        Вы получите уведомление на email, когда магазин будет одобрен.
+                      </p>
+                      <p className="text-sm text-yellow-800 mt-2 font-medium">
+                        ⚠️ Редактирование заявки заблокировано до получения ответа.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Rejection Reason */}
                 {shopData.status === 'rejected' && shopData.rejection_reason && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
-                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-red-900 mb-1">Причина отклонения:</p>
+                      <p className="text-sm text-red-800 mb-3">{shopData.rejection_reason}</p>
+                      <p className="text-sm text-red-900 font-medium">
+                        ✏️ Исправьте данные ниже и нажмите "Отправить повторно"
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Deactivated Message */}
+                {shopData.status === 'deactivated' && (
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 flex items-start space-x-3">
+                    <Ban className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-red-900 mb-1">Rejection Reason:</p>
-                      <p className="text-sm text-red-800">{shopData.rejection_reason}</p>
+                      <p className="text-sm font-medium text-orange-900 mb-1">
+                        Магазин деактивирован
+                      </p>
+                      {shopData.deactivation_reason && (
+                        <p className="text-sm text-orange-800 mb-2">
+                          <span className="font-medium">Причина:</span> {shopData.deactivation_reason}
+                        </p>
+                      )}
+                      <p className="text-sm text-orange-800">
+                        📧 Свяжитесь с администратором для получения дополнительной информации.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -267,7 +342,7 @@ function ShopRegistrationPage() {
                     <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-green-900">
-                        Your shop is live and ready to sell!
+                        ✅ Ваш магазин активен и готов к работе!
                       </p>
                     </div>
                   </div>
@@ -283,73 +358,79 @@ function ShopRegistrationPage() {
             {/* Avatar Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Shop Avatar
+                Логотип магазина
               </label>
               <ImageUploadSingle
                 value={avatarPreview}
                 onChange={handleAvatarChange}
-                maxSize={5}
+                maxSize={5 * 1024 * 1024}
                 shape="square"
+                disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
               />
               <p className="mt-2 text-xs text-gray-500">
-                Recommended: Square image, minimum 400x400px, max 5MB
+                Рекомендуется: квадратное изображение, минимум 400x400px, максимум 5МБ
               </p>
             </div>
 
             {/* Shop Name */}
             <FormInput
-              label="Shop Name"
+              label="Название магазина"
               {...register('name')}
               error={errors.name?.message}
-              placeholder="Enter your shop name"
+              placeholder="Введите название вашего магазина"
               required
+              disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
             />
 
             {/* Description */}
             <FormTextarea
-              label="Description"
+              label="Описание"
               {...register('description')}
               error={errors.description?.message}
-              placeholder="Describe your shop, products, and what makes you unique"
+              placeholder="Опишите ваш магазин, товары и что делает вас уникальными"
               rows={4}
               required
+              disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
             />
 
             {/* Contact Phone */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Contact Phone <span className="text-red-500">*</span>
+                Контактный телефон <span className="text-red-500">*</span>
               </label>
               <PhoneInput
                 value={shopData?.contact_phone || ''}
                 onChange={(value) => setValue('contact_phone', value)}
                 error={errors.contact_phone?.message}
+                disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
               />
             </div>
 
             {/* WhatsApp Phone (Optional) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                WhatsApp Phone (Optional)
+                Телефон WhatsApp (опционально)
               </label>
               <PhoneInput
                 value={shopData?.whatsapp_phone || ''}
                 onChange={(value) => setValue('whatsapp_phone', value)}
                 error={errors.whatsapp_phone?.message}
+                disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
               />
               <p className="mt-1 text-xs text-gray-500">
-                If different from contact phone
+                Если отличается от контактного телефона
               </p>
             </div>
 
             {/* Address */}
             <FormTextarea
-              label="Address"
+              label="Адрес"
               {...register('address')}
               error={errors.address?.message}
-              placeholder="Enter your shop's physical address"
+              placeholder="Введите физический адрес вашего магазина"
               rows={2}
               required
+              disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
             />
 
             {/* Submit Button */}
@@ -360,15 +441,25 @@ function ShopRegistrationPage() {
                 onClick={() => navigate(ROUTES.SHOP.DASHBOARD)}
                 disabled={isSaving}
               >
-                Cancel
+                Отмена
               </Button>
               <Button
                 type="submit"
                 variant="primary"
                 isLoading={isSaving}
-                disabled={isSaving}
+                disabled={
+                  isSaving ||
+                  shopData?.status === 'pending' ||
+                  shopData?.status === 'deactivated'
+                }
               >
-                {shopData ? 'Update Shop' : 'Submit for Approval'}
+                {shopData?.status === 'rejected'
+                  ? 'Отправить повторно'
+                  : shopData?.status === 'approved'
+                  ? 'Обновить информацию'
+                  : shopData
+                  ? 'Обновить магазин'
+                  : 'Отправить на утверждение'}
               </Button>
             </div>
           </form>

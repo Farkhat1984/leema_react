@@ -101,10 +101,37 @@ export function DataTable<TData>({
     getSortedRowModel: manualSorting ? undefined : getSortedRowModel(),
     getPaginationRowModel: manualPagination ? undefined : getPaginationRowModel(),
     getFilteredRowModel: manualFiltering ? undefined : getFilteredRowModel(),
-    onSortingChange: manualSorting && onSortingChange ? onSortingChange : setInternalSorting,
-    onColumnFiltersChange: manualFiltering && onColumnFiltersChange ? onColumnFiltersChange : setInternalColumnFilters,
+    onSortingChange: (updaterOrValue) => {
+      if (manualSorting && onSortingChange) {
+        const newValue = typeof updaterOrValue === 'function'
+          ? updaterOrValue(sorting)
+          : updaterOrValue;
+        onSortingChange(newValue);
+      } else {
+        setInternalSorting(updaterOrValue);
+      }
+    },
+    onColumnFiltersChange: (updaterOrValue) => {
+      if (manualFiltering && onColumnFiltersChange) {
+        const newValue = typeof updaterOrValue === 'function'
+          ? updaterOrValue(columnFilters)
+          : updaterOrValue;
+        onColumnFiltersChange(newValue);
+      } else {
+        setInternalColumnFilters(updaterOrValue);
+      }
+    },
     onColumnVisibilityChange: setInternalColumnVisibility,
-    onRowSelectionChange: onRowSelectionChange ? onRowSelectionChange : setInternalRowSelection,
+    onRowSelectionChange: (updaterOrValue) => {
+      if (onRowSelectionChange) {
+        const newValue = typeof updaterOrValue === 'function'
+          ? updaterOrValue(rowSelection)
+          : updaterOrValue;
+        onRowSelectionChange(newValue);
+      } else {
+        setInternalRowSelection(updaterOrValue);
+      }
+    },
     getRowId,
     manualPagination,
     manualSorting,

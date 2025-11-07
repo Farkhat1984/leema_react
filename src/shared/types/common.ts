@@ -66,7 +66,7 @@ export interface PaginationState {
 /**
  * Sort state
  */
-export interface SortState<T = any> {
+export interface SortState<T = Record<string, unknown>> {
   key: keyof T;
   direction: 'asc' | 'desc';
 }
@@ -144,7 +144,7 @@ export function formatTrend(trend: TrendData): string {
 /**
  * Generic filter state
  */
-export interface FilterState<T = any> {
+export interface FilterState<T = Record<string, unknown>> {
   search?: string;
   status?: string;
   dateRange?: DateRange;
@@ -154,7 +154,7 @@ export interface FilterState<T = any> {
 /**
  * Filter change handler
  */
-export type FilterChangeHandler<T = any> = (filters: Partial<FilterState<T>>) => void;
+export type FilterChangeHandler<T = Record<string, unknown>> = (filters: Partial<FilterState<T>>) => void;
 
 // ==================== API TYPES ====================
 
@@ -192,6 +192,6 @@ export interface FormState {
 /**
  * Generic form values
  */
-export type FormValues = Record<string, any>;
+export type FormValues = Record<string, unknown>;
 
 // All types are already exported above, no need to re-export

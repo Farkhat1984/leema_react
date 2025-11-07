@@ -112,10 +112,10 @@ export const newsletterSchema = z.object({
       id: z.string(),
       file: z.instanceof(File).optional(),
       url: z.string(),
-      quality: z.enum(['low', 'medium', 'high']).optional(),
+      quality: z.enum(['low', 'medium', 'high'] as const).optional(),
     })
   ).min(0),
-  recipient_type: z.enum(['all', 'selected']),
+  recipient_type: z.enum(['all', 'selected'] as const),
   recipient_ids: z.array(z.number()).min(0),
   scheduled_at: z.string().optional(),
 })
@@ -259,7 +259,7 @@ export const topUpSchema = z.object({
     .min(100, 'Minimum top-up amount is 100 KZT')
     .max(1000000, 'Maximum top-up amount is 1,000,000 KZT')
     .or(z.string().transform((val) => parseFloat(val))),
-  payment_method: z.enum(['card', 'kaspi', 'paypal'], {
+  payment_method: z.enum(['card', 'kaspi', 'paypal'] as const, {
     errorMap: () => ({ message: 'Please select a payment method' }),
   }),
 });

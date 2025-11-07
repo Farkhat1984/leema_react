@@ -25,6 +25,7 @@ import { newsletterSchema, type NewsletterFormData } from '@/shared/lib/validati
 import type { Contact, UploadedImage } from '../types/newsletter.types'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
+import { logger } from '@/shared/lib/utils/logger'
 
 export function CreateNewsletterTab() {
   const navigate = useNavigate()
@@ -114,10 +115,10 @@ export function CreateNewsletterTab() {
       if (!scheduleEnabled) {
         data.scheduled_at = undefined
       }
-      console.log('Submitting newsletter:', data)
+      logger.debug('Submitting newsletter', { subject: data.subject, contactCount: data.contact_ids.length })
       await createMutation.mutateAsync(data)
     } catch (error) {
-      console.error('Newsletter submission error:', error)
+      logger.error('Newsletter submission error', error)
       // Error is already handled by mutation's onError
     }
   }

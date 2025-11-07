@@ -10,7 +10,7 @@ import { logger } from './logger';
  * Debounce function - delays execution until after wait time
  * Useful for search inputs, window resize, etc.
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: never[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -31,7 +31,7 @@ export function debounce<T extends (...args: any[]) => any>(
  * Throttle function - limits execution to once per wait time
  * Useful for scroll events, mouse move, etc.
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: never[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
@@ -95,7 +95,7 @@ export function batchDOMUpdates(callback: () => void): void {
 /**
  * Measure function execution time
  */
-export function measurePerformance<T extends (...args: any[]) => any>(
+export function measurePerformance<T extends (...args: never[]) => unknown>(
   func: T,
   label?: string
 ): T {
@@ -168,7 +168,16 @@ export function getConnectionSpeed(): {
   rtt?: number;
   saveData?: boolean;
 } {
-  const connection = (navigator as any).connection;
+  interface NavigatorConnection extends Navigator {
+    connection?: {
+      effectiveType?: string;
+      downlink?: number;
+      rtt?: number;
+      saveData?: boolean;
+    };
+  }
+
+  const connection = (navigator as NavigatorConnection).connection;
 
   if (connection) {
     return {

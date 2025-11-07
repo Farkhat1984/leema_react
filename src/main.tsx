@@ -9,6 +9,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './index.css';
 import App from './App.tsx';
 import { logger } from './shared/lib/utils/logger';
+import { initializeCSP } from './shared/lib/security/csp';
+import { initializeWebVitals } from './shared/lib/monitoring/webVitals';
 
 // Create a React Query client with optimized caching
 const queryClient = new QueryClient({
@@ -56,6 +58,21 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Initialize security and monitoring
+logger.info('Initializing application...', {
+  environment: import.meta.env.VITE_ENV || 'development',
+});
+
+// Initialize Content Security Policy (CSP)
+if (import.meta.env.VITE_ENABLE_CSP !== 'false') {
+  initializeCSP();
+}
+
+// Initialize Web Vitals monitoring (Core Web Vitals tracking)
+if (import.meta.env.VITE_ENABLE_WEB_VITALS !== 'false') {
+  initializeWebVitals();
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

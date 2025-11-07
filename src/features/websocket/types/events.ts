@@ -53,13 +53,7 @@ export type WebSocketEventType =
 
 // Product Event Schema
 export const productEventSchema = z.object({
-  event: z.enum([
-    'product.created',
-    'product.updated',
-    'product.deleted',
-    'product.approved',
-    'product.rejected',
-  ]),
+  event: z.enum(['product.created', 'product.updated', 'product.deleted', 'product.approved', 'product.rejected'] as const),
   data: z.object({
     product_id: z.number(),
     product_name: z.string(),
@@ -76,7 +70,7 @@ export const productEventSchema = z.object({
 
 // Order Event Schema
 export const orderEventSchema = z.object({
-  event: z.enum(['order.created', 'order.updated', 'order.completed', 'order.cancelled']),
+  event: z.enum(['order.created', 'order.updated', 'order.completed', 'order.cancelled'] as const),
   data: z.object({
     order_id: z.number(),
     order_number: z.string(),
@@ -107,7 +101,7 @@ export const balanceEventSchema = z.object({
 
 // Transaction Event Schema
 export const transactionEventSchema = z.object({
-  event: z.enum(['transaction.completed', 'transaction.failed']),
+  event: z.enum(['transaction.completed', 'transaction.failed'] as const),
   data: z.object({
     transaction_id: z.number(),
     user_id: z.number().optional(),
@@ -122,7 +116,7 @@ export const transactionEventSchema = z.object({
 
 // Review Event Schema
 export const reviewEventSchema = z.object({
-  event: z.enum(['review.created', 'review.replied']),
+  event: z.enum(['review.created', 'review.replied'] as const),
   data: z.object({
     review_id: z.number(),
     product_id: z.number(),
@@ -137,15 +131,7 @@ export const reviewEventSchema = z.object({
 
 // Shop Event Schema
 export const shopEventSchema = z.object({
-  event: z.enum([
-    'shop.created',
-    'shop.updated',
-    'shop.deleted',
-    'shop.approved',
-    'shop.rejected',
-    'shop.activated',
-    'shop.deactivated',
-  ]),
+  event: z.enum(['shop.created', 'shop.updated', 'shop.deleted', 'shop.approved', 'shop.rejected', 'shop.activated', 'shop.deactivated'] as const),
   data: z.object({
     shop_id: z.number(),
     shop_name: z.string(),
@@ -180,7 +166,7 @@ export const whatsappStatusEventSchema = z.object({
   event: z.literal('whatsapp_status_changed'),
   data: z.object({
     shop_id: z.number(),
-    status: z.enum(['connected', 'disconnected', 'connecting', 'error']),
+    status: z.enum(['connected', 'disconnected', 'connecting', 'error'] as const),
     phone_number: z.string().optional(),
     qr_code: z.string().optional(),
     timestamp: z.string(),
@@ -189,9 +175,9 @@ export const whatsappStatusEventSchema = z.object({
 
 // Moderation Queue Event Schema
 export const moderationQueueEventSchema = z.object({
-  event: z.enum(['moderation_queue.added', 'moderation_queue.removed']),
+  event: z.enum(['moderation_queue.added', 'moderation_queue.removed'] as const),
   data: z.object({
-    action: z.enum(['added', 'removed']),
+    action: z.enum(['added', 'removed'] as const),
     pending_count: z.number(),
     product_id: z.number().optional(),
     shop_id: z.number().optional(),
@@ -214,14 +200,14 @@ export const settingsEventSchema = z.object({
 // Connection Event Schema (ping/pong) - supports both 'event' and 'type' fields
 export const connectionEventSchema = z.union([
   z.object({
-    event: z.enum(['connected', 'ping', 'pong']),
+    event: z.enum(['connected', 'ping', 'pong'] as const),
     client_type: z.string().optional(),
     client_id: z.number().optional(),
     timestamp: z.string().optional(),
     data: z.unknown().optional(),
   }),
   z.object({
-    type: z.enum(['ping', 'pong']),
+    type: z.enum(['ping', 'pong'] as const),
     timestamp: z.unknown().optional(),
   }),
 ]);
@@ -262,43 +248,43 @@ export type WebSocketEvent =
 // ==================== TYPE GUARDS ====================
 
 export const isProductEvent = (event: WebSocketEvent): event is ProductEvent => {
-  return event.event.startsWith('product.');
+  return 'event' in event && event.event.startsWith('product.');
 };
 
 export const isOrderEvent = (event: WebSocketEvent): event is OrderEvent => {
-  return event.event.startsWith('order.');
+  return 'event' in event && event.event.startsWith('order.');
 };
 
 export const isBalanceEvent = (event: WebSocketEvent): event is BalanceEvent => {
-  return event.event === 'balance.updated';
+  return 'event' in event && event.event === 'balance.updated';
 };
 
 export const isTransactionEvent = (event: WebSocketEvent): event is TransactionEvent => {
-  return event.event.startsWith('transaction.');
+  return 'event' in event && event.event.startsWith('transaction.');
 };
 
 export const isReviewEvent = (event: WebSocketEvent): event is ReviewEvent => {
-  return event.event.startsWith('review.');
+  return 'event' in event && event.event.startsWith('review.');
 };
 
 export const isShopEvent = (event: WebSocketEvent): event is ShopEvent => {
-  return event.event.startsWith('shop.');
+  return 'event' in event && event.event.startsWith('shop.');
 };
 
 export const isNotificationEvent = (event: WebSocketEvent): event is NotificationEvent => {
-  return event.event === 'notification.new';
+  return 'event' in event && event.event === 'notification.new';
 };
 
 export const isWhatsAppStatusEvent = (event: WebSocketEvent): event is WhatsAppStatusEvent => {
-  return event.event === 'whatsapp_status_changed';
+  return 'event' in event && event.event === 'whatsapp_status_changed';
 };
 
 export const isModerationQueueEvent = (event: WebSocketEvent): event is ModerationQueueEvent => {
-  return event.event.startsWith('moderation_queue.');
+  return 'event' in event && event.event.startsWith('moderation_queue.');
 };
 
 export const isSettingsEvent = (event: WebSocketEvent): event is SettingsEvent => {
-  return event.event === 'settings.updated';
+  return 'event' in event && event.event === 'settings.updated';
 };
 
 export const isConnectionEvent = (event: WebSocketEvent): event is ConnectionEvent => {
