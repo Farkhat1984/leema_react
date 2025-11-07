@@ -194,7 +194,7 @@ export function DataTable<TData>({
       {enableRowSelection && selectedRowsCount > 0 && bulkActions && (
         <div className="mb-4 flex items-center justify-between bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3">
           <span className="text-sm font-medium text-indigo-900">
-            {selectedRowsCount} row{selectedRowsCount > 1 ? 's' : ''} selected
+            Выбрано {selectedRowsCount} {selectedRowsCount === 1 ? 'строка' : selectedRowsCount > 1 && selectedRowsCount < 5 ? 'строки' : 'строк'}
           </span>
           <div className="flex items-center space-x-2">{bulkActions}</div>
         </div>
@@ -297,7 +297,7 @@ export function DataTable<TData>({
           <div className="flex items-center space-x-2">
             {showPageSizeSelector && (
               <>
-                <span className="text-sm text-gray-700">Show</span>
+                <span className="text-sm text-gray-700">Показать</span>
                 <select
                   value={currentPageSize}
                   onChange={(e) => handlePageSizeChange(Number(e.target.value))}
@@ -309,15 +309,15 @@ export function DataTable<TData>({
                     </option>
                   ))}
                 </select>
-                <span className="text-sm text-gray-700">entries</span>
+                <span className="text-sm text-gray-700">записей</span>
               </>
             )}
           </div>
 
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-700">
-              Page {currentPageIndex + 1} of {totalPages}
-              {totalRows && ` (${totalRows} total)`}
+              Страница {currentPageIndex + 1} из {totalPages}
+              {totalRows && ` (всего ${totalRows})`}
             </span>
 
             <div className="flex items-center space-x-1">

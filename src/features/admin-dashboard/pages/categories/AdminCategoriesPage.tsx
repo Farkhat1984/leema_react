@@ -67,7 +67,7 @@ function AdminCategoriesPage() {
       await queryClient.cancelQueries({ queryKey: ['admin-categories'] });
 
       // Snapshot previous data
-      const previousCategories = queryClient.getQueryData<Category[]>(['admin-categories']);
+      const previousCategories = queryClient.getQueryData<{ categories: Category[]; total: number }>(['admin-categories']);
 
       // Optimistically add new category
       if (previousCategories) {
@@ -80,9 +80,12 @@ function AdminCategoriesPage() {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
-        queryClient.setQueryData<Category[]>(
+        queryClient.setQueryData<{ categories: Category[]; total: number }>(
           ['admin-categories'],
-          [...previousCategories, optimisticCategory]
+          {
+            categories: [...previousCategories.categories, optimisticCategory],
+            total: previousCategories.total + 1,
+          }
         );
       }
 
@@ -93,8 +96,10 @@ function AdminCategoriesPage() {
       setIsCreateModalOpen(false);
       reset();
     },
-    onError: (_error, _variables, context) => {
-      toast.error('Не удалось создать категорию');
+    onError: (error: any, _variables, context) => {
+      // Extract error message from API response
+      const errorMessage = error?.error?.message || error?.message || 'Не удалось создать категорию';
+      toast.error(errorMessage);
       // Rollback to previous data
       if (context?.previousCategories) {
         queryClient.setQueryData(['admin-categories'], context.previousCategories);
@@ -119,23 +124,26 @@ function AdminCategoriesPage() {
       await queryClient.cancelQueries({ queryKey: ['admin-categories'] });
 
       // Snapshot previous data
-      const previousCategories = queryClient.getQueryData<Category[]>(['admin-categories']);
+      const previousCategories = queryClient.getQueryData<{ categories: Category[]; total: number }>(['admin-categories']);
 
       // Optimistically update category
       if (previousCategories && editingCategory) {
-        queryClient.setQueryData<Category[]>(
+        queryClient.setQueryData<{ categories: Category[]; total: number }>(
           ['admin-categories'],
-          previousCategories.map((cat) =>
-            cat.id === editingCategory.id
-              ? {
-                  ...cat,
-                  name: updatedData.name,
-                  slug: updatedData.slug,
-                  description: updatedData.description,
-                  updated_at: new Date().toISOString(),
-                }
-              : cat
-          )
+          {
+            categories: previousCategories.categories.map((cat) =>
+              cat.id === editingCategory.id
+                ? {
+                    ...cat,
+                    name: updatedData.name,
+                    slug: updatedData.slug,
+                    description: updatedData.description,
+                    updated_at: new Date().toISOString(),
+                  }
+                : cat
+            ),
+            total: previousCategories.total,
+          }
         );
       }
 
@@ -146,8 +154,10 @@ function AdminCategoriesPage() {
       setEditingCategory(null);
       reset();
     },
-    onError: (_error, _variables, context) => {
-      toast.error('Не удалось обновить категорию');
+    onError: (error: any, _variables, context) => {
+      // Extract error message from API response
+      const errorMessage = error?.error?.message || error?.message || 'Не удалось обновить категорию';
+      toast.error(errorMessage);
       // Rollback to previous data
       if (context?.previousCategories) {
         queryClient.setQueryData(['admin-categories'], context.previousCategories);
@@ -168,13 +178,16 @@ function AdminCategoriesPage() {
       await queryClient.cancelQueries({ queryKey: ['admin-categories'] });
 
       // Snapshot previous data
-      const previousCategories = queryClient.getQueryData<Category[]>(['admin-categories']);
+      const previousCategories = queryClient.getQueryData<{ categories: Category[]; total: number }>(['admin-categories']);
 
       // Optimistically remove category
       if (previousCategories) {
-        queryClient.setQueryData<Category[]>(
+        queryClient.setQueryData<{ categories: Category[]; total: number }>(
           ['admin-categories'],
-          previousCategories.filter((cat) => cat.id !== deletedId)
+          {
+            categories: previousCategories.categories.filter((cat) => cat.id !== deletedId),
+            total: previousCategories.total - 1,
+          }
         );
       }
 
@@ -184,8 +197,10 @@ function AdminCategoriesPage() {
       toast.success('Категория успешно удалена');
       setDeletingCategoryId(null);
     },
-    onError: (_error, _variables, context) => {
-      toast.error('Не удалось удалить категорию');
+    onError: (error: any, _variables, context) => {
+      // Extract error message from API response
+      const errorMessage = error?.error?.message || error?.message || 'Не удалось удалить категорию';
+      toast.error(errorMessage);
       // Rollback to previous data
       if (context?.previousCategories) {
         queryClient.setQueryData(['admin-categories'], context.previousCategories);

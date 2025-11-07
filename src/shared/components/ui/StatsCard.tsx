@@ -12,7 +12,19 @@
  */
 
 import { type ReactNode } from 'react';
-import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
+import {
+  ArrowUpIcon,
+  ArrowDownIcon,
+  Users,
+  Shirt,
+  Package,
+  ShoppingBag,
+  DollarSign,
+  TrendingUp,
+  Box,
+  BarChart3,
+  type LucideIcon
+} from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { Card } from '@/shared/components/feedback/Card';
 
@@ -53,6 +65,19 @@ const variantStyles = {
   },
 }
 
+// Icon name to Lucide icon mapping
+const iconMap: Record<string, LucideIcon> = {
+  users: Users,
+  tshirt: Shirt,
+  shirt: Shirt,
+  package: Package,
+  box: Box,
+  'shopping-bag': ShoppingBag,
+  dollar: DollarSign,
+  'trending-up': TrendingUp,
+  chart: BarChart3,
+}
+
 export const StatsCard = ({
   title,
   value,
@@ -63,6 +88,10 @@ export const StatsCard = ({
   loading = false,
 }: StatsCardProps) => {
   const colors = variantStyles[variant] || variantStyles.primary;
+
+  // Convert string icon name to actual icon component
+  const IconComponent = typeof icon === 'string' ? iconMap[icon] : null;
+  const iconElement = IconComponent ? <IconComponent className="h-6 w-6" /> : icon;
 
   if (loading) {
     return (
@@ -110,10 +139,10 @@ export const StatsCard = ({
           )}
         </div>
 
-        {icon && (
+        {iconElement && (
           <div className="flex-shrink-0">
             <div className={cn('flex h-12 w-12 items-center justify-center rounded-full', colors.bg, colors.text)}>
-              {icon}
+              {iconElement}
             </div>
           </div>
         )}

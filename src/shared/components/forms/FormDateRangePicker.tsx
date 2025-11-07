@@ -248,18 +248,27 @@ export const FormDateRangePicker: React.FC<FormDateRangePickerProps> = ({
         </div>
 
         {showPresets && (
-          <div className="flex flex-col gap-2">
-            {presets.map((preset, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => handlePresetClick(preset)}
-                disabled={disabled}
-                className="px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-              >
-                {preset.label}
-              </button>
-            ))}
+          <div className="w-48">
+            <select
+              onChange={(e) => {
+                const index = parseInt(e.target.value);
+                if (!isNaN(index) && index >= 0) {
+                  handlePresetClick(presets[index]);
+                }
+              }}
+              disabled={disabled}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              defaultValue=""
+            >
+              <option value="" disabled>
+                Быстрый выбор
+              </option>
+              {presets.map((preset, index) => (
+                <option key={index} value={index}>
+                  {preset.label}
+                </option>
+              ))}
+            </select>
           </div>
         )}
       </div>

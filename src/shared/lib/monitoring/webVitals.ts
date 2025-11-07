@@ -225,7 +225,13 @@ const reportOpts: ReportOpts = {
 export function initializeWebVitals(): void {
   try {
     // Track Largest Contentful Paint (loading performance)
-    onLCP(handleMetric, reportOpts);
+    try {
+      onLCP(handleMetric, reportOpts);
+    } catch (error) {
+      if (CONFIG.IS_DEV) {
+        logger.debug('LCP metric failed to initialize', { error });
+      }
+    }
 
     // Track Interaction to Next Paint (interactivity metric, replaces deprecated FID)
     // Wrap in try-catch in case of compatibility issues
@@ -239,13 +245,31 @@ export function initializeWebVitals(): void {
     }
 
     // Track Cumulative Layout Shift (visual stability)
-    onCLS(handleMetric, reportOpts);
+    try {
+      onCLS(handleMetric, reportOpts);
+    } catch (error) {
+      if (CONFIG.IS_DEV) {
+        logger.debug('CLS metric failed to initialize', { error });
+      }
+    }
 
     // Track First Contentful Paint (rendering)
-    onFCP(handleMetric, reportOpts);
+    try {
+      onFCP(handleMetric, reportOpts);
+    } catch (error) {
+      if (CONFIG.IS_DEV) {
+        logger.debug('FCP metric failed to initialize', { error });
+      }
+    }
 
     // Track Time to First Byte (server response)
-    onTTFB(handleMetric, reportOpts);
+    try {
+      onTTFB(handleMetric, reportOpts);
+    } catch (error) {
+      if (CONFIG.IS_DEV) {
+        logger.debug('TTFB metric failed to initialize', { error });
+      }
+    }
 
     logger.debug('Web Vitals monitoring initialized', {
       environment: CONFIG.ENV,
@@ -264,12 +288,23 @@ export async function getWebVitalsSummary(): Promise<Record<string, EnrichedMetr
   const metrics: Record<string, EnrichedMetric> = {};
 
   const collectMetric = (metric: Metric) => {
-    metrics[metric.name] = enrichMetric(metric);
+    try {
+      metrics[metric.name] = enrichMetric(metric);
+    } catch (error) {
+      // Silently skip metrics that fail to enrich
+      if (CONFIG.IS_DEV) {
+        logger.debug('Failed to enrich metric', { metric, error });
+      }
+    }
   };
 
   try {
-    // Collect all current metrics
-    onLCP(collectMetric, { reportAllChanges: true });
+    // Collect all current metrics with individual error handling
+    try {
+      onLCP(collectMetric, { reportAllChanges: true });
+    } catch (e) {
+      // Skip LCP if fails
+    }
 
     // INP might have compatibility issues
     try {
@@ -278,9 +313,23 @@ export async function getWebVitalsSummary(): Promise<Record<string, EnrichedMetr
       // Skip INP if not supported
     }
 
-    onCLS(collectMetric, { reportAllChanges: true });
-    onFCP(collectMetric, { reportAllChanges: true });
-    onTTFB(collectMetric, { reportAllChanges: true });
+    try {
+      onCLS(collectMetric, { reportAllChanges: true });
+    } catch (e) {
+      // Skip CLS if fails
+    }
+
+    try {
+      onFCP(collectMetric, { reportAllChanges: true });
+    } catch (e) {
+      // Skip FCP if fails
+    }
+
+    try {
+      onTTFB(collectMetric, { reportAllChanges: true });
+    } catch (e) {
+      // Skip TTFB if fails
+    }
   } catch (error) {
     logger.error('Error collecting web vitals', error);
   }

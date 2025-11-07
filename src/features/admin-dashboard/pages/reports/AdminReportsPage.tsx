@@ -173,9 +173,9 @@ function AdminReportsPage() {
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Создать новый отчет
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
           {/* Date Range Selector */}
-          <div>
+          <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Выберите диапазон дат
             </label>
@@ -235,28 +235,28 @@ function AdminReportsPage() {
           </div>
 
           {/* Report Type Buttons */}
-          <div>
+          <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Тип отчета
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex gap-3">
               <Button
                 onClick={() => handleGenerateReport('financial')}
                 isLoading={isLoading}
                 disabled={!dateRange}
-                className="bg-green-600 hover:bg-green-700"
+                className="flex-1 bg-green-600 hover:bg-green-700"
               >
                 <DollarSign className="w-4 h-4 mr-2" />
-                Финансовый отчет
+                Финансовый
               </Button>
               <Button
                 onClick={() => handleGenerateReport('sales')}
                 isLoading={isLoading}
                 disabled={!dateRange}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
               >
                 <TrendingUp className="w-4 h-4 mr-2" />
-                Отчет по продажам
+                Продажи
               </Button>
             </div>
           </div>

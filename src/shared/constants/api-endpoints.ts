@@ -182,12 +182,13 @@ export const API_ENDPOINTS = {
 
   // ==================== REVIEWS ====================
   REVIEWS: {
-    LIST: '/api/v1/reviews/',
+    LIST: '/api/v1/admin/reviews',
+    STATS: '/api/v1/admin/reviews/stats',
     CREATE: '/api/v1/reviews/',
     BY_ID: (id: string | number) => `/api/v1/reviews/${id}`,
     BY_PRODUCT: (productId: string | number) => `/api/v1/products/${productId}/reviews`,
     MODERATE: (id: string | number) => `/api/v1/admin/reviews/${id}/moderate`,
-    DELETE: (id: string | number) => `/api/v1/reviews/${id}`,
+    DELETE: (id: string | number) => `/api/v1/admin/reviews/${id}`,
   },
 
   // ==================== NOTIFICATIONS ====================
