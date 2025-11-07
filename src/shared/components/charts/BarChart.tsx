@@ -119,7 +119,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   formatTooltip,
   className = '',
   loading = false,
-  emptyMessage = 'No data available',
+  emptyMessage = 'Нет данных',
   title,
   subtitle,
   barSize,

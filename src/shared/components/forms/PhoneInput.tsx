@@ -18,7 +18,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   onChange,
   error,
   label,
-  placeholder = 'Enter phone number',
+  placeholder = 'Введите номер телефона',
   disabled = false,
   required = false,
   country = 'kz',

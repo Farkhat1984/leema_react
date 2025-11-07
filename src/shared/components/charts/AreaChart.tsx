@@ -98,7 +98,7 @@ export const AreaChart: React.FC<AreaChartProps> = ({
   formatTooltip,
   className = '',
   loading = false,
-  emptyMessage = 'No data available',
+  emptyMessage = 'Нет данных',
   title,
   subtitle,
 }) => {

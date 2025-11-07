@@ -52,7 +52,7 @@ const CustomInput = forwardRef<
       `}
     >
       <span className={value ? 'text-gray-900' : 'text-gray-400'}>
-        {value || placeholder || 'Select date range'}
+        {value || placeholder || 'Выберите диапазон дат'}
       </span>
     </button>
     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -83,14 +83,14 @@ const getDefaultPresets = (): { label: string; getValue: () => DateRange }[] => 
 
   return [
     {
-      label: 'Today',
+      label: 'Сегодня',
       getValue: () => ({
         from: today,
         to: today,
       }),
     },
     {
-      label: 'Last 7 days',
+      label: 'Последние 7 дней',
       getValue: () => {
         const start = new Date(today);
         start.setDate(start.getDate() - 6);
@@ -98,7 +98,7 @@ const getDefaultPresets = (): { label: string; getValue: () => DateRange }[] => 
       },
     },
     {
-      label: 'Last 30 days',
+      label: 'Последние 30 дней',
       getValue: () => {
         const start = new Date(today);
         start.setDate(start.getDate() - 29);
@@ -106,7 +106,7 @@ const getDefaultPresets = (): { label: string; getValue: () => DateRange }[] => 
       },
     },
     {
-      label: 'Last 3 months',
+      label: 'Последние 3 месяца',
       getValue: () => {
         const start = new Date(today);
         start.setMonth(start.getMonth() - 3);
@@ -114,7 +114,7 @@ const getDefaultPresets = (): { label: string; getValue: () => DateRange }[] => 
       },
     },
     {
-      label: 'Last 6 months',
+      label: 'Последние 6 месяцев',
       getValue: () => {
         const start = new Date(today);
         start.setMonth(start.getMonth() - 6);
@@ -122,7 +122,7 @@ const getDefaultPresets = (): { label: string; getValue: () => DateRange }[] => 
       },
     },
     {
-      label: 'Last year',
+      label: 'Последний год',
       getValue: () => {
         const start = new Date(today);
         start.setFullYear(start.getFullYear() - 1);
@@ -130,7 +130,7 @@ const getDefaultPresets = (): { label: string; getValue: () => DateRange }[] => 
       },
     },
     {
-      label: 'This month',
+      label: 'Текущий месяц',
       getValue: () => {
         const start = new Date(today.getFullYear(), today.getMonth(), 1);
         const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -138,7 +138,7 @@ const getDefaultPresets = (): { label: string; getValue: () => DateRange }[] => 
       },
     },
     {
-      label: 'Last month',
+      label: 'Прошлый месяц',
       getValue: () => {
         const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
         const end = new Date(today.getFullYear(), today.getMonth(), 0);
