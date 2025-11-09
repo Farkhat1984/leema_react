@@ -34,7 +34,7 @@ type AddSettingFormData = z.infer<typeof addSettingSchema>;
 export default function SettingsPage() {
   const queryClient = useQueryClient();
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editValue, setEditValue] = useState('');
+  const [editValues, setEditValues] = useState<Record<number, string>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [settingToDelete, setSettingToDelete] = useState<Setting | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -54,11 +54,15 @@ export default function SettingsPage() {
       const response = await apiClient.put(API_ENDPOINTS.ADMIN.SETTING_UPDATE(String(id)), { value });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-settings'] });
       toast.success('Настройка успешно обновлена');
       setEditingId(null);
-      setEditValue('');
+      setEditValues(prev => {
+        const newValues = { ...prev };
+        delete newValues[variables.id];
+        return newValues;
+      });
     },
     onError: () => {
       toast.error('Не удалось обновить настройку');
@@ -111,18 +115,29 @@ export default function SettingsPage() {
 
   const handleEdit = (setting: Setting) => {
     setEditingId(setting.id);
-    setEditValue(setting.value);
+    setEditValues(prev => ({ ...prev, [setting.id]: setting.value }));
   };
 
   const handleSave = (id: number) => {
-    if (editValue.trim()) {
-      updateMutation.mutate({ id, value: editValue.trim() });
+    const value = editValues[id];
+    if (value && value.trim()) {
+      updateMutation.mutate({ id, value: value.trim() });
     }
   };
 
   const handleCancel = () => {
+    if (editingId !== null) {
+      setEditValues(prev => {
+        const newValues = { ...prev };
+        delete newValues[editingId];
+        return newValues;
+      });
+    }
     setEditingId(null);
-    setEditValue('');
+  };
+
+  const handleValueChange = (id: number, value: string) => {
+    setEditValues(prev => ({ ...prev, [id]: value }));
   };
 
   const handleDeleteClick = (setting: Setting) => {
@@ -190,8 +205,15 @@ export default function SettingsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {settings?.map((setting) => (
-                <tr key={setting.id} className="hover:bg-gray-50 transition-colors">
+              {settings?.map((setting) => {
+                const isEditing = editingId === setting.id;
+                const displayValue = isEditing ? (editValues[setting.id] ?? setting.value) : setting.value;
+
+                return (
+                <tr
+                  key={setting.id}
+                  className={`transition-colors ${isEditing ? 'bg-blue-50 ring-2 ring-blue-500 ring-inset' : 'hover:bg-gray-50'}`}
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-gray-900">{setting.key}</span>
@@ -203,16 +225,53 @@ export default function SettingsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    {editingId === setting.id ? (
-                      <input
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        autoFocus
-                      />
+                    {isEditing ? (
+                      setting.key === 'newsletter_default_interval' ? (
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1">
+                            <label className="block text-xs text-gray-500 mb-1">Интервал (секунд)</label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="60"
+                              value={displayValue}
+                              onChange={(e) => handleValueChange(setting.id, e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleSave(setting.id);
+                                } else if (e.key === 'Escape') {
+                                  handleCancel();
+                                }
+                              }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                              placeholder="1-60"
+                              autoFocus
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Интервал между отправками сообщений (1-60 секунд)</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <input
+                          type="text"
+                          value={displayValue}
+                          onChange={(e) => handleValueChange(setting.id, e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleSave(setting.id);
+                            } else if (e.key === 'Escape') {
+                              handleCancel();
+                            }
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                          autoFocus
+                        />
+                      )
                     ) : (
-                      <span className="text-sm text-gray-900">{setting.value}</span>
+                      <span className="text-sm text-gray-900">
+                        {setting.key === 'newsletter_default_interval'
+                          ? `${setting.value} сек`
+                          : setting.value}
+                      </span>
                     )}
                   </td>
                   <td className="px-6 py-4">
@@ -224,7 +283,7 @@ export default function SettingsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    {editingId === setting.id ? (
+                    {isEditing ? (
                       <div className="flex items-center justify-end gap-2">
                         <Button
                           size="sm"
@@ -261,7 +320,8 @@ export default function SettingsPage() {
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
 

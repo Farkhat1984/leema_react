@@ -37,6 +37,9 @@ export type WebSocketEventType =
   | 'shop.rejected'
   | 'shop.activated'
   | 'shop.deactivated'
+  // Newsletter Events
+  | 'newsletter.approved'
+  | 'newsletter.rejected'
   // System Events
   | 'settings.updated'
   | 'whatsapp_status_changed'
@@ -146,6 +149,17 @@ export const shopEventSchema = z.object({
   }),
 });
 
+// Newsletter Event Schema
+export const newsletterEventSchema = z.object({
+  event: z.enum(['newsletter.approved', 'newsletter.rejected'] as const),
+  data: z.object({
+    newsletter_id: z.number(),
+    status: z.enum(['approved', 'rejected'] as const),
+    rejection_reason: z.string().optional(),
+    timestamp: z.string().optional(),
+  }),
+});
+
 // Notification Event Schema
 export const notificationEventSchema = z.object({
   event: z.literal('notification.new'),
@@ -220,6 +234,7 @@ export type BalanceEvent = z.infer<typeof balanceEventSchema>;
 export type TransactionEvent = z.infer<typeof transactionEventSchema>;
 export type ReviewEvent = z.infer<typeof reviewEventSchema>;
 export type ShopEvent = z.infer<typeof shopEventSchema>;
+export type NewsletterEvent = z.infer<typeof newsletterEventSchema>;
 export type NotificationEvent = z.infer<typeof notificationEventSchema>;
 export type WhatsAppStatusEvent = z.infer<typeof whatsappStatusEventSchema>;
 export type ModerationQueueEvent = z.infer<typeof moderationQueueEventSchema>;
@@ -239,6 +254,7 @@ export type WebSocketEvent =
   | TransactionEvent
   | ReviewEvent
   | ShopEvent
+  | NewsletterEvent
   | NotificationEvent
   | WhatsAppStatusEvent
   | ModerationQueueEvent
@@ -269,6 +285,10 @@ export const isReviewEvent = (event: WebSocketEvent): event is ReviewEvent => {
 
 export const isShopEvent = (event: WebSocketEvent): event is ShopEvent => {
   return 'event' in event && event.event.startsWith('shop.');
+};
+
+export const isNewsletterEvent = (event: WebSocketEvent): event is NewsletterEvent => {
+  return 'event' in event && event.event.startsWith('newsletter.');
 };
 
 export const isNotificationEvent = (event: WebSocketEvent): event is NotificationEvent => {
@@ -338,6 +358,8 @@ export const validateWebSocketEvent = (rawMessage: unknown): WebSocketEvent | nu
       return reviewEventSchema.parse(rawMessage);
     } else if (message.event.startsWith('shop.')) {
       return shopEventSchema.parse(rawMessage);
+    } else if (message.event.startsWith('newsletter.')) {
+      return newsletterEventSchema.parse(rawMessage);
     } else if (message.event === 'notification.new') {
       return notificationEventSchema.parse(rawMessage);
     } else if (message.event === 'whatsapp_status_changed') {

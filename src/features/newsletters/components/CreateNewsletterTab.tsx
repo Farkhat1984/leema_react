@@ -24,11 +24,11 @@ import { newslettersService } from '../services/newsletters.service'
 import { newsletterSchema, type NewsletterFormData } from '@/shared/lib/validation/schemas'
 import type { Contact, UploadedImage } from '../types/newsletter.types'
 import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { logger } from '@/shared/lib/utils/logger'
 
 export function CreateNewsletterTab() {
-  const navigate = useNavigate()
+  const [, setSearchParams] = useSearchParams()
   const queryClient = useQueryClient()
   const [contactSearch, setContactSearch] = useState('')
   const debouncedSearch = useDebounce(contactSearch, 300)
@@ -48,7 +48,7 @@ export function CreateNewsletterTab() {
     defaultValues: {
       title: '',
       description: '',
-      texts: [],
+      texts: [{ content: '', order: 0 }], // Start with one empty text field by default
       images: [],
       recipient_type: 'all',
       recipient_ids: [],
@@ -99,9 +99,9 @@ export function CreateNewsletterTab() {
       toast.success('Рассылка создана успешно! Ожидание одобрения администратора.')
       reset()
       queryClient.invalidateQueries({ queryKey: ['newsletters'] })
-      // Switch to history tab or navigate
+      // Switch to history tab
       setTimeout(() => {
-        navigate('/shop/newsletters?tab=history')
+        setSearchParams({ tab: 'history' })
       }, 1500)
     },
     onError: (error: Error) => {
@@ -111,11 +111,27 @@ export function CreateNewsletterTab() {
 
   const onSubmit = async (data: NewsletterFormData) => {
     try {
+      // Validate recipients before submission
+      if (data.recipient_type === 'all') {
+        // Check if shop has any contacts
+        const contactsCheck = await contactsService.getContacts({ page: 1, per_page: 1 })
+        if (!contactsCheck?.data || contactsCheck.data.length === 0) {
+          toast.error('У вас нет контактов для рассылки. Пожалуйста, сначала добавьте контакты.')
+          return
+        }
+      } else if (data.recipient_type === 'selected') {
+        // Check if any recipients are selected
+        if (!data.recipient_ids || data.recipient_ids.length === 0) {
+          toast.error('Пожалуйста, выберите хотя бы один контакт для рассылки.')
+          return
+        }
+      }
+
       // Add scheduled_at if scheduling is enabled
       if (!scheduleEnabled) {
         data.scheduled_at = undefined
       }
-      logger.debug('Submitting newsletter', { subject: data.subject, contactCount: data.contact_ids.length })
+      logger.debug('Submitting newsletter', { title: data.title, recipientCount: data.recipient_ids?.length || 0 })
       await createMutation.mutateAsync(data)
     } catch (error) {
       logger.error('Newsletter submission error', error)
