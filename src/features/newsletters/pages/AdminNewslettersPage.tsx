@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
-import { Eye, CheckCircle, XCircle, Store, Calendar, TrendingUp } from 'lucide-react'
+import { Eye, CheckCircle, XCircle, Store, Calendar, TrendingUp, Trash2 } from 'lucide-react'
 import { DataTable } from '@/shared/components/ui/DataTable'
 import { Button } from '@/shared/components/ui/Button'
 import { SearchInput } from '@/shared/components/ui/SearchInput'
@@ -16,13 +16,13 @@ import type { Newsletter, NewsletterStatus } from '../types/newsletter.types'
 import toast from 'react-hot-toast'
 
 const STATUS_CONFIG = {
-  draft: { label: 'Черновик', color: 'gray' as const },
-  pending: { label: 'Ожидает', color: 'yellow' as const },
+  pending: { label: 'Ожидание одобрения', color: 'yellow' as const },
   approved: { label: 'Одобрено', color: 'green' as const },
   rejected: { label: 'Отклонено', color: 'red' as const },
-  sending: { label: 'Отправляется', color: 'blue' as const },
+  in_progress: { label: 'Отправляется', color: 'blue' as const },
   completed: { label: 'Завершено', color: 'green' as const },
   failed: { label: 'Ошибка', color: 'red' as const },
+  cancelled: { label: 'Отменено', color: 'gray' as const },
 }
 
 export default function AdminNewslettersPage() {
@@ -36,6 +36,7 @@ export default function AdminNewslettersPage() {
   const [viewingNewsletter, setViewingNewsletter] = useState<Newsletter | null>(null)
   const [approvingNewsletter, setApprovingNewsletter] = useState<Newsletter | null>(null)
   const [rejectingNewsletter, setRejectingNewsletter] = useState<Newsletter | null>(null)
+  const [deletingNewsletter, setDeletingNewsletter] = useState<Newsletter | null>(null)
 
   // Fetch stats
   const { data: stats } = useQuery({
@@ -84,6 +85,20 @@ export default function AdminNewslettersPage() {
     },
   })
 
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => newslettersService.deleteNewsletter(id),
+    onSuccess: () => {
+      toast.success('Рассылка удалена успешно')
+      setDeletingNewsletter(null)
+      refetch()
+      queryClient.invalidateQueries({ queryKey: ['newsletter-stats'] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Ошибка при удалении рассылки')
+    },
+  })
+
   const clearFilters = () => {
     setSearch('')
     setStatusFilter('all')
@@ -123,7 +138,11 @@ export default function AdminNewslettersPage() {
       accessorKey: 'status',
       header: 'Статус',
       cell: ({ row }) => {
-        const config = STATUS_CONFIG[row.original.status]
+        const config = STATUS_CONFIG[row.original.status as keyof typeof STATUS_CONFIG]
+        // Fallback for unknown statuses
+        if (!config) {
+          return <StatusBadge status={row.original.status} variant="gray" />
+        }
         return <StatusBadge status={row.original.status} variant={config.color} />
       },
     },
@@ -173,6 +192,15 @@ export default function AdminNewslettersPage() {
               </Button>
             </>
           )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDeletingNewsletter(row.original)}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="w-4 h-4 mr-1.5" />
+            Удалить
+          </Button>
         </div>
       ),
     },
@@ -235,11 +263,13 @@ export default function AdminNewslettersPage() {
             className="w-full sm:w-56 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Все статусы</option>
-            <option value="pending">Ожидает</option>
+            <option value="pending">Ожидание одобрения</option>
             <option value="approved">Одобрено</option>
             <option value="rejected">Отклонено</option>
-            <option value="sending">Отправляется</option>
+            <option value="in_progress">Отправляется</option>
             <option value="completed">Завершено</option>
+            <option value="failed">Ошибка</option>
+            <option value="cancelled">Отменено</option>
           </select>
 
           {hasFilters && (
@@ -334,6 +364,20 @@ export default function AdminNewslettersPage() {
         title="Отклонить рассылку"
         description={`Пожалуйста, укажите причину отклонения "${rejectingNewsletter?.title}". Владелец магазина будет уведомлен.`}
         loading={rejectMutation.isPending}
+      />
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={!!deletingNewsletter}
+        onClose={() => setDeletingNewsletter(null)}
+        onConfirm={() =>
+          deletingNewsletter ? deleteMutation.mutate(deletingNewsletter.id) : Promise.resolve()
+        }
+        title="Удалить рассылку"
+        description={`Вы уверены, что хотите удалить "${deletingNewsletter?.title}"? Это действие невозможно отменить.`}
+        confirmText="Удалить"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
       />
     </div>
   )

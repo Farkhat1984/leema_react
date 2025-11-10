@@ -57,7 +57,7 @@ export const contactsService = {
   },
 
   async bulkDeleteContacts(ids: number[]): Promise<void> {
-    return apiRequest<void>(API_ENDPOINTS.SHOPS.CONTACT_BULK_DELETE, 'POST', { ids })
+    return apiRequest<void>(API_ENDPOINTS.SHOPS.CONTACT_BULK_DELETE, 'POST', { contact_ids: ids })
   },
 
   async importFromExcel(file: File): Promise<ContactsImportResult> {

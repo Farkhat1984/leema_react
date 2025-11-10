@@ -57,10 +57,12 @@ export const PhoneInput = ({
         dropdownClass="!rounded-lg !shadow-lg"
         enableSearch
         searchPlaceholder="Поиск страны..."
-        preferredCountries={['kz', 'ru', 'uz', 'kg']}
+        preferredCountries={['kz']}
         // Formatting
         masks={{ kz: '(...) ...-..-..' }}
-        // Only show countries that might be relevant
+        // Disable auto country detection to keep Kazakhstan as default
+        disableCountryGuess
+        // Only show countries that might be relevant (KZ first)
         onlyCountries={['kz', 'ru', 'uz', 'kg', 'tj', 'by', 'ua', 'ge', 'am', 'az']}
       />
       {error && (

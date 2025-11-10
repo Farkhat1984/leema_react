@@ -49,9 +49,9 @@ export function ContactFormModal({
       title={title || (contact ? 'Редактировать контакт' : 'Добавить контакт')}
       onSubmit={handleSubmit(onSubmit as any)}
       isSubmitting={isSubmitting}
-      size="md"
+      size="lg"
     >
-      <div className="space-y-4">
+      <div className="space-y-4 min-h-[400px]">
         {/* Name */}
         <div>
           <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">

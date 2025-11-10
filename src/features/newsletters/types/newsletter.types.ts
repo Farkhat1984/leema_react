@@ -43,13 +43,13 @@ export interface NewsletterImage {
 }
 
 export type NewsletterStatus =
-  | 'draft'
   | 'pending'
   | 'approved'
   | 'rejected'
-  | 'sending'
+  | 'in_progress'
   | 'completed'
   | 'failed'
+  | 'cancelled'
 
 export type RecipientType = 'all' | 'selected'
 

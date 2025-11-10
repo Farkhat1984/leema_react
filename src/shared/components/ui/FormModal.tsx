@@ -131,7 +131,7 @@ export const FormModal: React.FC<FormModalProps> = ({
                 </div>
 
                 {/* Content */}
-                <div className="px-6 py-4 max-h-[calc(100vh-16rem)] overflow-y-auto">
+                <div className="px-6 py-4 min-h-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto">
                   {children}
                 </div>
 

@@ -14,13 +14,13 @@ import type { Newsletter, NewsletterStatus } from '../types/newsletter.types'
 import toast from 'react-hot-toast'
 
 const STATUS_CONFIG = {
-  draft: { label: 'Черновик', color: 'gray' as const },
-  pending: { label: 'Ожидание', color: 'yellow' as const },
+  pending: { label: 'Ожидание одобрения', color: 'yellow' as const },
   approved: { label: 'Одобрено', color: 'green' as const },
   rejected: { label: 'Отклонено', color: 'red' as const },
-  sending: { label: 'Отправляется', color: 'blue' as const },
+  in_progress: { label: 'Отправляется', color: 'blue' as const },
   completed: { label: 'Завершено', color: 'green' as const },
   failed: { label: 'Ошибка', color: 'red' as const },
+  cancelled: { label: 'Отменено', color: 'gray' as const },
 }
 
 export function NewsletterHistoryTab() {
@@ -79,7 +79,11 @@ export function NewsletterHistoryTab() {
       accessorKey: 'status',
       header: 'Статус',
       cell: ({ row }) => {
-        const config = STATUS_CONFIG[row.original.status]
+        const config = STATUS_CONFIG[row.original.status as keyof typeof STATUS_CONFIG]
+        // Fallback for unknown statuses
+        if (!config) {
+          return <StatusBadge status={row.original.status} variant="gray" />
+        }
         return <StatusBadge status={row.original.status} variant={config.color} />
       },
     },
@@ -125,17 +129,15 @@ export function NewsletterHistoryTab() {
             <Eye className="w-4 h-4 mr-1.5" />
             Просмотр
           </Button>
-          {row.original.status === 'draft' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setDeletingNewsletter(row.original)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <Trash2 className="w-4 h-4 mr-1.5" />
-              Удалить
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDeletingNewsletter(row.original)}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="w-4 h-4 mr-1.5" />
+            Удалить
+          </Button>
         </div>
       ),
     },
@@ -159,13 +161,13 @@ export function NewsletterHistoryTab() {
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Все статусы</option>
-            <option value="draft">Черновик</option>
-            <option value="pending">Ожидание</option>
+            <option value="pending">Ожидание одобрения</option>
             <option value="approved">Одобрено</option>
             <option value="rejected">Отклонено</option>
-            <option value="sending">Отправляется</option>
+            <option value="in_progress">Отправляется</option>
             <option value="completed">Завершено</option>
             <option value="failed">Ошибка</option>
+            <option value="cancelled">Отменено</option>
           </select>
         </div>
       </div>
@@ -175,16 +177,16 @@ export function NewsletterHistoryTab() {
         <h4 className="text-sm font-medium text-blue-900 mb-2">📋 Справка по статусам рассылок:</h4>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-blue-800">
           <div>
-            <span className="font-semibold">Ожидание:</span> Ожидание одобрения администратора
+            <span className="font-semibold">Ожидание одобрения:</span> Отправлено администратору
           </div>
           <div>
-            <span className="font-semibold">Одобрено:</span> Одобрено, скоро отправится
+            <span className="font-semibold">Одобрено:</span> Одобрено, скоро начнёт отправляться
           </div>
           <div>
-            <span className="font-semibold">Отправляется:</span> Сейчас отправляется
+            <span className="font-semibold">Отправляется:</span> В процессе отправки контактам
           </div>
           <div>
-            <span className="font-semibold">Завершено:</span> Успешно отправлено
+            <span className="font-semibold">Завершено:</span> Успешно отправлено всем
           </div>
         </div>
       </div>
@@ -219,7 +221,7 @@ export function NewsletterHistoryTab() {
           deletingNewsletter ? deleteMutation.mutate(deletingNewsletter.id) : Promise.resolve()
         }
         title="Удалить рассылку"
-        description={`Вы уверены, что хотите удалить "${deletingNewsletter?.title}"? Это действие невозможно отменить. Удалять можно только черновики.`}
+        description={`Вы уверены, что хотите удалить "${deletingNewsletter?.title}"? Это действие невозможно отменить.`}
         confirmText="Удалить"
         variant="danger"
         isLoading={deleteMutation.isPending}
