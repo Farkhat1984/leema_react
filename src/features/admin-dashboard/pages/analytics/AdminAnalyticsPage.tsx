@@ -8,6 +8,7 @@ import { LineChart } from '@/shared/components/charts/LineChart';
 import { BarChart } from '@/shared/components/charts/BarChart';
 import { AreaChart } from '@/shared/components/charts/AreaChart';
 import { Button } from '@/shared/components/ui/Button';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { FormDateRangePicker } from '@/shared/components/forms/FormDateRangePicker';
 import { formatCurrency } from '@/shared/lib/utils';
 import { logger } from '@/shared/lib/utils/logger';
@@ -76,7 +77,7 @@ function AdminAnalyticsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Аналитика платформы
@@ -85,16 +86,18 @@ function AdminAnalyticsPage() {
             Мониторинг показателей и производительности платформы
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => handleExport('csv')}>
-            <Download className="w-4 h-4 mr-2" />
-            Экспорт CSV
-          </Button>
-          <Button variant="outline" onClick={() => handleExport('json')}>
-            <Download className="w-4 h-4 mr-2" />
-            Экспорт JSON
-          </Button>
-        </div>
+        <BackButton to="/admin" />
+      </div>
+
+      <div className="flex items-center gap-2 justify-end mb-4">
+        <Button variant="outline" onClick={() => handleExport('csv')}>
+          <Download className="w-4 h-4 mr-2" />
+          Экспорт CSV
+        </Button>
+        <Button variant="outline" onClick={() => handleExport('json')}>
+          <Download className="w-4 h-4 mr-2" />
+          Экспорт JSON
+        </Button>
       </div>
 
       {/* Period Selector & Date Range */}

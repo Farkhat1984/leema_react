@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { Settings as SettingsIcon, Trash2, Edit2, Save, X } from 'lucide-react';
 import { apiClient } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { Button } from '@/shared/components/ui/Button';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { PageLoader } from '@/shared/components/feedback/PageLoader';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 
@@ -32,6 +33,9 @@ export default function SettingsPage() {
       const response = await apiClient.get(API_ENDPOINTS.ADMIN.SETTINGS);
       return response.data;
     },
+    // Отключаем автоматическое обновление во время редактирования
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
   });
 
   // Update setting mutation
@@ -40,8 +44,26 @@ export default function SettingsPage() {
       const response = await apiClient.put(API_ENDPOINTS.ADMIN.SETTING_UPDATE(String(id)), { value });
       return response.data;
     },
+    onMutate: async ({ id, value }) => {
+      // Отменяем текущие запросы чтобы они не перезаписали наше оптимистичное обновление
+      await queryClient.cancelQueries({ queryKey: ['admin-settings'] });
+
+      // Сохраняем предыдущее состояние
+      const previousSettings = queryClient.getQueryData<Setting[]>(['admin-settings']);
+
+      // Оптимистично обновляем кеш
+      queryClient.setQueryData<Setting[]>(['admin-settings'], (old) => {
+        if (!old) return old;
+        return old.map((setting) =>
+          setting.id === id
+            ? { ...setting, value, updated_at: new Date().toISOString() }
+            : setting
+        );
+      });
+
+      return { previousSettings };
+    },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-settings'] });
       toast.success('Настройка успешно обновлена');
       setEditingId(null);
       setEditValues(prev => {
@@ -50,8 +72,16 @@ export default function SettingsPage() {
         return newValues;
       });
     },
-    onError: () => {
+    onError: (error, _, context) => {
+      // Откатываем изменения при ошибке
+      if (context?.previousSettings) {
+        queryClient.setQueryData(['admin-settings'], context.previousSettings);
+      }
       toast.error('Не удалось обновить настройку');
+    },
+    onSettled: () => {
+      // Синхронизируем с сервером после завершения
+      queryClient.invalidateQueries({ queryKey: ['admin-settings'] });
     },
   });
 
@@ -61,14 +91,36 @@ export default function SettingsPage() {
       const response = await apiClient.delete(API_ENDPOINTS.ADMIN.SETTING_DELETE(String(id)));
       return response.data;
     },
+    onMutate: async (id) => {
+      // Отменяем текущие запросы
+      await queryClient.cancelQueries({ queryKey: ['admin-settings'] });
+
+      // Сохраняем предыдущее состояние
+      const previousSettings = queryClient.getQueryData<Setting[]>(['admin-settings']);
+
+      // Оптимистично удаляем из кеша
+      queryClient.setQueryData<Setting[]>(['admin-settings'], (old) => {
+        if (!old) return old;
+        return old.filter((setting) => setting.id !== id);
+      });
+
+      return { previousSettings };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-settings'] });
       toast.success('Настройка успешно удалена');
       setDeleteDialogOpen(false);
       setSettingToDelete(null);
     },
-    onError: () => {
+    onError: (error, _, context) => {
+      // Откатываем изменения при ошибке
+      if (context?.previousSettings) {
+        queryClient.setQueryData(['admin-settings'], context.previousSettings);
+      }
       toast.error('Не удалось удалить настройку');
+    },
+    onSettled: () => {
+      // Синхронизируем с сервером
+      queryClient.invalidateQueries({ queryKey: ['admin-settings'] });
     },
   });
 
@@ -111,6 +163,13 @@ export default function SettingsPage() {
     }
   };
 
+  // Мемоизируем настройки чтобы сохранить порядок
+  const sortedSettings = useMemo(() => {
+    if (!settings) return [];
+    // Сортируем по ID чтобы порядок всегда был одинаковый
+    return [...settings].sort((a, b) => a.id - b.id);
+  }, [settings]);
+
   if (isLoading) {
     return <PageLoader />;
   }
@@ -118,12 +177,15 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <SettingsIcon className="w-7 h-7" />
-          Настройки платформы
-        </h1>
-        <p className="text-gray-600 mt-1">Управление системными параметрами и настройками</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <SettingsIcon className="w-7 h-7" />
+            Настройки платформы
+          </h1>
+          <p className="text-gray-600 mt-1">Управление системными параметрами и настройками</p>
+        </div>
+        <BackButton to="/admin" />
       </div>
 
       {/* Settings Table */}
@@ -150,13 +212,13 @@ export default function SettingsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {settings?.map((setting) => {
+              {sortedSettings.map((setting) => {
                 const isEditing = editingId === setting.id;
                 const displayValue = isEditing ? (editValues[setting.id] ?? setting.value) : setting.value;
 
                 return (
                 <tr
-                  key={setting.id}
+                  key={`setting-${setting.id}`}
                   className={`transition-colors ${isEditing ? 'bg-blue-50 ring-2 ring-blue-500 ring-inset' : 'hover:bg-gray-50'}`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -276,7 +338,7 @@ export default function SettingsPage() {
           </table>
 
           {/* Empty State */}
-          {settings?.length === 0 && (
+          {sortedSettings.length === 0 && (
             <div className="text-center py-12">
               <SettingsIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500">Настройки не найдены</p>

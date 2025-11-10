@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Smartphone, Settings, BarChart3, CheckCircle, XCircle, Loader, RefreshCw, Lightbulb } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import QRCode from 'qrcode';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
@@ -252,23 +253,17 @@ export default function UnifiedWhatsAppPage() {
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                to={ROUTES.SHOP.DASHBOARD}
-                className="flex items-center text-gray-600 hover:text-gray-900"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Назад
-              </Link>
-              <div className="flex items-center">
-                <i className="fab fa-whatsapp text-green-600 text-2xl mr-3"></i>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">WhatsApp Business</h1>
-                  <p className="text-xs text-gray-500">Управление интеграцией</p>
-                </div>
+            <div className="flex items-center">
+              <i className="fab fa-whatsapp text-green-600 text-2xl mr-3"></i>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">WhatsApp Business</h1>
+                <p className="text-xs text-gray-500">Управление интеграцией</p>
               </div>
             </div>
-            {getStatusBadge()}
+            <div className="flex items-center gap-4">
+              {getStatusBadge()}
+              <BackButton to="/shop" />
+            </div>
           </div>
         </div>
       </nav>

@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Users as UsersIcon, Download } from 'lucide-react';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { ROUTES } from '@/shared/constants/config';
@@ -185,19 +186,11 @@ function CustomersPage() {
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                to={ROUTES.SHOP.DASHBOARD}
-                className="text-gray-600 hover:text-gray-900"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Назад
-              </Link>
-              <div className="flex items-center">
-                <i className="Users className="w-5 h-5 text-purple-600 text-2xl mr-3 />
-                <span className="text-xl font-bold text-gray-900">Клиенты</span>
-              </div>
+            <div className="flex items-center">
+              <UsersIcon className="w-5 h-5 text-purple-600 mr-3" />
+              <span className="text-xl font-bold text-gray-900">Клиенты</span>
             </div>
+            <BackButton to="/shop" />
           </div>
         </div>
       </nav>

@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { Plus, Edit, Trash2, Eye, Search, Filter, X } from 'lucide-react';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { productService } from '../services/productService';
@@ -346,17 +347,20 @@ function ShopProductsPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Товары</h1>
             <p className="text-gray-600 mt-1">
               Управление товарами ({totalProducts} всего)
             </p>
           </div>
-          <Button onClick={handleCreate} variant="primary" className="flex items-center gap-2">
-            <Plus className="w-5 h-5" />
-            Добавить товар
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={handleCreate} variant="primary" className="flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              Добавить товар
+            </Button>
+            <BackButton to="/shop" />
+          </div>
         </div>
 
         {/* Filters */}

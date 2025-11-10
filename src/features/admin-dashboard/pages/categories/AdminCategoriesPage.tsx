@@ -9,6 +9,7 @@ import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { DataTable } from '@/shared/components/ui/DataTable';
 import { Button } from '@/shared/components/ui/Button';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { FormModal } from '@/shared/components/ui/FormModal';
 import { FormInput } from '@/shared/components/forms/FormInput';
 import { FormTextarea } from '@/shared/components/forms/FormTextarea';
@@ -297,7 +298,7 @@ function AdminCategoriesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Управление категориями
@@ -306,13 +307,17 @@ function AdminCategoriesPage() {
             Управление категориями товаров на платформе
           </p>
         </div>
-        {categories?.length > 0 && (
+        <BackButton to="/admin" />
+      </div>
+
+      {categories?.length > 0 && (
+        <div className="flex justify-end mb-4">
           <Button onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Добавить категорию
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Categories Table */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">

@@ -4,6 +4,7 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { Eye, Edit, Store } from 'lucide-react'
 import { DataTable } from '@/shared/components/ui/DataTable'
 import { Button } from '@/shared/components/ui/Button'
+import { BackButton } from '@/shared/components/ui/BackButton'
 import { SearchInput } from '@/shared/components/ui/SearchInput'
 import { StatusBadge } from '@/shared/components/ui/StatusBadge'
 import { FormModal } from '@/shared/components/ui/FormModal'
@@ -161,9 +162,12 @@ export default function AdminOrdersPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Все заказы</h1>
-        <p className="text-gray-600 mt-2">Управление заказами во всех магазинах</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Все заказы</h1>
+          <p className="text-gray-600 mt-2">Управление заказами во всех магазинах</p>
+        </div>
+        <BackButton to="/admin" />
       </div>
 
       {/* Filters */}

@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { formatNumber } from '@/shared/lib/utils';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useInitiateTopUp } from '../hooks/useBilling';
@@ -63,18 +64,14 @@ export function TopUpPage() {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <button
-            onClick={() => navigate('/shop/billing')}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Назад к биллингу
-          </button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Пополнение баланса</h1>
-          <p className="text-gray-600">
-            Добавьте средства на баланс магазина для аренды слотов товаров и управления магазином
-          </p>
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Пополнение баланса</h1>
+            <p className="text-gray-600">
+              Добавьте средства на баланс магазина для аренды слотов товаров и управления магазином
+            </p>
+          </div>
+          <BackButton to="/shop/billing" />
         </div>
 
         {/* Main Card */}

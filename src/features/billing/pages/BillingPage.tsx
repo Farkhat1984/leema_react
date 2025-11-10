@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Wallet, TrendingUp, AlertCircle, ArrowUpCircle, Plus } from 'lucide-react';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { useShopBalance } from '../hooks/useBilling';
 import { ActiveRentals } from '../components/ActiveRentals';
 import { TransactionHistory } from '../components/TransactionHistory';
@@ -21,11 +22,14 @@ export function BillingPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Биллинг и платежи</h1>
-        <p className="text-gray-600">
-          Управление балансом магазина, арендой товаров и историей транзакций
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Биллинг и платежи</h1>
+          <p className="text-gray-600">
+            Управление балансом магазина, арендой товаров и историей транзакций
+          </p>
+        </div>
+        <BackButton to="/shop" />
       </div>
 
       {/* Balance Cards */}

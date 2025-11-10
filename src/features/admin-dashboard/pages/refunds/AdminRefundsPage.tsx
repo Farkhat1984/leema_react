@@ -7,6 +7,7 @@ import { apiClient } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { DataTable } from '@/shared/components/ui/DataTable';
 import { Button } from '@/shared/components/ui/Button';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { PageLoader } from '@/shared/components/feedback/PageLoader';
 import { StatsCard } from '@/shared/components/ui/StatsCard';
 import { StatusBadge } from '@/shared/components/ui/StatusBadge';
@@ -255,12 +256,15 @@ export default function RefundsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <RefreshCcw className="w-7 h-7" />
-          Управление возвратами
-        </h1>
-        <p className="text-gray-600 mt-1">Обработка запросов на возврат от клиентов</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <RefreshCcw className="w-7 h-7" />
+            Управление возвратами
+          </h1>
+          <p className="text-gray-600 mt-1">Обработка запросов на возврат от клиентов</p>
+        </div>
+        <BackButton to="/admin" />
       </div>
 
       {/* Stats Cards */}

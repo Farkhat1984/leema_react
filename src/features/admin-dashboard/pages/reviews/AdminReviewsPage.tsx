@@ -9,6 +9,7 @@ import { DataTable } from '@/shared/components/ui/DataTable';
 import { StatsCard } from '@/shared/components/ui/StatsCard';
 import { SearchInput } from '@/shared/components/ui/SearchInput';
 import { Button } from '@/shared/components/ui/Button';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailModal } from '@/shared/components/ui/DetailModal';
 import { useDebounce } from '@/shared/hooks';
@@ -188,13 +189,16 @@ function AdminReviewsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Управление отзывами
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Модерация отзывов о товарах и управление отзывами пользователей
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Управление отзывами
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Модерация отзывов о товарах и управление отзывами пользователей
+          </p>
+        </div>
+        <BackButton to="/admin" />
       </div>
 
       {/* Stats Cards */}

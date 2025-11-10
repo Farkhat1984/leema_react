@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
 import { Eye, Calendar, TrendingUp } from 'lucide-react'
+import { BackButton } from '@/shared/components/ui/BackButton'
 import { DataTable } from '@/shared/components/ui/DataTable'
 import { Button } from '@/shared/components/ui/Button'
 import { SearchInput } from '@/shared/components/ui/SearchInput'
@@ -130,9 +131,12 @@ export default function ShopOrdersPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Заказы</h1>
-        <p className="text-gray-600 mt-2">Управление и отслеживание заказов</p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Заказы</h1>
+          <p className="text-gray-600 mt-2">Управление и отслеживание заказов</p>
+        </div>
+        <BackButton to="/shop" />
       </div>
 
       {/* Stats Cards */}

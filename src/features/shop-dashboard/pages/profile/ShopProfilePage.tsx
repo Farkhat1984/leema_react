@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, UserCog, Info } from 'lucide-react';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -143,19 +144,11 @@ function ShopProfilePage() {
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                to={ROUTES.SHOP.DASHBOARD}
-                className="text-gray-600 hover:text-gray-900"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Назад
-              </Link>
-              <div className="flex items-center">
-                <UserCog className="text-purple-600 w-6 h-6 mr-3" />
-                <span className="text-xl font-bold text-gray-900">Настройки профиля</span>
-              </div>
+            <div className="flex items-center">
+              <UserCog className="text-purple-600 w-6 h-6 mr-3" />
+              <span className="text-xl font-bold text-gray-900">Настройки профиля</span>
             </div>
+            <BackButton to="/shop" />
           </div>
         </div>
       </nav>

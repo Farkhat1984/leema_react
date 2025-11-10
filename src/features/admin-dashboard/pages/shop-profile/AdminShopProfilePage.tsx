@@ -9,6 +9,7 @@ import { useParams } from 'react-router-dom';
 import { Card } from '@/shared/components/feedback/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Badge } from '@/shared/components/feedback/Badge';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { toast } from 'react-hot-toast';
 
 interface ShopProfile {
@@ -154,6 +155,11 @@ export default function AdminShopProfilePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
+      <div className="mb-6 flex items-start justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Профиль магазина</h1>
+        <BackButton to="/admin" />
+      </div>
+
       <div className="flex items-start gap-6">
         {/* Logo */}
         <div className="flex-shrink-0">

@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useWebSocketStore } from '@/features/websocket/WebSocketManager';
 import { Card } from '@/shared/components/feedback/Card';
 import { Button } from '@/shared/components/ui/Button';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { Badge } from '@/shared/components/feedback/Badge';
 import { toast } from 'react-hot-toast';
 
@@ -175,7 +176,7 @@ export default function AdminNotificationsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Уведомления администратора</h1>
           <p className="text-gray-600 mt-1">
@@ -190,19 +191,21 @@ export default function AdminNotificationsPage() {
             )}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge
-            variant={isConnected ? 'success' : 'error'}
-            className="text-xs"
-          >
-            {isConnected ? '🟢 Онлайн' : '🔴 Оффлайн'}
-          </Badge>
-          {unreadCount > 0 && (
-            <Button onClick={markAllAsRead} variant="outline" size="sm">
-              Отметить все как прочитанные
-            </Button>
-          )}
-        </div>
+        <BackButton to="/admin" />
+      </div>
+
+      <div className="flex items-center gap-2 justify-end mb-4">
+        <Badge
+          variant={isConnected ? 'success' : 'error'}
+          className="text-xs"
+        >
+          {isConnected ? '🟢 Онлайн' : '🔴 Оффлайн'}
+        </Badge>
+        {unreadCount > 0 && (
+          <Button onClick={markAllAsRead} variant="outline" size="sm">
+            Отметить все как прочитанные
+          </Button>
+        )}
       </div>
 
       {/* Filter Tabs */}

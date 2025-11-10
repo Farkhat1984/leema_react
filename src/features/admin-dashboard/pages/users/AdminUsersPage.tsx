@@ -5,6 +5,7 @@ import { Eye } from 'lucide-react';
 import { managementService } from '@/features/admin-dashboard/services';
 import { DataTable } from '@/shared/components/ui/DataTable';
 import { Button } from '@/shared/components/ui/Button';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { formatDate } from '@/shared/lib/utils';
 import UserProfileModal from './UserProfileModal';
 
@@ -75,11 +76,14 @@ function AdminUsersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Пользователи</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Просмотр пользователей мобильного приложения
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Пользователи</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Просмотр пользователей мобильного приложения
+          </p>
+        </div>
+        <BackButton to="/admin" />
       </div>
 
       {/* Users Table */}

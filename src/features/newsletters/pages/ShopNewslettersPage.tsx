@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components/ui/Tabs'
 import { Users, Plus, History } from 'lucide-react'
+import { BackButton } from '@/shared/components/ui/BackButton'
 import { ContactsTab } from '../components/ContactsTab'
 import { CreateNewsletterTab } from '../components/CreateNewsletterTab'
 import { NewsletterHistoryTab } from '../components/NewsletterHistoryTab'
@@ -19,11 +20,14 @@ export default function ShopNewslettersPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Управление рассылками</h1>
-        <p className="text-gray-600 mt-2">
-          Управляйте контактами, создавайте рассылки и отслеживайте эффективность кампаний
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Управление рассылками</h1>
+          <p className="text-gray-600 mt-2">
+            Управляйте контактами, создавайте рассылки и отслеживайте эффективность кампаний
+          </p>
+        </div>
+        <BackButton to="/shop" />
       </div>
 
       {/* Tabs */}

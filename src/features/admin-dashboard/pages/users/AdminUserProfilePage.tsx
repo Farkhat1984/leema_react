@@ -18,6 +18,7 @@ import {
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { Button } from '@/shared/components/ui/Button';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { StatusBadge } from '@/shared/components/ui/StatusBadge';
 import { StatsCard } from '@/shared/components/ui/StatsCard';
 import { DataTable } from '@/shared/components/ui/DataTable';
@@ -197,18 +198,17 @@ function AdminUserProfilePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate('/admin/users')}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Профиль пользователя</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Просмотр и управление данными пользователя
-            </p>
-          </div>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Профиль пользователя</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Просмотр и управление данными пользователя
+          </p>
         </div>
+        <BackButton to="/admin/users" />
+      </div>
+
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {user.status === 'suspended' ? (
             <Button

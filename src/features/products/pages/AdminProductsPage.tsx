@@ -11,6 +11,7 @@ import { CheckCircle, XCircle, Eye, X, Box, Clock } from 'lucide-react';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { Button } from '@/shared/components/ui/Button';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { SearchInput } from '@/shared/components/ui/SearchInput';
 import { StatusBadge } from '@/shared/components/ui/StatusBadge';
 import { StatsCard } from '@/shared/components/ui/StatsCard';
@@ -379,9 +380,12 @@ function AdminProductsPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Модерация товаров</h1>
-          <p className="text-gray-600 mt-1">Проверка и модерация товаров из магазинов</p>
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Модерация товаров</h1>
+            <p className="text-gray-600 mt-1">Проверка и модерация товаров из магазинов</p>
+          </div>
+          <BackButton to="/admin" />
         </div>
 
         {/* Stats Cards */}

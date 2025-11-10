@@ -23,6 +23,7 @@ import { logger } from '@/shared/lib/utils/logger';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { RejectModal } from '@/shared/components/ui/RejectModal';
 import { useDebounce } from '@/shared/hooks';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import type { Shop, ShopsResponse, ShopStats, ShopStatus } from '../types/shop';
 import { type ColumnDef, type Row } from '@tanstack/react-table';
 
@@ -537,9 +538,12 @@ function AdminShopsPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Управление магазинами</h1>
-          <p className="text-gray-600 mt-1">Модерация и управление магазинами на платформе</p>
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Управление магазинами</h1>
+            <p className="text-gray-600 mt-1">Модерация и управление магазинами на платформе</p>
+          </div>
+          <BackButton to="/admin" />
         </div>
 
         {/* Stats Cards */}

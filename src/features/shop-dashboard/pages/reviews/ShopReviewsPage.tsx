@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Star, MessageSquare } from 'lucide-react';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { DataTable } from '@/shared/components/ui/DataTable';
@@ -205,13 +206,16 @@ function ShopReviewsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Отзывы о товарах
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Просмотр и анализ отзывов клиентов о ваших товарах
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Отзывы о товарах
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Просмотр и анализ отзывов клиентов о ваших товарах
+          </p>
+        </div>
+        <BackButton to="/shop" />
       </div>
 
       {/* Stats Cards */}

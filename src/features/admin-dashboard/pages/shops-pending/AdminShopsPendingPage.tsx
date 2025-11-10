@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/shared/components/feedback/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Badge } from '@/shared/components/feedback/Badge';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import toast from 'react-hot-toast';
 import { logger } from '@/shared/lib/utils/logger';
 import { moderationService, managementService } from '@/features/admin-dashboard/services';
@@ -102,7 +103,7 @@ export default function AdminShopsPendingPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Модерация магазинов</h1>
           <p className="text-gray-600 mt-1">
@@ -111,6 +112,10 @@ export default function AdminShopsPendingPage() {
               : 'Нет магазинов на модерации'}
           </p>
         </div>
+        <BackButton to="/admin" />
+      </div>
+
+      <div className="flex justify-end mb-4">
         <Button
           onClick={() => queryClient.invalidateQueries({ queryKey: ['admin', 'shops'] })}
           variant="outline"

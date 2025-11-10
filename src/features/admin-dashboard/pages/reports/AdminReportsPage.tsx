@@ -7,6 +7,7 @@ import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { DataTable } from '@/shared/components/ui/DataTable';
 import { Button } from '@/shared/components/ui/Button';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { FormDateRangePicker } from '@/shared/components/forms/FormDateRangePicker';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { formatDate, formatCurrency } from '@/shared/lib/utils';
@@ -161,11 +162,14 @@ function AdminReportsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Отчеты</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Генерация и скачивание отчетов платформы
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Отчеты</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Генерация и скачивание отчетов платформы
+          </p>
+        </div>
+        <BackButton to="/admin" />
       </div>
 
       {/* Generate Report Section */}

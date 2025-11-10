@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { useWebSocketStore } from '@/features/websocket/WebSocketManager';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { Card } from '@/shared/components/feedback/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Badge } from '@/shared/components/feedback/Badge';
@@ -143,7 +144,7 @@ export default function ShopNotificationsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Уведомления</h1>
           <p className="text-gray-600 mt-1">
@@ -164,6 +165,7 @@ export default function ShopNotificationsPage() {
               Отметить все как прочитанные
             </Button>
           )}
+          <BackButton to="/shop" />
         </div>
       </div>
 

@@ -5,7 +5,8 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Shirt, Image as ImageIcon, Eye, User as UserIcon, X } from 'lucide-react';
+import { Shirt, Image as ImageIcon, Eye, User as UserIcon, X } from 'lucide-react';
+import { BackButton } from '@/shared/components/ui/BackButton';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { ROUTES } from '@/shared/constants/config';
@@ -277,25 +278,18 @@ function AdminUserWardrobePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                to={ROUTES.ADMIN.WARDROBES}
-                className="text-gray-600 hover:text-gray-900 flex items-center"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Назад к гардеробам
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Гардероб пользователя</h1>
+            <p className="text-gray-600 mt-1">Просмотр всех вещей пользователя</p>
+          </div>
+          <BackButton to={ROUTES.ADMIN.WARDROBES} />
+        </div>
+
         {/* User Info */}
         {user && (
           <Card className="p-6 mb-6">
