@@ -171,16 +171,18 @@ export default function SettingsPage() {
                   </td>
                   <td className="px-6 py-4">
                     {isEditing ? (
-                      setting.key === 'newsletter_frequency_min' || setting.key === 'newsletter_frequency_max' ? (
+                      setting.key.startsWith('newsletter_') && (
+                        setting.key.includes('frequency') ||
+                        setting.key.includes('batch_size') ||
+                        setting.key.includes('batch_pause') ||
+                        setting.key.includes('time_window')
+                      ) ? (
                         <div className="flex items-center gap-2">
                           <div className="flex-1">
-                            <label className="block text-xs text-gray-500 mb-1">
-                              {setting.key === 'newsletter_frequency_min' ? 'Мин. интервал (секунд)' : 'Макс. интервал (секунд)'}
-                            </label>
                             <input
                               type="number"
-                              min="1"
-                              max="3600"
+                              min={setting.key.includes('time_window') ? "0" : "1"}
+                              max={setting.key.includes('time_window') ? "23" : "3600"}
                               value={displayValue}
                               onChange={(e) => handleValueChange(setting.id, e.target.value)}
                               onKeyDown={(e) => {
@@ -191,14 +193,9 @@ export default function SettingsPage() {
                                 }
                               }}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                              placeholder="60-300"
                               autoFocus
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                              {setting.key === 'newsletter_frequency_min'
-                                ? 'Минимальная пауза между сообщениями (секунд)'
-                                : 'Максимальная пауза между сообщениями (секунд)'}
-                            </p>
+                            <p className="text-xs text-gray-500 mt-1">{setting.description}</p>
                           </div>
                         </div>
                       ) : (
@@ -219,8 +216,10 @@ export default function SettingsPage() {
                       )
                     ) : (
                       <span className="text-sm text-gray-900">
-                        {(setting.key === 'newsletter_frequency_min' || setting.key === 'newsletter_frequency_max')
+                        {setting.key.includes('frequency') || setting.key.includes('pause')
                           ? `${setting.value} сек`
+                          : setting.key.includes('time_window')
+                          ? `${setting.value}:00`
                           : setting.value}
                       </span>
                     )}
