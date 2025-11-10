@@ -262,7 +262,7 @@ export function ContactsTab() {
             variant="outline"
             onClick={() => setIsImportModalOpen(true)}
           >
-            <Upload className="w-4 h-4 mr-2" />
+            <Download className="w-4 h-4 mr-2" />
             Импорт Excel
           </Button>
           <Button
@@ -270,7 +270,7 @@ export function ContactsTab() {
             onClick={handleExport}
             disabled={!data?.data || !Array.isArray(data.data) || data.data.length === 0}
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Upload className="w-4 h-4 mr-2" />
             Экспорт Excel
           </Button>
           <Button
