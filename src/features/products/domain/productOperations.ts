@@ -421,6 +421,11 @@ export class ProductOperations {
   /**
    * Validate image files
    *
+   * Note: Minimum size and aspect ratio validation is performed on the backend.
+   * Backend requirements:
+   * - Product images: 800×1200px minimum (3:4 aspect ratio)
+   * - Wardrobe images: 1000×1500px minimum (2:3 aspect ratio)
+   *
    * @param files - Files to validate
    * @returns Validation result
    */
@@ -428,7 +433,7 @@ export class ProductOperations {
     valid: boolean;
     error?: string;
   } {
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (updated for Flutter app requirements)
     const MAX_FILES = 10;
     const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
@@ -450,9 +455,13 @@ export class ProductOperations {
       if (file.size > MAX_FILE_SIZE) {
         return {
           valid: false,
-          error: `Файл ${file.name} слишком большой (макс. 5MB)`
+          error: `Файл ${file.name} слишком большой (макс. 10MB)`
         };
       }
+
+      // Note: Minimum size validation is performed on backend
+      // Product images require 800×1200px minimum
+      // If backend validation fails, user will receive detailed error message
     }
 
     return { valid: true };

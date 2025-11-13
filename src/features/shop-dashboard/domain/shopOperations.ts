@@ -428,6 +428,8 @@ export class ShopOperations {
   /**
    * Validate avatar file
    *
+   * Note: Backend requires minimum 256×256px for avatars
+   *
    * @param file - File to validate
    * @returns Validation result
    */
@@ -435,7 +437,7 @@ export class ShopOperations {
     valid: boolean;
     error?: string;
   } {
-    const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB (increased for high-quality avatars)
     const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -448,10 +450,11 @@ export class ShopOperations {
     if (file.size > MAX_FILE_SIZE) {
       return {
         valid: false,
-        error: 'Файл слишком большой (макс. 2MB)'
+        error: 'Файл слишком большой (макс. 5MB)'
       };
     }
 
+    // Note: Minimum size validation (256×256px) is performed on backend
     return { valid: true };
   }
 
