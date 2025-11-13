@@ -41,15 +41,16 @@ export interface ShopBalance {
 
 export interface TopUpPayload {
   amount: number;
-  payment_method: 'paypal' | 'card';
-  return_url: string;
-  cancel_url: string;
+  payment_type: 'top_up';
+  description?: string;
+  extra_data?: Record<string, unknown>;
 }
 
 export interface TopUpResponse {
-  payment_url: string;
-  transaction_id: string;
-  expires_at: string;
+  order_id: string;
+  approval_url: string;
+  amount: number;
+  status: string;
 }
 
 export interface PaymentCaptureResponse {

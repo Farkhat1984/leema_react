@@ -68,12 +68,13 @@ export interface AuthState {
   user: User | null;
   shop: Shop | null;
   accessToken: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
 
 export interface AuthStore extends AuthState {
-  login: (user: User, accessToken: string, shop?: Shop) => void;
+  login: (user: User, accessToken: string, refreshToken?: string, shop?: Shop) => void;
   logout: () => void;
   setAccessToken: (token: string) => void;
   setUser: (user: User) => void;

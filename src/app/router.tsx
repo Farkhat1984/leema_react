@@ -102,6 +102,10 @@ const ShopAnalytics = lazy(() => import('@/features/analytics/pages/ShopAnalytic
 const ShopOrders = lazy(() => import('@/features/orders/pages/ShopOrdersPage'));
 const AdminOrders = lazy(() => import('@/features/orders/pages/AdminOrdersPage'));
 
+// Kaspi pages
+const ShopKaspi = lazy(() => import('@/features/shop-dashboard/pages/kaspi/ShopKaspiPage'));
+const AdminKaspi = lazy(() => import('@/features/admin-dashboard/pages/kaspi/AdminKaspiPage'));
+
 // Billing pages
 const ShopBilling = lazy(() => import('@/features/billing/pages/BillingPage'));
 const ShopTopUp = lazy(() => import('@/features/billing/pages/TopUpPage'));
@@ -208,6 +212,11 @@ export const router = createBrowserRouter([
     path: ROUTES.SHOP.REVIEWS,
     element: withErrorBoundary(<ShopReviews />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
+  // Kaspi routes
+  {
+    path: '/shop/kaspi',
+    element: withErrorBoundary(<ShopKaspi />, { allowedRoles: [ROLES.SHOP_OWNER] }),
+  },
 
   // Admin routes
   {
@@ -265,6 +274,10 @@ export const router = createBrowserRouter([
   {
     path: '/admin/users/:userId',
     element: withErrorBoundary(<AdminUserProfile />, { allowedRoles: [ROLES.ADMIN] }),
+  },
+  {
+    path: '/admin/kaspi',
+    element: withErrorBoundary(<AdminKaspi />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.REVIEWS,

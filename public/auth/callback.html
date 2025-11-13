@@ -55,9 +55,9 @@
             }
 
             try {
-                // Получаем запрошенный тип аккаунта
-                const requestedType = localStorage.getItem('requestedAccountType') || 'user';
-                const accountType = requestedType === 'admin' ? 'user' : requestedType;
+                // Получаем запрошенный тип аккаунта для отправки в backend
+                const requestedLoginType = localStorage.getItem('requestedLoginType') || 'user';
+                const accountType = requestedLoginType === 'admin' ? 'user' : requestedLoginType;
 
                 // Авторизуемся в бэкенде
                 const authEndpoint = `${API_URL}/api/v1/auth/google/login`;
@@ -86,7 +86,34 @@
                     localStorage.setItem('refresh_token', data.refresh_token);
                 }
 
-                // Сохраняем данные пользователя/магазина в localStorage для Zustand
+                // Получаем запрошенный тип аккаунта ПЕРЕД очисткой (что пользователь хотел)
+                const requestedAccountType = localStorage.getItem('requestedLoginType') || 'user';
+
+                // Проверка прав доступа ПЕРЕД сохранением данных
+                const finalAccountType = data.shop ? 'shop' : (data.user?.role === 'admin' ? 'admin' : data.user?.role === 'shop_owner' ? 'shop' : 'user');
+
+                // Проверяем соответствие запрошенного типа и фактического
+                if (requestedAccountType === 'admin' && finalAccountType !== 'admin') {
+                    // Очищаем все токены и временные данные
+                    sessionStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    localStorage.removeItem('requestedLoginType');
+                    localStorage.removeItem('oauth_state');
+                    showError('У вас нет прав администратора. Попробуйте войти как пользователь или владелец магазина.');
+                    return;
+                }
+
+                if (requestedAccountType === 'shop' && finalAccountType !== 'shop') {
+                    // Очищаем все токены и временные данные
+                    sessionStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    localStorage.removeItem('requestedLoginType');
+                    localStorage.removeItem('oauth_state');
+                    showError('У вас нет прав владельца магазина. Попробуйте войти как пользователь.');
+                    return;
+                }
+
+                // Сохраняем данные пользователя/магазина в localStorage для Zustand ТОЛЬКО после проверки прав
                 const authData = {
                     user: data.user || null,
                     shop: data.shop || null,
@@ -95,10 +122,10 @@
                 localStorage.setItem('auth-storage', JSON.stringify({ state: authData, version: 0 }));
 
                 // Очистка временных данных
-                localStorage.removeItem('requestedAccountType');
+                localStorage.removeItem('requestedLoginType');
                 localStorage.removeItem('oauth_state');
 
-                // Определяем redirect path
+                // Определяем redirect path только после проверки прав
                 let redirectPath = '/user/dashboard';
 
                 if (data.shop) {
@@ -111,23 +138,6 @@
                     } else {
                         redirectPath = '/user/dashboard';
                     }
-                }
-
-                // Проверка прав доступа
-                const finalAccountType = data.shop ? 'shop' : (data.user?.role === 'admin' ? 'admin' : data.user?.role === 'shop_owner' ? 'shop' : 'user');
-
-                if (requestedType === 'admin' && finalAccountType !== 'admin') {
-                    sessionStorage.removeItem('access_token');
-                    localStorage.removeItem('refresh_token');
-                    showError('У вас нет прав администратора. Попробуйте войти как пользователь или владелец магазина.');
-                    return;
-                }
-
-                if (requestedType === 'shop' && finalAccountType !== 'shop') {
-                    sessionStorage.removeItem('access_token');
-                    localStorage.removeItem('refresh_token');
-                    showError('Не удалось войти как владелец магазина. Попробуйте войти как пользователь.');
-                    return;
                 }
 
                 // Redirect на dashboard

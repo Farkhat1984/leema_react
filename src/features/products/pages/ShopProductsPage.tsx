@@ -220,12 +220,14 @@ function ShopProductsPage() {
 
         // Upload new images if any (with product_id)
         if (newImages.length > 0) {
-          const files = await Promise.all(
-            newImages.map(async (img) => {
-              const blob = await fetch(img.url).then((r) => r.blob());
-              return new File([blob], `image-${Date.now()}.jpg`, { type: 'image/jpeg' });
-            })
-          );
+          // Extract File objects from UploadedImage array
+          const files = newImages
+            .map(img => img.file)
+            .filter((file): file is File => file !== undefined);
+
+          if (files.length === 0) {
+            throw new Error('Не удалось получить файлы изображений');
+          }
 
           const uploadResponse = await productService.uploadImages(selectedProduct.id, files);
 
@@ -267,12 +269,14 @@ function ShopProductsPage() {
 
         // Then upload images with the product_id
         if (newImages.length > 0) {
-          const files = await Promise.all(
-            newImages.map(async (img) => {
-              const blob = await fetch(img.url).then((r) => r.blob());
-              return new File([blob], `image-${Date.now()}.jpg`, { type: 'image/jpeg' });
-            })
-          );
+          // Extract File objects from UploadedImage array
+          const files = newImages
+            .map(img => img.file)
+            .filter((file): file is File => file !== undefined);
+
+          if (files.length === 0) {
+            throw new Error('Не удалось получить файлы изображений');
+          }
 
           const uploadResponse = await productService.uploadImages(createdProduct.id, files);
 

@@ -131,9 +131,11 @@ function AuthCallbackPage() {
           throw new Error('No access token received from server');
         }
 
+        const refreshToken = response.refreshToken || response.refresh_token;
         login(
           shopAsUser,
           accessToken,
+          refreshToken,
           response.shop
         );
       } else if (response.user) {
@@ -157,7 +159,8 @@ function AuthCallbackPage() {
             throw new Error('No access token received from server');
           }
 
-          login(response.user!, accessToken);
+          const refreshToken = response.refreshToken || response.refresh_token;
+          login(response.user!, accessToken, refreshToken);
         }
       } else {
         throw new Error('Некорректный ответ от сервера: отсутствуют данные пользователя');

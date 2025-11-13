@@ -12,7 +12,7 @@ import { Button } from '@/shared/components/ui/Button';
 import { logger } from '@/shared/lib/utils/logger';
 import authService from '../services/authService';
 
-type AccountType = 'shop' | 'admin';
+type AccountType = 'shop' | 'admin' | 'user';
 
 /**
  * Google SVG Icon Component
@@ -88,10 +88,12 @@ function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Store requested login type for callback (admin is treated as user account type)
+      // Store requested login type for callback validation
+      // 'admin' button stores 'admin', 'shop' button stores 'shop'
       localStorage.setItem('requestedLoginType', accountType);
 
       // Backend only accepts 'user' or 'shop' account types
+      // Admin uses 'user' account type with admin role check
       const backendAccountType = accountType === 'shop' ? 'shop' : 'user';
 
       // Get secure OAuth URL from backend with state and nonce
@@ -149,7 +151,7 @@ function LoginPage() {
 
             {/* Admin Login */}
             <Button
-              onClick={() => handleGoogleLogin('user')}
+              onClick={() => handleGoogleLogin('admin')}
               disabled={isLoading}
               className="w-full h-12 bg-gray-800 hover:bg-gray-900 text-white transition-all duration-200"
             >

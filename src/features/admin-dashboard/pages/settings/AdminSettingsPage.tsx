@@ -233,18 +233,25 @@ export default function SettingsPage() {
                   </td>
                   <td className="px-6 py-4">
                     {isEditing ? (
-                      setting.key.startsWith('newsletter_') && (
+                      // Числовые поля для newsletter и AI credits настроек
+                      (setting.key.startsWith('newsletter_') && (
                         setting.key.includes('frequency') ||
                         setting.key.includes('batch_size') ||
                         setting.key.includes('batch_pause') ||
                         setting.key.includes('time_window')
-                      ) ? (
+                      )) || setting.key.startsWith('ai_') ? (
                         <div className="flex items-center gap-2">
                           <div className="flex-1">
                             <input
                               type="number"
-                              min={setting.key.includes('time_window') ? "0" : "1"}
-                              max={setting.key.includes('time_window') ? "23" : "3600"}
+                              min={
+                                setting.key.includes('time_window') ? "0" :
+                                setting.key.includes('ai_credits_price') ? "0.01" :
+                                setting.key.startsWith('ai_') ? "0" :
+                                "1"
+                              }
+                              max={setting.key.includes('time_window') ? "23" : "99999"}
+                              step={setting.key.includes('ai_credits_price') ? "0.01" : "1"}
                               value={displayValue}
                               onChange={(e) => handleValueChange(setting.id, e.target.value)}
                               onKeyDown={(e) => {
@@ -257,7 +264,11 @@ export default function SettingsPage() {
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                               autoFocus
                             />
-                            <p className="text-xs text-gray-500 mt-1">{setting.description}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {setting.description}
+                              {setting.key.includes('ai_credits_price') && ' (USD)'}
+                              {(setting.key === 'ai_new_user_bonus_credits' || setting.key === 'ai_daily_free_quota_new_user') && ' (кредитов)'}
+                            </p>
                           </div>
                         </div>
                       ) : (
@@ -282,6 +293,10 @@ export default function SettingsPage() {
                           ? `${setting.value} сек`
                           : setting.key.includes('time_window')
                           ? `${setting.value}:00`
+                          : setting.key.includes('ai_credits_price')
+                          ? `$${setting.value}`
+                          : setting.key === 'ai_new_user_bonus_credits' || setting.key === 'ai_daily_free_quota_new_user'
+                          ? `${setting.value} кредитов`
                           : setting.value}
                       </span>
                     )}

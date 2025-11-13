@@ -22,12 +22,14 @@ import {
   MessageSquare,
   QrCode,
   FileText,
-  Bell
+  Bell,
+  ShoppingBag
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { shopService } from '@/features/shop-dashboard/services';
 import { useProductEvents, useOrderEvents, useBalanceEvents, useNotificationEvents, useShopEvents, useWhatsAppEvents } from '@/features/websocket/hooks';
+import { useKaspiEvents } from '../hooks/useKaspiEvents';
 import { Card } from '@/shared/components/feedback/Card';
 import { Spinner } from '@/shared/components/feedback/Spinner';
 import { NotificationDropdown } from '@/shared/components/layout/NotificationDropdown';
@@ -48,6 +50,7 @@ function ShopDashboard() {
   // Enable WebSocket event handlers
   useProductEvents();
   useOrderEvents();
+  useKaspiEvents();
   useBalanceEvents();
   useNotificationEvents();
   useShopEvents();
@@ -334,6 +337,20 @@ function ShopDashboard() {
               <div>
                 <h3 className="font-medium text-gray-900">WhatsApp Business</h3>
                 <p className="text-sm text-gray-500">Подключение и настройки</p>
+              </div>
+            </Link>
+
+            {/* Kaspi Integration */}
+            <Link
+              to={ROUTES.SHOP.KASPI}
+              className="flex items-center p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+            >
+              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                <ShoppingBag className="text-red-600 w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">Kaspi Интеграция</h3>
+                <p className="text-sm text-gray-500">Заказы из Kaspi.kz</p>
               </div>
             </Link>
 

@@ -9,6 +9,7 @@ import {
   Download,
   ChevronDown,
 } from 'lucide-react'
+import { BackButton } from '@/shared/components/ui/BackButton'
 import { StatsCard } from '@/shared/components/ui/StatsCard'
 import { DataTable } from '@/shared/components/ui/DataTable'
 import { Button } from '@/shared/components/ui/Button'
@@ -99,11 +100,14 @@ export default function ShopAnalyticsPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Панель аналитики</h1>
-        <p className="text-gray-600 mt-2">
-          Отслеживайте производительность магазина и получайте инсайты
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Панель аналитики</h1>
+          <p className="text-gray-600 mt-2">
+            Отслеживайте производительность магазина и получайте инсайты
+          </p>
+        </div>
+        <BackButton to="/shop" />
       </div>
 
       {/* Controls */}

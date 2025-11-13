@@ -5,19 +5,16 @@
  * @route /shop/billing
  */
 
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Wallet, TrendingUp, AlertCircle, ArrowUpCircle, Plus } from 'lucide-react';
+import { Wallet, AlertCircle, ArrowUpCircle, Plus } from 'lucide-react';
 import { BackButton } from '@/shared/components/ui/BackButton';
 import { useShopBalance } from '../hooks/useBilling';
-import { ActiveRentals } from '../components/ActiveRentals';
 import { TransactionHistory } from '../components/TransactionHistory';
 import { Button } from '@/shared/components/ui/Button';
 import { StatsCard } from '@/shared/components/ui/StatsCard';
 
 export function BillingPage() {
   const { data: balance, isLoading } = useShopBalance();
-  const [activeTab, setActiveTab] = useState<'rentals' | 'history'>('rentals');
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -33,7 +30,7 @@ export function BillingPage() {
       </div>
 
       {/* Balance Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <div className="lg:col-span-2 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -75,14 +72,6 @@ export function BillingPage() {
           variant="warning"
           loading={isLoading}
         />
-
-        <StatsCard
-          title="Активные аренды"
-          value={balance?.active_rentals_count || 0}
-          icon={<TrendingUp className="w-6 h-6" />}
-          variant="info"
-          loading={isLoading}
-        />
       </div>
 
       {/* Additional Stats (smaller cards) */}
@@ -120,36 +109,14 @@ export function BillingPage() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Transaction History */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="border-b border-gray-200">
-          <nav className="flex">
-            <button
-              onClick={() => setActiveTab('rentals')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'rentals'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Активные аренды
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'history'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              История транзакций
-            </button>
-          </nav>
+        <div className="border-b border-gray-200 px-6 py-4">
+          <h2 className="text-lg font-semibold text-gray-900">История транзакций</h2>
         </div>
 
         <div className="p-6">
-          {activeTab === 'rentals' && <ActiveRentals />}
-          {activeTab === 'history' && <TransactionHistory />}
+          <TransactionHistory />
         </div>
       </div>
     </div>

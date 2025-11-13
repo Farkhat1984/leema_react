@@ -263,15 +263,25 @@ apiClient.interceptors.response.use(
         url: originalRequest?.url
       });
 
-      // Try to refresh the token using HttpOnly cookie
-      // Note: Refresh token is automatically sent via HttpOnly cookie (withCredentials: true)
+      // Get refresh token from store
+      const refreshToken = useAuthStore.getState().refreshToken;
+      if (!refreshToken) {
+        logger.error('[API] No refresh token available');
+        // Logout user and redirect to login
+        useAuthStore.getState().logout();
+        isRefreshing = false;
+        processQueue(null, new Error('No refresh token'));
+        return Promise.reject(error);
+      }
+
+      // Try to refresh the token
       const response = await axios.post(
         `${CONFIG.API_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
-        {}, // Empty body - refresh token is sent as HttpOnly cookie
+        { refresh_token: refreshToken }, // Send refresh token in body
         { withCredentials: true }
       );
 
-      const { accessToken } = response.data;
+      const { accessToken, refreshToken: newRefreshToken } = response.data;
 
       logger.debug('[API] Token refresh successful', {
         hasNewToken: !!accessToken
@@ -280,6 +290,11 @@ apiClient.interceptors.response.use(
       // Update token in store and sessionStorage
       setStorageToken(accessToken);
       useAuthStore.getState().setAccessToken(accessToken);
+
+      // Update refresh token if new one was provided
+      if (newRefreshToken) {
+        useAuthStore.setState({ refreshToken: newRefreshToken });
+      }
 
       // Update authorization header
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -329,7 +344,7 @@ export const apiRequest = async <T>(
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'GET',
   data?: unknown,
   params?: Record<string, unknown>,
-  options?: { responseType?: 'blob' | 'json' }
+  options?: { responseType?: 'blob' | 'json'; timeout?: number }
 ): Promise<T> => {
   try {
     const response = await apiClient.request<T>({

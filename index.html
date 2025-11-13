@@ -8,9 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Content Security Policy - XSS Protection -->
-    <!-- Note: CSP is also set via HTTP headers in nginx for defense in depth -->
-    <!-- Development: Relaxed for Vite HMR. Production: Strict policy. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://api.leema.kz https://lh3.googleusercontent.com https://via.placeholder.com; connect-src 'self' blob: https://api.leema.kz wss://api.leema.kz ws://localhost:* http://localhost:*; font-src 'self' https://fonts.gstatic.com; object-src 'none'; media-src 'self'; frame-src https://accounts.google.com; base-uri 'self'; form-action 'self';">
+    <!-- Note: CSP is set via HTTP headers in nginx only (removed meta tag to avoid conflicts) -->
+    <!-- CSP from nginx includes kaspi.kz for Kaspi integration images -->
 
     <title>Leema Fashion AI - Shop Management</title>
   </head>

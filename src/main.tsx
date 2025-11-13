@@ -72,7 +72,9 @@ if (import.meta.env.VITE_ENABLE_CSP !== 'false') {
 
 // Initialize Web Vitals monitoring (Core Web Vitals tracking)
 if (import.meta.env.VITE_ENABLE_WEB_VITALS !== 'false') {
-  initializeWebVitals();
+  initializeWebVitals().catch((error) => {
+    console.error('Failed to initialize Web Vitals:', error);
+  });
 }
 
 // Suppress React DevTools message in production

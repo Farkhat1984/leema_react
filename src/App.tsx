@@ -19,7 +19,10 @@ function App() {
 
   // Memoize connect/disconnect to prevent unnecessary re-renders
   const handleConnect = useCallback(() => {
-    if (!accessToken || !user) return;
+    if (!accessToken || !user) {
+      console.log('[WebSocket] Не подключаемся: нет токена или пользователя', { accessToken: !!accessToken, user: !!user });
+      return;
+    }
 
     // Determine client type based on role and shop presence
     // Priority: role (admin) > shop presence > default (user)
@@ -27,17 +30,29 @@ function App() {
 
     if (user.role === ROLES.ADMIN) {
       clientType = 'admin';
-    } else if (shop) {
-      // Only connect WebSocket for approved and active shops
-      // Unapproved shops should not have real-time access
-      if (shop.is_approved && shop.is_active) {
-        clientType = 'shop';
-      } else {
-        // Don't connect WebSocket for unapproved/inactive shops
+      console.log('[WebSocket] Подключаемся как ADMIN');
+    } else if (user.role === ROLES.SHOP_OWNER) {
+      // Для shop_owner нужен магазин
+      if (!shop) {
+        console.log('[WebSocket] Не подключаемся: shop_owner без магазина');
         return;
       }
+
+      // Only connect WebSocket for approved and active shops
+      // Unapproved shops should not have real-time access
+      if (!shop.is_approved || !shop.is_active) {
+        console.log('[WebSocket] Не подключаемся: магазин не одобрен или неактивен', {
+          is_approved: shop.is_approved,
+          is_active: shop.is_active
+        });
+        return;
+      }
+
+      clientType = 'shop';
+      console.log('[WebSocket] Подключаемся как SHOP', { shop_id: shop.id });
     } else {
       clientType = 'user';
+      console.log('[WebSocket] Подключаемся как USER');
     }
 
     connect(accessToken, clientType);
@@ -59,20 +74,47 @@ function App() {
         toastOptions={{
           duration: 4000,
           style: {
-            background: '#363636',
-            color: '#fff',
+            background: '#fff',
+            color: '#1f2937',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            border: '1px solid #e5e7eb',
+            borderRadius: '12px',
+            padding: '16px',
+            fontSize: '14px',
+            maxWidth: '500px',
           },
           success: {
             duration: 3000,
+            style: {
+              background: '#f0fdf4',
+              color: '#166534',
+              border: '1px solid #86efac',
+            },
             iconTheme: {
               primary: '#10b981',
               secondary: '#fff',
             },
           },
           error: {
-            duration: 5000,
+            duration: 6000,
+            style: {
+              background: '#fef2f2',
+              color: '#991b1b',
+              border: '1px solid #fca5a5',
+            },
             iconTheme: {
               primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+          loading: {
+            style: {
+              background: '#f0f9ff',
+              color: '#1e40af',
+              border: '1px solid #93c5fd',
+            },
+            iconTheme: {
+              primary: '#3b82f6',
               secondary: '#fff',
             },
           },

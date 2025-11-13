@@ -56,8 +56,17 @@ export const useWebSocketStore = create<WSState>((set, get) => ({
   connect: (token: string, clientType: 'user' | 'shop' | 'admin' = 'shop') => {
     const state = get();
 
+    console.log('[WebSocket Manager] connect() вызван', {
+      clientType,
+      hasToken: !!token,
+      currentSocketState: state.socket?.readyState,
+      isConnecting: state.isConnecting,
+      isConnected: state.isConnected
+    });
+
     // Don't reconnect if already connected or connecting
     if (state.socket?.readyState === WebSocket.OPEN || state.isConnecting) {
+      console.log('[WebSocket Manager] Уже подключен или подключается, пропускаем');
       return;
     }
 
@@ -65,6 +74,7 @@ export const useWebSocketStore = create<WSState>((set, get) => ({
 
     try {
       const wsUrl = `${CONFIG.WS_URL}?token=${token}&client_type=${clientType}&platform=web`;
+      console.log('[WebSocket Manager] Подключаемся к', { url: CONFIG.WS_URL, clientType });
       const socket = new WebSocket(wsUrl);
 
       // Connection opened

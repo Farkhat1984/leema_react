@@ -33,13 +33,11 @@ export function TopUpPage() {
   } = useForm<TopUpFormData>({
     resolver: zodResolver(topUpSchema),
     defaultValues: {
-      payment_method: 'paypal',
       amount: undefined,
     },
   });
 
   const amount = watch('amount');
-  const paymentMethod = watch('payment_method');
 
   const initiateMutation = useInitiateTopUp();
 
@@ -49,14 +47,10 @@ export function TopUpPage() {
   };
 
   const onSubmit = (data: TopUpFormData) => {
-    const returnUrl = `${window.location.origin}/payment/success?type=topup`;
-    const cancelUrl = `${window.location.origin}/payment/cancel?type=topup`;
-
     initiateMutation.mutate({
       amount: data.amount,
-      payment_method: data.payment_method,
-      return_url: returnUrl,
-      cancel_url: cancelUrl,
+      payment_type: 'top_up',
+      description: `Shop balance top-up: ${data.amount} KZT`,
     });
   };
 
@@ -117,63 +111,20 @@ export function TopUpPage() {
               )}
             </div>
 
-            {/* Payment Method Selection */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-900 mb-3">
-                Способ оплаты
-              </label>
-
-              <div className="space-y-3">
-                {/* PayPal Option */}
-                <label
-                  className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    paymentMethod === 'paypal'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    value="paypal"
-                    {...register('payment_method')}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <div className="flex items-center gap-3 flex-1">
-                    <img
-                      src="https://www.paypalobjects.com/webstatic/icon/pp258.png"
-                      alt="PayPal"
-                      className="w-8 h-8"
-                    />
-                    <div>
-                      <div className="font-medium text-gray-900">PayPal</div>
-                      <div className="text-sm text-gray-500">
-                        Безопасная оплата через PayPal
-                      </div>
-                    </div>
+            {/* Payment Method Info */}
+            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <img
+                  src="https://www.paypalobjects.com/webstatic/icon/pp258.png"
+                  alt="PayPal"
+                  className="w-10 h-10"
+                />
+                <div>
+                  <div className="font-semibold text-gray-900">Оплата через PayPal</div>
+                  <div className="text-sm text-gray-600">
+                    Вы будете перенаправлены на безопасную страницу оплаты PayPal
                   </div>
-                  {paymentMethod === 'paypal' && (
-                    <CheckCircle2 className="w-5 h-5 text-blue-600" />
-                  )}
-                </label>
-
-                {/* Card Option (Coming Soon) */}
-                <label
-                  className="flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 bg-gray-50 cursor-not-allowed opacity-60"
-                >
-                  <input
-                    type="radio"
-                    value="card"
-                    disabled
-                    className="w-4 h-4 text-gray-400"
-                  />
-                  <div className="flex items-center gap-3 flex-1">
-                    <CreditCard className="w-8 h-8 text-gray-400" />
-                    <div>
-                      <div className="font-medium text-gray-600">Кредитная/дебетовая карта</div>
-                      <div className="text-sm text-gray-500">Скоро будет доступно</div>
-                    </div>
-                  </div>
-                </label>
+                </div>
               </div>
             </div>
 

@@ -16,11 +16,12 @@ export const useAuthStore = create<AuthStore>()(
       user: null,
       shop: null,
       accessToken: null,
+      refreshToken: null, // Add refresh token to state
       isAuthenticated: false,
       isLoading: false,
 
       // Actions
-      login: (user: User, accessToken: string, shop?: Shop) => {
+      login: (user: User, accessToken: string, refreshToken?: string, shop?: Shop) => {
         logger.debug('User login', {
           userId: user?.id,
           userRole: user?.role,
@@ -39,6 +40,7 @@ export const useAuthStore = create<AuthStore>()(
           user,
           shop: shop || null,
           accessToken,
+          refreshToken: refreshToken || null, // Store refresh token
           isAuthenticated: true,
           isLoading: false,
         });
@@ -47,12 +49,12 @@ export const useAuthStore = create<AuthStore>()(
       logout: () => {
         // Clear all auth storage (access token from sessionStorage)
         clearAuthStorage();
-        // Note: HttpOnly refresh token cookie is cleared by backend on logout
 
         set({
           user: null,
           shop: null,
           accessToken: null,
+          refreshToken: null,
           isAuthenticated: false,
           isLoading: false,
         });
@@ -100,13 +102,14 @@ export const useAuthStore = create<AuthStore>()(
           sessionStorage.removeItem(name);
         },
       },
-      // Persist user, shop, auth state, and access token
+      // Persist user, shop, auth state, access token, and refresh token
       // Note: Access token is also stored in sessionStorage separately for API client
       partialize: (state) => ({
         user: state.user,
         shop: state.shop,
         isAuthenticated: state.isAuthenticated,
         accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
       }),
     }
   )

@@ -65,10 +65,11 @@ export function useInitiateTopUp() {
     mutationFn: (payload: TopUpPayload) => initiateTopUp(payload),
     onSuccess: (response) => {
       // Redirect to PayPal
-      window.location.href = response.payment_url;
+      window.location.href = response.approval_url;
     },
     onError: (error: unknown) => {
-      toast.error(getErrorMessage(error) || 'Failed to initiate payment');
+      const errorMessage = getErrorMessage(error);
+      toast.error(typeof errorMessage === 'string' ? errorMessage : 'Failed to initiate payment');
     },
   });
 }

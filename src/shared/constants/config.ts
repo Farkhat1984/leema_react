@@ -97,6 +97,7 @@ export const ROUTES = {
     WHATSAPP: '/shop/whatsapp',
     NOTIFICATIONS: '/shop/notifications',
     REPORTS: '/shop/reports',
+    KASPI: '/shop/kaspi',
   },
   ADMIN: {
     DASHBOARD: '/admin',

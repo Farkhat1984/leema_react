@@ -17,7 +17,21 @@
  * @see https://github.com/GoogleChrome/web-vitals
  */
 
-import { onCLS, onFCP, onINP, onLCP, onTTFB, Metric, ReportOpts } from 'web-vitals';
+// Импортируем функции по отдельности для лучшей совместимости
+import { onCLS, onFCP, onLCP, onTTFB } from 'web-vitals';
+import type { Metric, ReportOpts } from 'web-vitals';
+
+// Динамический импорт onINP - он может не поддерживаться в некоторых версиях/браузерах
+let onINP: ((callback: (metric: Metric) => void, opts?: ReportOpts) => void) | undefined;
+try {
+  // @ts-expect-error - onINP может не экспортироваться
+  import('web-vitals').then((mod) => {
+    onINP = mod.onINP;
+  });
+} catch {
+  // onINP не поддерживается
+}
+
 import { CONFIG } from '@/shared/constants/config';
 import { logger } from '@/shared/lib/utils/logger';
 
@@ -222,7 +236,7 @@ const reportOpts: ReportOpts = {
  * Initialize Web Vitals tracking
  * Call this in main.tsx at app startup
  */
-export function initializeWebVitals(): void {
+export async function initializeWebVitals(): Promise<void> {
   try {
     // Track Largest Contentful Paint (loading performance)
     try {
@@ -234,13 +248,14 @@ export function initializeWebVitals(): void {
     }
 
     // Track Interaction to Next Paint (interactivity metric, replaces deprecated FID)
-    // Wrap in try-catch in case of compatibility issues
     try {
-      onINP(handleMetric, reportOpts);
-    } catch (inpError) {
+      if (onINP && typeof onINP === 'function') {
+        onINP(handleMetric, reportOpts);
+      }
+    } catch (error) {
       // INP metric might not be supported in all browsers
       if (CONFIG.IS_DEV) {
-        logger.debug('INP metric not supported', { error: inpError });
+        logger.debug('INP metric not supported', { error });
       }
     }
 
@@ -306,9 +321,10 @@ export async function getWebVitalsSummary(): Promise<Record<string, EnrichedMetr
       // Skip LCP if fails
     }
 
-    // INP might have compatibility issues
     try {
-      onINP(collectMetric, { reportAllChanges: true });
+      if (onINP && typeof onINP === 'function') {
+        onINP(collectMetric, { reportAllChanges: true });
+      }
     } catch (e) {
       // Skip INP if not supported
     }

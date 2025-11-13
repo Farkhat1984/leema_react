@@ -13,6 +13,7 @@ import { FormTextarea } from '@/shared/components/forms/FormTextarea';
 import { Modal } from '@/shared/components/ui/Modal';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { Alert, AlertDescription, AlertTitle } from '@/shared/components/feedback/Alert';
+import { useWebSocketEvent } from '@/features/websocket/hooks/useWebSocketEvent';
 
 const integrationSchema = z.object({
   api_token: z.string().min(10, 'API токен должен содержать минимум 10 символов'),
@@ -29,6 +30,8 @@ export function KaspiSettingsTab() {
   const [editingTemplate, setEditingTemplate] = useState<{ status: string; text: string } | null>(
     null
   );
+  const [timeUntilNextSync, setTimeUntilNextSync] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Get integration
   const { data: integration, isLoading } = useQuery({
@@ -87,7 +90,17 @@ export function KaspiSettingsTab() {
   // Delete integration
   const deleteMutation = useMutation({
     mutationFn: kaspiService.deleteIntegration,
+    onMutate: () => {
+      toast.loading(
+        '🗑️ Удаление интеграции...\nПроисходит удаление всех заказов и уведомлений.',
+        {
+          duration: Infinity,
+          id: 'delete-integration'
+        }
+      );
+    },
     onSuccess: () => {
+      toast.dismiss('delete-integration');
       toast.success('✅ Интеграция успешно удалена');
       setShowDeleteConfirm(false);
 
@@ -103,6 +116,7 @@ export function KaspiSettingsTab() {
       }, 1000);
     },
     onError: (error: any) => {
+      toast.dismiss('delete-integration');
       toast.error(error.response?.data?.detail || 'Ошибка удаления интеграции');
     },
   });
@@ -111,16 +125,17 @@ export function KaspiSettingsTab() {
   const syncMutation = useMutation({
     mutationFn: (data?: { force?: boolean }) => kaspiService.syncOrders(data),
     onSuccess: (data) => {
+      // Sync started in background (202 Accepted)
+      setIsSyncing(true);
       toast.success(
-        `✅ Синхронизация завершена!\n` +
-        `Новых заказов: ${data.new_orders}\n` +
-        `Обновлено: ${data.updated_orders}\n` +
-        `Уведомлений отправлено: ${data.notifications_sent}`,
-        { duration: 5000 }
+        '🔄 Синхронизация запущена!\nРезультаты появятся через несколько секунд...',
+        { duration: 3000 }
       );
+      // Refresh integration data to show "syncing" status
       queryClient.invalidateQueries({ queryKey: ['kaspi'] });
     },
     onError: (error: any) => {
+      setIsSyncing(false);
       const errorDetail = error.response?.data?.detail || 'Ошибка синхронизации';
       toast.error(`❌ ${errorDetail}`, { duration: 7000 });
     },
@@ -129,6 +144,61 @@ export function KaspiSettingsTab() {
   const handleManualSync = () => {
     syncMutation.mutate({ force: true });
   };
+
+  // Countdown timer for next auto-sync
+  useEffect(() => {
+    if (!integration?.last_sync_at) {
+      setTimeUntilNextSync(null);
+      return;
+    }
+
+    const updateCountdown = () => {
+      const lastSync = new Date(integration.last_sync_at!);
+      const syncInterval = integration.sync_interval_minutes * 60 * 1000; // Convert to ms
+      const nextSync = new Date(lastSync.getTime() + syncInterval);
+      const now = new Date();
+      const timeLeft = nextSync.getTime() - now.getTime();
+
+      if (timeLeft <= 0) {
+        setTimeUntilNextSync('Синхронизация...');
+        // Refresh integration data to get new last_sync_at
+        queryClient.invalidateQueries({ queryKey: ['kaspi', 'integration'] });
+        return;
+      }
+
+      const minutes = Math.floor(timeLeft / 60000);
+      const seconds = Math.floor((timeLeft % 60000) / 1000);
+      setTimeUntilNextSync(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    // Update immediately
+    updateCountdown();
+
+    // Update every second
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [integration?.last_sync_at, integration?.sync_interval_minutes, queryClient]);
+
+  // WebSocket event handlers for background sync results
+  useWebSocketEvent('kaspi:sync_completed', (data) => {
+    setIsSyncing(false);
+    toast.success(
+      `✅ Синхронизация завершена!\n` +
+      `Новых заказов: ${data.new_orders}\n` +
+      `Обновлено: ${data.updated_orders}\n` +
+      `Уведомлений отправлено: ${data.notifications_sent}`,
+      { duration: 5000 }
+    );
+    // Refresh data to update last_sync_at and restart timer
+    queryClient.invalidateQueries({ queryKey: ['kaspi'] });
+  });
+
+  useWebSocketEvent('kaspi:sync_error', (data) => {
+    setIsSyncing(false);
+    toast.error(`❌ Ошибка синхронизации: ${data.error}`, { duration: 7000 });
+    queryClient.invalidateQueries({ queryKey: ['kaspi', 'integration'] });
+  });
 
   // Forms
   const createForm = useForm<IntegrationFormData>({
@@ -262,7 +332,7 @@ export function KaspiSettingsTab() {
             <Alert variant="info">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                После создания интеграции выполните первую синхронизацию вручную. Затем заказы будут синхронизироваться автоматически каждые 5 минут.
+                После создания интеграции заказы будут синхронизироваться автоматически каждые 5 минут. Можете запустить первую синхронизацию вручную для мгновенного старта.
               </AlertDescription>
             </Alert>
 
@@ -301,29 +371,28 @@ export function KaspiSettingsTab() {
       {/* Status Card */}
       <Card className="p-6">
         <div className="space-y-6">
-          {/* Manual Sync Button - ПЕРВАЯ КАРТОЧКА */}
+          {/* Manual Sync Button */}
           <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-5">
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <h4 className="font-semibold text-gray-900 mb-1 flex items-center gap-2">
-                  <RefreshCw className="w-5 h-5 text-purple-600" />
-                  {!integration.last_sync_at ? 'Первая синхронизация' : 'Ручная синхронизация'}
+                  <RefreshCw className={`w-5 h-5 text-purple-600 ${isSyncing ? 'animate-spin' : ''}`} />
+                  Ручная синхронизация
                 </h4>
                 <p className="text-sm text-gray-600">
-                  {!integration.last_sync_at
-                    ? '⚡ Запустите первую синхронизацию вручную, затем она будет автоматической каждые 5 минут'
-                    : 'Запустить синхронизацию заказов из Kaspi прямо сейчас'}
+                  {isSyncing
+                    ? '🔄 Синхронизация в процессе... Подождите, данные обновляются.'
+                    : 'Запустить синхронизацию заказов из Kaspi прямо сейчас (автосинхронизация каждые 5 минут)'
+                  }
                 </p>
               </div>
               <Button
                 onClick={handleManualSync}
-                isLoading={syncMutation.isPending}
-                disabled={syncMutation.isPending}
+                disabled={isSyncing}
                 className="ml-4"
-                size={!integration.last_sync_at ? 'lg' : 'default'}
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
-                {syncMutation.isPending ? 'Синхронизация...' : 'Синхронизировать'}
+                <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                {isSyncing ? 'Синхронизация...' : 'Синхронизировать'}
               </Button>
             </div>
           </div>
@@ -346,24 +415,34 @@ export function KaspiSettingsTab() {
               <span className="text-gray-600">Статус синхронизации:</span>
               <p
                 className={`font-medium ${
-                  !integration.last_sync_status
-                    ? 'text-gray-500'
-                    : integration.last_sync_status === 'success'
-                      ? 'text-green-600'
-                      : 'text-red-600'
+                  isSyncing
+                    ? 'text-purple-600'
+                    : !integration.last_sync_status
+                      ? 'text-blue-600'
+                      : integration.last_sync_status === 'success'
+                        ? 'text-green-600'
+                        : 'text-red-600'
                 }`}
               >
-                {!integration.last_sync_status
-                  ? 'Ожидает первой синхронизации'
-                  : integration.last_sync_status === 'success'
-                    ? 'Успешно'
-                    : 'Ошибка'}
+                {isSyncing
+                  ? '🔄 Синхронизация...'
+                  : !integration.last_sync_status
+                    ? 'Готова к запуску'
+                    : integration.last_sync_status === 'success'
+                      ? 'Успешно'
+                      : 'Ошибка'}
               </p>
             </div>
             <div>
               <span className="text-gray-600">Интервал синхронизации:</span>
               <p className="font-medium">{integration.sync_interval_minutes} мин</p>
             </div>
+            {timeUntilNextSync && (
+              <div className="col-span-2">
+                <span className="text-gray-600">Следующая автосинхронизация через:</span>
+                <p className="font-medium text-purple-600 text-lg">{timeUntilNextSync}</p>
+              </div>
+            )}
           </div>
 
           {/* Error Alert - если последняя синхронизация завершилась с ошибкой */}

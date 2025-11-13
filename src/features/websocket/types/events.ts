@@ -40,6 +40,9 @@ export type WebSocketEventType =
   // Newsletter Events
   | 'newsletter.approved'
   | 'newsletter.rejected'
+  // Kaspi Events
+  | 'kaspi:order_created'
+  | 'kaspi:order_status_changed'
   // System Events
   | 'settings.updated'
   | 'whatsapp_status_changed'
@@ -57,6 +60,7 @@ export type WebSocketEventType =
 // Product Event Schema
 export const productEventSchema = z.object({
   event: z.enum(['product.created', 'product.updated', 'product.deleted', 'product.approved', 'product.rejected'] as const),
+  timestamp: z.string(),
   data: z.object({
     product_id: z.number(),
     product_name: z.string(),
@@ -65,15 +69,15 @@ export const productEventSchema = z.object({
     action: z.string(),
     moderation_status: z.string().optional(),
     rejection_reason: z.string().optional(),
-    is_active: z.boolean(),
+    is_active: z.boolean().optional(),
     product: z.record(z.unknown()).optional(),
-    timestamp: z.string(),
   }),
 });
 
 // Order Event Schema
 export const orderEventSchema = z.object({
   event: z.enum(['order.created', 'order.updated', 'order.completed', 'order.cancelled'] as const),
+  timestamp: z.string(),
   data: z.object({
     order_id: z.number(),
     order_number: z.string(),
@@ -83,13 +87,13 @@ export const orderEventSchema = z.object({
     status: z.string(),
     action: z.string(),
     order: z.record(z.unknown()).optional(),
-    timestamp: z.string(),
   }),
 });
 
 // Balance Event Schema
 export const balanceEventSchema = z.object({
   event: z.literal('balance.updated'),
+  timestamp: z.string(),
   data: z.object({
     user_id: z.number().optional(),
     shop_id: z.number().optional(),
@@ -98,13 +102,13 @@ export const balanceEventSchema = z.object({
     amount: z.number(),
     transaction_id: z.number().optional(),
     transaction_type: z.string().optional(),
-    timestamp: z.string(),
   }),
 });
 
 // Transaction Event Schema
 export const transactionEventSchema = z.object({
   event: z.enum(['transaction.completed', 'transaction.failed'] as const),
+  timestamp: z.string(),
   data: z.object({
     transaction_id: z.number(),
     user_id: z.number().optional(),
@@ -113,13 +117,13 @@ export const transactionEventSchema = z.object({
     type: z.string(),
     status: z.string(),
     description: z.string().optional(),
-    timestamp: z.string(),
   }),
 });
 
 // Review Event Schema
 export const reviewEventSchema = z.object({
   event: z.enum(['review.created', 'review.replied'] as const),
+  timestamp: z.string(),
   data: z.object({
     review_id: z.number(),
     product_id: z.number(),
@@ -128,41 +132,67 @@ export const reviewEventSchema = z.object({
     rating: z.number().min(1).max(5),
     comment: z.string().optional(),
     action: z.string(),
-    timestamp: z.string(),
   }),
 });
 
 // Shop Event Schema
 export const shopEventSchema = z.object({
   event: z.enum(['shop.created', 'shop.updated', 'shop.deleted', 'shop.approved', 'shop.rejected', 'shop.activated', 'shop.deactivated'] as const),
+  timestamp: z.string(),
   data: z.object({
     shop_id: z.number(),
     shop_name: z.string(),
     owner_name: z.string(),
     action: z.string(),
-    is_approved: z.boolean(),
-    is_active: z.boolean(),
+    is_approved: z.boolean().optional(),
+    is_active: z.boolean().optional(),
     rejection_reason: z.string().optional(),
     deactivation_reason: z.string().optional(),
     shop: z.record(z.unknown()).optional(),
-    timestamp: z.string(),
   }),
 });
 
 // Newsletter Event Schema
 export const newsletterEventSchema = z.object({
   event: z.enum(['newsletter.approved', 'newsletter.rejected'] as const),
+  timestamp: z.string().optional(),
   data: z.object({
     newsletter_id: z.number(),
     status: z.enum(['approved', 'rejected'] as const),
     rejection_reason: z.string().optional(),
-    timestamp: z.string().optional(),
+  }),
+});
+
+// Kaspi Event Schemas
+export const kaspiOrderCreatedEventSchema = z.object({
+  event: z.literal('kaspi:order_created'),
+  timestamp: z.string(),
+  data: z.object({
+    order_id: z.number(),
+    kaspi_order_code: z.string(),
+    customer_name: z.string(),
+    total_price: z.string(),
+    status: z.string(),
+    whatsapp_sent: z.boolean(),
+  }),
+});
+
+export const kaspiOrderStatusChangedEventSchema = z.object({
+  event: z.literal('kaspi:order_status_changed'),
+  timestamp: z.string(),
+  data: z.object({
+    order_id: z.number(),
+    kaspi_order_code: z.string(),
+    old_status: z.string(),
+    new_status: z.string(),
+    whatsapp_sent: z.boolean(),
   }),
 });
 
 // Notification Event Schema
 export const notificationEventSchema = z.object({
   event: z.literal('notification.new'),
+  timestamp: z.string(),
   data: z.object({
     notification_id: z.number(),
     user_id: z.number().optional(),
@@ -171,43 +201,42 @@ export const notificationEventSchema = z.object({
     title: z.string(),
     message: z.string(),
     data: z.record(z.unknown()).optional(),
-    timestamp: z.string(),
   }),
 });
 
 // WhatsApp Status Event Schema
 export const whatsappStatusEventSchema = z.object({
   event: z.literal('whatsapp_status_changed'),
+  timestamp: z.string(),
   data: z.object({
     shop_id: z.number(),
     status: z.enum(['connected', 'disconnected', 'connecting', 'error'] as const),
     phone_number: z.string().optional(),
     qr_code: z.string().optional(),
-    timestamp: z.string(),
   }),
 });
 
 // Moderation Queue Event Schema
 export const moderationQueueEventSchema = z.object({
   event: z.enum(['moderation_queue.added', 'moderation_queue.removed'] as const),
+  timestamp: z.string(),
   data: z.object({
     action: z.enum(['added', 'removed'] as const),
     pending_count: z.number(),
     product_id: z.number().optional(),
     shop_id: z.number().optional(),
-    timestamp: z.string(),
   }),
 });
 
 // Settings Event Schema
 export const settingsEventSchema = z.object({
   event: z.literal('settings.updated'),
+  timestamp: z.string(),
   data: z.object({
     setting_key: z.string(),
     old_value: z.unknown().optional(),
     new_value: z.unknown(),
     changed_by: z.number(),
-    timestamp: z.string(),
   }),
 });
 
@@ -235,6 +264,8 @@ export type TransactionEvent = z.infer<typeof transactionEventSchema>;
 export type ReviewEvent = z.infer<typeof reviewEventSchema>;
 export type ShopEvent = z.infer<typeof shopEventSchema>;
 export type NewsletterEvent = z.infer<typeof newsletterEventSchema>;
+export type KaspiOrderCreatedEvent = z.infer<typeof kaspiOrderCreatedEventSchema>;
+export type KaspiOrderStatusChangedEvent = z.infer<typeof kaspiOrderStatusChangedEventSchema>;
 export type NotificationEvent = z.infer<typeof notificationEventSchema>;
 export type WhatsAppStatusEvent = z.infer<typeof whatsappStatusEventSchema>;
 export type ModerationQueueEvent = z.infer<typeof moderationQueueEventSchema>;
@@ -255,6 +286,8 @@ export type WebSocketEvent =
   | ReviewEvent
   | ShopEvent
   | NewsletterEvent
+  | KaspiOrderCreatedEvent
+  | KaspiOrderStatusChangedEvent
   | NotificationEvent
   | WhatsAppStatusEvent
   | ModerationQueueEvent
@@ -289,6 +322,14 @@ export const isShopEvent = (event: WebSocketEvent): event is ShopEvent => {
 
 export const isNewsletterEvent = (event: WebSocketEvent): event is NewsletterEvent => {
   return 'event' in event && event.event.startsWith('newsletter.');
+};
+
+export const isKaspiOrderCreatedEvent = (event: WebSocketEvent): event is KaspiOrderCreatedEvent => {
+  return 'event' in event && event.event === 'kaspi:order_created';
+};
+
+export const isKaspiOrderStatusChangedEvent = (event: WebSocketEvent): event is KaspiOrderStatusChangedEvent => {
+  return 'event' in event && event.event === 'kaspi:order_status_changed';
 };
 
 export const isNotificationEvent = (event: WebSocketEvent): event is NotificationEvent => {
@@ -360,6 +401,10 @@ export const validateWebSocketEvent = (rawMessage: unknown): WebSocketEvent | nu
       return shopEventSchema.parse(rawMessage);
     } else if (message.event.startsWith('newsletter.')) {
       return newsletterEventSchema.parse(rawMessage);
+    } else if (message.event === 'kaspi:order_created') {
+      return kaspiOrderCreatedEventSchema.parse(rawMessage);
+    } else if (message.event === 'kaspi:order_status_changed') {
+      return kaspiOrderStatusChangedEventSchema.parse(rawMessage);
     } else if (message.event === 'notification.new') {
       return notificationEventSchema.parse(rawMessage);
     } else if (message.event === 'whatsapp_status_changed') {

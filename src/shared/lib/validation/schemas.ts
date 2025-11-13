@@ -259,9 +259,6 @@ export const topUpSchema = z.object({
     .min(100, 'Минимальная сумма пополнения: 100 KZT')
     .max(1000000, 'Максимальная сумма пополнения: 1,000,000 KZT')
     .or(z.string().transform((val) => parseFloat(val))),
-  payment_method: z.enum(['card', 'kaspi', 'paypal'] as const, {
-    errorMap: () => ({ message: 'Выберите способ оплаты' }),
-  }),
 });
 
 export type TopUpFormData = z.infer<typeof topUpSchema>;
