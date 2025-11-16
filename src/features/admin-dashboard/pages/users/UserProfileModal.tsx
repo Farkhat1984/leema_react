@@ -30,19 +30,14 @@ interface UserProfile {
   updated_at: string;
 }
 
+type UsersResponse = UserProfile[] | { users: UserProfile[] } | UserProfile;
+
 function UserProfileModal({ userId, onClose }: UserProfileModalProps) {
   const { data: user, isLoading } = useQuery<UserProfile>({
     queryKey: ['user-profile', userId],
     queryFn: async () => {
-      const response = await apiRequest<UserProfile>(`/api/v1/admin/users-all`, 'GET');
-      // Find user in the response
-      if (Array.isArray(response)) {
-        return response.find((u: any) => u.id === userId);
-      }
-      // If response has users array
-      if (response && 'users' in response) {
-        return (response as any).users.find((u: any) => u.id === userId);
-      }
+      // Use the specific user endpoint instead of fetching all users
+      const response = await apiRequest<UserProfile>(`/api/v1/admin/users/${userId}`, 'GET');
       return response;
     },
   });
