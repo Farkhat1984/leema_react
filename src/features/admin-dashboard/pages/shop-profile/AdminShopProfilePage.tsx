@@ -3,7 +3,7 @@
  * Detailed view of a specific shop for administrators
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { formatNumber } from '@/shared/lib/utils';
 import { useParams } from 'react-router-dom';
 import { Card } from '@/shared/components/feedback/Card';
@@ -11,125 +11,72 @@ import { Button } from '@/shared/components/ui/Button';
 import { Badge } from '@/shared/components/feedback/Badge';
 import { BackButton } from '@/shared/components/ui/BackButton';
 import { toast } from 'react-hot-toast';
-
-interface ShopProfile {
-  id: string;
-  name: string;
-  description: string;
-  logo?: string;
-  owner: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-  };
-  status: 'active' | 'inactive' | 'suspended' | 'pending';
-  category: string;
-  address: string;
-  phone: string;
-  website?: string;
-  registrationDate: string;
-  stats: {
-    totalProducts: number;
-    activeProducts: number;
-    totalOrders: number;
-    totalRevenue: number;
-    rating: number;
-    reviewsCount: number;
-  };
-  billing: {
-    balance: number;
-    currency: string;
-  };
-}
+import { ROUTES } from '@/shared/constants/config';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { managementService, type Shop } from '@/features/admin-dashboard/services/managementService';
+import { moderationService } from '@/features/admin-dashboard/services';
 
 export default function AdminShopProfilePage() {
   const { shopId } = useParams<{ shopId: string }>();
-  const [shop, setShop] = useState<ShopProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'info' | 'products' | 'orders' | 'billing'>('info');
 
-  useEffect(() => {
-    if (shopId) {
-      loadShopProfile(shopId);
-    }
-  }, [shopId]);
+  // Fetch shop data
+  const { data: shop, isLoading } = useQuery({
+    queryKey: ['admin', 'shop', shopId],
+    queryFn: () => managementService.getShop(Number(shopId)),
+    enabled: !!shopId,
+  });
 
-  const loadShopProfile = async (id: string) => {
-    try {
-      setLoading(true);
-      // TODO: Replace with actual API call
-      const mockShop: ShopProfile = {
-        id,
-        name: 'Fashion Style Boutique',
-        description: 'Современная женская одежда и аксессуары высокого качества',
-        logo: undefined,
-        owner: {
-          id: 'owner1',
-          name: 'Айгерим Жанбекова',
-          email: 'aigerim@example.com',
-          phone: '+7 777 123 4567',
-        },
-        status: 'active',
-        category: 'Женская одежда',
-        address: 'Алматы, пр. Абая, 123',
-        phone: '+7 727 123 4567',
-        website: 'https://fashionstyle.kz',
-        registrationDate: '2024-01-15T10:00:00Z',
-        stats: {
-          totalProducts: 145,
-          activeProducts: 132,
-          totalOrders: 1234,
-          totalRevenue: 5678900,
-          rating: 4.8,
-          reviewsCount: 456,
-        },
-        billing: {
-          balance: 125000,
-          currency: 'KZT',
-        },
-      };
-      setShop(mockShop);
-    } catch (error) {
-      toast.error('Ошибка загрузки профиля магазина');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const suspendShop = async () => {
-    if (!shop) return;
-    try {
-      // TODO: API call
-      setShop({ ...shop, status: 'suspended' });
-      toast.success('Магазин приостановлен');
-    } catch (error) {
-      toast.error('Ошибка приостановки магазина');
-    }
-  };
-
-  const activateShop = async () => {
-    if (!shop) return;
-    try {
-      // TODO: API call
-      setShop({ ...shop, status: 'active' });
+  // Activate mutation
+  const activateMutation = useMutation({
+    mutationFn: (id: number) => moderationService.activateShop(id),
+    onSuccess: () => {
       toast.success('Магазин активирован');
-    } catch (error) {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'shop', shopId] });
+    },
+    onError: () => {
       toast.error('Ошибка активации магазина');
-    }
+    },
+  });
+
+  // Deactivate mutation
+  const deactivateMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason: string }) =>
+      moderationService.deactivateShop(id, reason),
+    onSuccess: () => {
+      toast.success('Магазин деактивирован');
+      queryClient.invalidateQueries({ queryKey: ['admin', 'shop', shopId] });
+    },
+    onError: () => {
+      toast.error('Ошибка деактивации магазина');
+    },
+  });
+
+  const handleActivate = () => {
+    if (!shop) return;
+    activateMutation.mutate(shop.id);
   };
 
-  const getStatusBadge = (status: ShopProfile['status']) => {
+  const handleDeactivate = () => {
+    if (!shop) return;
+    const reason = prompt('Введите причину деактивации:');
+    if (!reason) return;
+    deactivateMutation.mutate({ id: shop.id, reason });
+  };
+
+  const getStatusBadge = (status: Shop['status']) => {
     const badges = {
       active: <Badge className="bg-green-100 text-green-800">✅ Активен</Badge>,
-      inactive: <Badge className="bg-gray-100 text-gray-800">⚪ Неактивен</Badge>,
-      suspended: <Badge className="bg-red-100 text-red-800">🚫 Приостановлен</Badge>,
+      approved: <Badge className="bg-blue-100 text-blue-800">✓ Одобрен</Badge>,
+      deactivated: <Badge className="bg-gray-100 text-gray-800">⚪ Деактивирован</Badge>,
+      rejected: <Badge className="bg-red-100 text-red-800">✕ Отклонен</Badge>,
       pending: <Badge className="bg-yellow-100 text-yellow-800">🕐 На модерации</Badge>,
     };
     return badges[status];
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -157,15 +104,15 @@ export default function AdminShopProfilePage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Профиль магазина</h1>
-        <BackButton to="/admin" />
+        <BackButton to={ROUTES.ADMIN.SHOPS} />
       </div>
 
       <div className="flex items-start gap-6">
         {/* Logo */}
         <div className="flex-shrink-0">
-          {shop.logo ? (
+          {shop.avatar ? (
             <img
-              src={shop.logo}
+              src={shop.avatar}
               alt={shop.name}
               className="w-32 h-32 rounded-lg object-cover border-2 border-gray-200"
             />
@@ -188,40 +135,43 @@ export default function AdminShopProfilePage() {
             <div className="flex gap-2">
               {shop.status === 'active' ? (
                 <Button
-                  onClick={suspendShop}
+                  onClick={handleDeactivate}
                   variant="outline"
                   className="text-red-600 border-red-600"
+                  disabled={deactivateMutation.isPending}
+                  isLoading={deactivateMutation.isPending}
                 >
-                  🚫 Приостановить
+                  🚫 Деактивировать
                 </Button>
-              ) : (
+              ) : shop.status === 'approved' ? (
                 <Button
-                  onClick={activateShop}
+                  onClick={handleActivate}
                   variant="primary"
                   className="bg-green-600"
+                  disabled={activateMutation.isPending}
+                  isLoading={activateMutation.isPending}
                 >
                   ✅ Активировать
                 </Button>
-              )}
-              <Button variant="outline">✏️ Редактировать</Button>
+              ) : null}
             </div>
           </div>
           <p className="text-gray-700 mb-4">{shop.description}</p>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <p className="text-sm text-gray-500">Категория</p>
-              <p className="font-medium">{shop.category}</p>
+              <p className="text-sm text-gray-500">Владелец</p>
+              <p className="font-medium">{shop.owner_name || 'N/A'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Дата регистрации</p>
               <p className="font-medium">
-                {new Date(shop.registrationDate).toLocaleDateString('ru-RU')}
+                {new Date(shop.created_at).toLocaleDateString('ru-RU')}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Рейтинг</p>
+              <p className="text-sm text-gray-500">Обновлен</p>
               <p className="font-medium">
-                ⭐ {shop.stats.rating} ({shop.stats.reviewsCount} отзывов)
+                {new Date(shop.updated_at).toLocaleDateString('ru-RU')}
               </p>
             </div>
           </div>
@@ -229,44 +179,37 @@ export default function AdminShopProfilePage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <Card className="p-4">
           <p className="text-sm text-gray-500 mb-1">Товары</p>
           <p className="text-2xl font-bold text-gray-900">
-            {shop.stats.activeProducts}/{shop.stats.totalProducts}
+            {shop.active_products}/{shop.total_products}
           </p>
           <p className="text-xs text-gray-600">активных/всего</p>
         </Card>
         <Card className="p-4">
           <p className="text-sm text-gray-500 mb-1">Заказы</p>
           <p className="text-2xl font-bold text-gray-900">
-            {formatNumber(shop.stats?.totalOrders)}
+            {formatNumber(shop.total_orders)}
           </p>
           <p className="text-xs text-gray-600">всего заказов</p>
         </Card>
         <Card className="p-4">
           <p className="text-sm text-gray-500 mb-1">Выручка</p>
           <p className="text-2xl font-bold text-gray-900">
-            {(shop.stats.totalRevenue / 1000).toFixed(0)}k
+            {formatNumber(shop.total_revenue)} ₸
           </p>
-          <p className="text-xs text-gray-600">{shop.billing.currency}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-gray-500 mb-1">Баланс</p>
-          <p className="text-2xl font-bold text-gray-900">
-            {formatNumber(shop.billing?.balance)}
-          </p>
-          <p className="text-xs text-gray-600">{shop.billing.currency}</p>
+          <p className="text-xs text-gray-600">всего</p>
         </Card>
       </div>
 
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <div className="flex gap-8">
-          {['info', 'products', 'orders', 'billing'].map((tab) => (
+          {(['info', 'products', 'orders', 'billing'] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab as any)}
+              onClick={() => setActiveTab(tab)}
               className={`pb-4 px-1 font-medium border-b-2 transition-colors capitalize ${
                 activeTab === tab
                   ? 'border-blue-500 text-blue-600'
@@ -296,19 +239,18 @@ export default function AdminShopProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Телефон</p>
-                  <p className="font-medium">{shop.phone}</p>
+                  <p className="font-medium">{shop.contact_phone}</p>
                 </div>
-                {shop.website && (
+                {shop.whatsapp_phone && (
                   <div>
-                    <p className="text-sm text-gray-500">Веб-сайт</p>
-                    <a
-                      href={shop.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium text-blue-600 hover:underline"
-                    >
-                      {shop.website}
-                    </a>
+                    <p className="text-sm text-gray-500">WhatsApp</p>
+                    <p className="font-medium">{shop.whatsapp_phone}</p>
+                  </div>
+                )}
+                {shop.rejection_reason && (
+                  <div>
+                    <p className="text-sm text-gray-500">Причина отклонения</p>
+                    <p className="font-medium text-red-600">{shop.rejection_reason}</p>
                   </div>
                 )}
               </div>
@@ -318,15 +260,15 @@ export default function AdminShopProfilePage() {
               <div className="space-y-2">
                 <div>
                   <p className="text-sm text-gray-500">Имя</p>
-                  <p className="font-medium">{shop.owner.name}</p>
+                  <p className="font-medium">{shop.owner_name || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-medium">{shop.owner.email}</p>
+                  <p className="font-medium">{shop.owner_email || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Телефон</p>
-                  <p className="font-medium">{shop.owner.phone}</p>
+                  <p className="text-sm text-gray-500">ID владельца</p>
+                  <p className="font-medium">{shop.owner_id}</p>
                 </div>
               </div>
             </div>

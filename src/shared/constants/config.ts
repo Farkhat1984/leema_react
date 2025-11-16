@@ -41,7 +41,7 @@ function validateEnv() {
     };
 
     return envSchema.parse(env);
-  } catch (error) {
+  } catch {
     if (error instanceof z.ZodError) {
       // Format validation errors nicely
       const errors = error.errors.map((err) => `  - ${err.path.join('.')}: ${err.message}`).join('\n');
@@ -118,6 +118,7 @@ export const ROUTES = {
     NOTIFICATIONS: '/admin/notifications',
     WARDROBES: '/admin/wardrobes',
     WARDROBE_USER: (userId: string | number) => `/admin/wardrobes/user/${userId}`,
+    KASPI: '/admin/kaspi',
   },
   // USER routes removed - users use mobile app only (www.app.leema.kz)
 } as const;

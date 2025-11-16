@@ -172,7 +172,7 @@ export const managementService = {
    * @returns List of users
    */
   getUsers: async (filters?: UserFilters): Promise<User[]> => {
-    const response = await apiRequest<any>(`${API_ENDPOINTS.ADMIN.USERS}-all`, 'GET', null, filters);
+    const response = await apiRequest<unknown>(`${API_ENDPOINTS.ADMIN.USERS}-all`, 'GET', null, filters);
     return response.users || response;
   },
 
@@ -337,6 +337,15 @@ export const managementService = {
     return apiRequest<ShopsResponse>(API_ENDPOINTS.ADMIN.SHOPS, 'GET', null, filters)
   },
 
+  /**
+   * Get shop by ID
+   * @param id - Shop ID
+   * @returns Shop details
+   */
+  getShop: async (id: number): Promise<Shop> => {
+    return apiRequest<Shop>(API_ENDPOINTS.ADMIN.SHOP_BY_ID(id))
+  },
+
   // ==================== WARDROBES ====================
 
   /**
@@ -351,8 +360,8 @@ export const managementService = {
    * Get wardrobe statistics
    * @returns Wardrobe stats
    */
-  getWardrobeStats: async (): Promise<any> => {
-    return apiRequest<any>(API_ENDPOINTS.ADMIN.WARDROBES_STATS)
+  getWardrobeStats: async (): Promise<unknown> => {
+    return apiRequest<unknown>(API_ENDPOINTS.ADMIN.WARDROBES_STATS)
   },
 
   /**
