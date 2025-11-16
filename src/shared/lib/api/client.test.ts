@@ -401,7 +401,7 @@ describe('API Client - Response Interceptor', () => {
 
       try {
         await apiRequest('/api/protected');
-      } catch (error) {
+      } catch {
         // Expected to fail
       }
 
@@ -430,7 +430,7 @@ describe('API Client - Response Interceptor', () => {
 
       try {
         await apiRequest('/api/protected');
-      } catch (error) {
+      } catch {
         // Expected to fail
       }
 
@@ -519,7 +519,7 @@ describe('API Client - Response Interceptor', () => {
 
       try {
         await apiRequest('/api/test');
-      } catch (error) {
+      } catch {
         // Expected to fail
       }
 

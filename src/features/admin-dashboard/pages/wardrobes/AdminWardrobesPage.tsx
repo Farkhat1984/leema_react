@@ -66,7 +66,7 @@ function WardrobesPage() {
       );
       setStats(response);
       setUsers(response.top_users || []);
-    } catch (error) {
+    } catch {
       logger.error('Failed to load wardrobe stats', error);
     } finally {
       setIsLoading(false);
@@ -184,7 +184,7 @@ function WardrobesPage() {
               <p className="text-gray-600 mt-1">Просмотр гардеробов всех пользователей</p>
             </div>
           </div>
-          <BackButton to="/admin" />
+          <BackButton to={ROUTES.ADMIN.DASHBOARD} />
         </div>
 
         <div className="space-y-6">

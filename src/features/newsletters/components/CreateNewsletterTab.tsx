@@ -90,7 +90,7 @@ export function CreateNewsletterTab() {
         const result = await newslettersService.createNewsletter(data)
         toast.dismiss('upload')
         return result
-      } catch (error) {
+      } catch {
         toast.dismiss('upload')
         throw error
       }
@@ -133,7 +133,7 @@ export function CreateNewsletterTab() {
       }
       logger.debug('Submitting newsletter', { title: data.title, recipientCount: data.recipient_ids?.length || 0 })
       await createMutation.mutateAsync(data)
-    } catch (error) {
+    } catch {
       logger.error('Newsletter submission error', error)
       // Error is already handled by mutation's onError
     }

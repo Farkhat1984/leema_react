@@ -75,7 +75,7 @@ export class ShopOperations {
         message: 'Shop created successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ShopOperations] Failed to create shop', error);
       handleError(error, {
         context: {
@@ -148,7 +148,7 @@ export class ShopOperations {
         message: 'Shop profile updated successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ShopOperations] Failed to update shop profile', error);
       handleError(error, {
         context: {
@@ -200,7 +200,7 @@ export class ShopOperations {
         message: 'Avatar uploaded successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ShopOperations] Failed to upload avatar', error);
       handleError(error, {
         context: {
@@ -240,7 +240,7 @@ export class ShopOperations {
         message: 'Analytics fetched successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ShopOperations] Failed to fetch analytics', error);
       handleError(error, {
         context: {
@@ -279,7 +279,7 @@ export class ShopOperations {
         message: 'Analytics exported successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ShopOperations] Failed to export analytics', error);
       handleError(error, {
         context: {
@@ -315,7 +315,7 @@ export class ShopOperations {
         message: 'Shop deleted successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ShopOperations] Failed to delete shop', error);
       handleError(error, {
         context: {

@@ -84,7 +84,7 @@ function AdminProductsPage() {
         API_ENDPOINTS.CATEGORIES.LIST
       );
       setCategories(Array.isArray(response) ? response : []);
-    } catch (error) {
+    } catch {
       logger.error('Failed to load categories', error);
       setCategories([]);
     }
@@ -111,7 +111,7 @@ function AdminProductsPage() {
         name: shop.shop_name
       }));
       setShops(shopsArray);
-    } catch (error) {
+    } catch {
       logger.error('Failed to load shops', error);
       setShops([]);
     }
@@ -126,7 +126,7 @@ function AdminProductsPage() {
         API_ENDPOINTS.ADMIN.PRODUCTS_STATS
       );
       setStats(response);
-    } catch (error) {
+    } catch {
       logger.error('Failed to load stats', error);
       // Keep default stats on error (don't show error to user)
       setStats({
@@ -168,7 +168,7 @@ function AdminProductsPage() {
       const productsArray = Array.isArray(response.products) ? response.products : [];
       setProducts(productsArray);
       setTotalPages(response.total_pages || 1);
-    } catch (error) {
+    } catch {
       logger.error('Failed to load products', error);
       toast.error('Failed to load products');
       setProducts([]); // Set empty array on error
@@ -219,7 +219,7 @@ function AdminProductsPage() {
       setShowApproveDialog(false);
       loadStats();
       loadProducts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Failed to approve product', error);
       toast.error(error.message || 'Failed to approve product');
     } finally {
@@ -245,7 +245,7 @@ function AdminProductsPage() {
       setShowRejectModal(false);
       loadStats();
       loadProducts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Failed to reject product', error);
       toast.error(error.message || 'Failed to reject product');
     } finally {
@@ -277,7 +277,7 @@ function AdminProductsPage() {
       setSelectedIds([]);
       loadStats();
       loadProducts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Failed to bulk approve', error);
       toast.error(error.message || 'Failed to approve products');
     } finally {
@@ -313,7 +313,7 @@ function AdminProductsPage() {
       setSelectedIds([]);
       loadStats();
       loadProducts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Failed to bulk reject', error);
       toast.error(error.message || 'Failed to reject products');
     } finally {

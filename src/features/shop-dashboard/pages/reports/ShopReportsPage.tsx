@@ -58,7 +58,7 @@ function ShopReportsPage() {
       window.URL.revokeObjectURL(url);
 
       toast.success('Отчет успешно сгенерирован');
-    } catch (error) {
+    } catch {
       logger.error('Failed to generate report', error);
       toast.error('Не удалось сгенерировать отчет');
     } finally {

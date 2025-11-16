@@ -53,7 +53,7 @@ export default function AdminShopsPendingPage() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shops'] });
       toast.success('Магазин одобрен! Владелец получит уведомление.');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error approving shop', error);
       toast.error(error.message || 'Ошибка одобрения магазина');
     },
@@ -70,7 +70,7 @@ export default function AdminShopsPendingPage() {
       setRejectReason('');
       setSelectedShop(null);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error rejecting shop', error);
       toast.error(error.message || 'Ошибка отклонения магазина');
     },
@@ -137,7 +137,7 @@ export default function AdminShopsPendingPage() {
         </Card>
       ) : (
         <div className="grid gap-6">
-          {shops.map((shop: any) => (
+          {shops.map((shop: unknown) => (
             <Card key={shop.id} className="p-6">
               <div className="flex items-start gap-6">
                 {/* Logo */}

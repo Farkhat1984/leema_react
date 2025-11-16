@@ -20,7 +20,7 @@ interface Notification {
   read: boolean;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   actionUrl?: string;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 export default function AdminNotificationsPage() {
@@ -34,9 +34,9 @@ export default function AdminNotificationsPage() {
     // Subscribe to WebSocket notifications
     const unsubscribe = subscribe('notification.new', (data) => {
       // Extract notification from the event data
-      const notification = (data as any).notification;
-      if (notification) {
-        addNotification(notification as Notification);
+      const eventData = data as { notification?: Notification };
+      if (eventData.notification) {
+        addNotification(eventData.notification);
       }
     });
 
@@ -99,7 +99,7 @@ export default function AdminNotificationsPage() {
         },
       ];
       setNotifications(mockNotifications);
-    } catch (error) {
+    } catch {
       toast.error('Ошибка загрузки уведомлений');
     }
   };
@@ -118,7 +118,7 @@ export default function AdminNotificationsPage() {
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
-    } catch (error) {
+    } catch {
       toast.error('Ошибка обновления уведомления');
     }
   };
@@ -127,7 +127,7 @@ export default function AdminNotificationsPage() {
     try {
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       toast.success('Все уведомления отмечены как прочитанные');
-    } catch (error) {
+    } catch {
       toast.error('Ошибка обновления уведомлений');
     }
   };
@@ -136,7 +136,7 @@ export default function AdminNotificationsPage() {
     try {
       setNotifications((prev) => prev.filter((n) => n.id !== id));
       toast.success('Уведомление удалено');
-    } catch (error) {
+    } catch {
       toast.error('Ошибка удаления уведомления');
     }
   };

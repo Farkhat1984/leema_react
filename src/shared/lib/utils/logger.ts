@@ -121,11 +121,11 @@ class Logger {
         console.info(prefix, message, sanitizedContext);
         break;
       case LogLevel.WARN:
-        // eslint-disable-next-line no-console
+         
         console.warn(prefix, message, sanitizedContext);
         break;
       case LogLevel.ERROR:
-        // eslint-disable-next-line no-console
+         
         console.error(prefix, message, sanitizedContext);
         break;
     }

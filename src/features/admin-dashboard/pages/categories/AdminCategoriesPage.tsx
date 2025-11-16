@@ -97,9 +97,10 @@ function AdminCategoriesPage() {
       setIsCreateModalOpen(false);
       reset();
     },
-    onError: (error: any, _variables, context) => {
+    onError: (error: unknown, _variables, context) => {
       // Extract error message from API response
-      const errorMessage = error?.error?.message || error?.message || 'Не удалось создать категорию';
+      const err = error as { error?: { message?: string }; message?: string };
+      const errorMessage = err?.error?.message || err?.message || 'Не удалось создать категорию';
       toast.error(errorMessage);
       // Rollback to previous data
       if (context?.previousCategories) {
@@ -155,9 +156,10 @@ function AdminCategoriesPage() {
       setEditingCategory(null);
       reset();
     },
-    onError: (error: any, _variables, context) => {
+    onError: (error: unknown, _variables, context) => {
       // Extract error message from API response
-      const errorMessage = error?.error?.message || error?.message || 'Не удалось обновить категорию';
+      const err = error as { error?: { message?: string }; message?: string };
+      const errorMessage = err?.error?.message || err?.message || 'Не удалось обновить категорию';
       toast.error(errorMessage);
       // Rollback to previous data
       if (context?.previousCategories) {
@@ -198,9 +200,10 @@ function AdminCategoriesPage() {
       toast.success('Категория успешно удалена');
       setDeletingCategoryId(null);
     },
-    onError: (error: any, _variables, context) => {
+    onError: (error: unknown, _variables, context) => {
       // Extract error message from API response
-      const errorMessage = error?.error?.message || error?.message || 'Не удалось удалить категорию';
+      const err = error as { error?: { message?: string }; message?: string };
+      const errorMessage = err?.error?.message || err?.message || 'Не удалось удалить категорию';
       toast.error(errorMessage);
       // Rollback to previous data
       if (context?.previousCategories) {

@@ -28,7 +28,7 @@ export const contactsService = {
     if (params.search) queryParams.append('search', params.search)
 
     const url = `${API_ENDPOINTS.SHOPS.CONTACTS}?${queryParams.toString()}`
-    const response = await apiRequest<any>(url)
+    const response = await apiRequest<unknown>(url)
 
     // Transform backend response to match frontend expectations
     return {

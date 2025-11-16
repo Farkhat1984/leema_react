@@ -15,7 +15,7 @@ export interface Product {
   description?: string
   price: number
   images?: string[]
-  characteristics?: Record<string, any>
+  characteristics?: Record<string, unknown>
   category_id?: number
   moderation_status: 'pending' | 'approved' | 'rejected'
   rejection_reason?: string | null
@@ -115,8 +115,8 @@ export const moderationService = {
    * Get product statistics
    * @returns Product stats
    */
-  getProductStats: async (): Promise<any> => {
-    return apiRequest<any>(API_ENDPOINTS.ADMIN.PRODUCTS_STATS)
+  getProductStats: async (): Promise<unknown> => {
+    return apiRequest<unknown>(API_ENDPOINTS.ADMIN.PRODUCTS_STATS)
   },
 
   /**
@@ -317,8 +317,8 @@ export const moderationService = {
    * Get newsletter statistics
    * @returns Newsletter stats
    */
-  getNewsletterStats: async (): Promise<any> => {
-    return apiRequest<any>(API_ENDPOINTS.ADMIN.NEWSLETTER_STATS)
+  getNewsletterStats: async (): Promise<unknown> => {
+    return apiRequest<unknown>(API_ENDPOINTS.ADMIN.NEWSLETTER_STATS)
   },
 
   // ==================== REFUNDS ====================
@@ -426,8 +426,8 @@ export const moderationService = {
    * Get moderation queue
    * @returns Moderation queue items
    */
-  getModerationQueue: async (): Promise<any> => {
-    return apiRequest<any>(API_ENDPOINTS.ADMIN.MODERATION_QUEUE)
+  getModerationQueue: async (): Promise<unknown> => {
+    return apiRequest<unknown>(API_ENDPOINTS.ADMIN.MODERATION_QUEUE)
   },
 }
 

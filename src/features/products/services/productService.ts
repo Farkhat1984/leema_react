@@ -15,7 +15,7 @@ export interface Product {
   description?: string | null
   price: number
   images?: string[]
-  characteristics?: Record<string, any>
+  characteristics?: Record<string, unknown>
   category_id?: number | null
   category_name?: string
   moderation_status: 'pending' | 'approved' | 'rejected'

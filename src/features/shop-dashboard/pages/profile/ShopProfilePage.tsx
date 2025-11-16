@@ -148,7 +148,7 @@ function ShopProfilePage() {
               <UserCog className="text-purple-600 w-6 h-6 mr-3" />
               <span className="text-xl font-bold text-gray-900">Настройки профиля</span>
             </div>
-            <BackButton to="/shop" />
+            <BackButton to={ROUTES.SHOP.DASHBOARD} />
           </div>
         </div>
       </nav>

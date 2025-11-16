@@ -74,7 +74,7 @@ export default function ShopNotificationsPage() {
         },
       ];
       setNotifications(mockNotifications);
-    } catch (error) {
+    } catch {
       toast.error('Ошибка загрузки уведомлений');
     }
   };
@@ -90,7 +90,7 @@ export default function ShopNotificationsPage() {
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
-    } catch (error) {
+    } catch {
       toast.error('Ошибка обновления уведомления');
     }
   };
@@ -100,7 +100,7 @@ export default function ShopNotificationsPage() {
       // TODO: API call to mark all as read
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       toast.success('Все уведомления отмечены как прочитанные');
-    } catch (error) {
+    } catch {
       toast.error('Ошибка обновления уведомлений');
     }
   };
@@ -110,7 +110,7 @@ export default function ShopNotificationsPage() {
       // TODO: API call to delete
       setNotifications((prev) => prev.filter((n) => n.id !== id));
       toast.success('Уведомление удалено');
-    } catch (error) {
+    } catch {
       toast.error('Ошибка удаления уведомления');
     }
   };

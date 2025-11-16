@@ -51,7 +51,7 @@ export function useErrorHandler() {
       return async (...args: Args): Promise<T | null> => {
         try {
           return await fn(...args);
-        } catch (error) {
+        } catch {
           handleComponentError(error, options);
           return null;
         }

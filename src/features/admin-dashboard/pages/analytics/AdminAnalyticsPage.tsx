@@ -36,7 +36,7 @@ function AdminAnalyticsPage() {
   const [dateRange, setDateRange] = useState<DateRange>({});
 
   // Fetch analytics data
-  const { data: analytics, isLoading } = useQuery<AnalyticsData>({
+  const { data: analytics } = useQuery<AnalyticsData>({
     queryKey: ['admin-analytics', period, dateRange],
     queryFn: () => {
       const params = new URLSearchParams({
@@ -69,7 +69,7 @@ function AdminAnalyticsPage() {
       a.download = `platform-analytics-${new Date().toISOString()}.${format}`;
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch {
       logger.error('Export failed', error);
     }
   };

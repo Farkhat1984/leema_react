@@ -94,7 +94,7 @@ function AuthCallbackPage() {
         finalAccountType = 'shop';
 
         // Check if shop is approved and active
-        const shopData: any = response.shop;
+        const shopData: unknown = response.shop;
         const isApproved = shopData.is_approved === true;
         const isActive = shopData.is_active === true;
 
@@ -113,7 +113,7 @@ function AuthCallbackPage() {
         }
 
         // Create minimal user object for shop (shop acts as user)
-        const shopAsUser: any = {
+        const shopAsUser: unknown = {
           id: String(shopData.id),
           email: shopData.email || '',
           name: shopData.shop_name || shopData.name || 'Shop Owner',
@@ -214,7 +214,7 @@ function AuthCallbackPage() {
 
         navigate(redirectPath, { replace: true });
       }, 500); // Increased delay to 500ms to ensure persistence completes
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('[AuthCallback] Auth callback error', {
         error: err,
         message: err.message,

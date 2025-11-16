@@ -1,5 +1,4 @@
 import { Calendar, TrendingUp, BarChart3 } from 'lucide-react'
-import { Button } from '@/shared/components/ui/Button'
 import type { TimePeriod } from '../types/analytics.types'
 
 interface PeriodSelectorProps {

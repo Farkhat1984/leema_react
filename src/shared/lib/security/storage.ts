@@ -54,7 +54,7 @@ export const removeAccessToken = (): void => {
 export const setUserData = (data: Record<string, unknown>): void => {
   try {
     localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(data));
-  } catch (error) {
+  } catch {
     logger.error('Failed to store user data', error);
   }
 };
@@ -66,7 +66,7 @@ export const getUserData = <T = Record<string, unknown>>(): T | null => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.USER_DATA);
     return data ? JSON.parse(data) : null;
-  } catch (error) {
+  } catch {
     logger.error('Failed to retrieve user data', error);
     return null;
   }
@@ -85,7 +85,7 @@ export const removeUserData = (): void => {
 export const setPreferences = (preferences: Record<string, unknown>): void => {
   try {
     localStorage.setItem(STORAGE_KEYS.PREFERENCES, JSON.stringify(preferences));
-  } catch (error) {
+  } catch {
     logger.error('Failed to store preferences', error);
   }
 };
@@ -97,7 +97,7 @@ export const getPreferences = <T = Record<string, unknown>>(): T | null => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.PREFERENCES);
     return data ? JSON.parse(data) : null;
-  } catch (error) {
+  } catch {
     logger.error('Failed to retrieve preferences', error);
     return null;
   }
@@ -147,7 +147,7 @@ export const decodeJWT = <T = Record<string, unknown>>(token: string): T | null 
     );
 
     return JSON.parse(jsonPayload);
-  } catch (error) {
+  } catch {
     logger.error('Failed to decode JWT', error);
     return null;
   }

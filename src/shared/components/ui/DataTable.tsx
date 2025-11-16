@@ -183,7 +183,7 @@ export function DataTable<TData>({
   let totalPages = 0;
   try {
     totalPages = manualPagination ? (pageCount || 0) : (table.getPageCount?.() || 0);
-  } catch (error) {
+  } catch {
     logger.warn('[DataTable] Error getting page count', error);
     totalPages = 0;
   }

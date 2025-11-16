@@ -4,8 +4,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Shirt, Image as ImageIcon, Eye, User as UserIcon, X } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Image as ImageIcon, Eye, User as UserIcon, X } from 'lucide-react';
 import { BackButton } from '@/shared/components/ui/BackButton';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
@@ -14,7 +14,6 @@ import { Card } from '@/shared/components/feedback/Card';
 import { Spinner } from '@/shared/components/feedback/Spinner';
 import { DataTable } from '@/shared/components/ui/DataTable';
 import { StatsCard } from '@/shared/components/ui/StatsCard';
-import { SearchInput } from '@/shared/components/ui/SearchInput';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { DetailModal } from '@/shared/components/ui/DetailModal';
 import { Button } from '@/shared/components/ui/Button';
@@ -113,7 +112,7 @@ function AdminUserWardrobePage() {
       setWardrobes(response.items || []);
       setTotalItems(response.total);
       setTotalPages(Math.ceil(response.total / limit));
-    } catch (error) {
+    } catch {
       logger.error('Failed to load user wardrobe', error);
       setWardrobes([]);
     } finally {

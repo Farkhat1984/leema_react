@@ -27,8 +27,8 @@ export function ContactFormModal({
     formState: { errors, isSubmitting },
     setValue,
     watch,
-  } = useForm({
-    resolver: zodResolver(contactSchema) as any,
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
     defaultValues: contact
       ? {
           full_name: contact.full_name,
@@ -47,7 +47,7 @@ export function ContactFormModal({
       isOpen={isOpen}
       onClose={onClose}
       title={title || (contact ? 'Редактировать контакт' : 'Добавить контакт')}
-      onSubmit={handleSubmit(onSubmit as any)}
+      onSubmit={handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
       size="lg"
     >

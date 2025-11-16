@@ -23,6 +23,16 @@ import {
   TrendingUp,
   Box,
   BarChart3,
+  Store,
+  Clock,
+  Check,
+  Zap,
+  XCircle,
+  Pause,
+  Star,
+  Sparkles,
+  UserPlus,
+  Wallet,
   type LucideIcon
 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
@@ -32,7 +42,7 @@ export interface StatsCardProps {
   title: string;
   value: string | number;
   icon?: ReactNode | string; // Support both JSX elements and icon names
-  variant?: 'primary' | 'success' | 'warning' | 'danger' | 'info'; // Color variants
+  variant?: 'primary' | 'success' | 'warning' | 'danger' | 'error' | 'info'; // Color variants
   trend?: {
     value: number;
     isPositive: boolean;
@@ -59,6 +69,10 @@ const variantStyles = {
     bg: 'bg-red-100',
     text: 'text-red-600',
   },
+  error: {
+    bg: 'bg-red-100',
+    text: 'text-red-600',
+  },
   info: {
     bg: 'bg-purple-100',
     text: 'text-purple-600',
@@ -76,6 +90,16 @@ const iconMap: Record<string, LucideIcon> = {
   dollar: DollarSign,
   'trending-up': TrendingUp,
   chart: BarChart3,
+  store: Store,
+  clock: Clock,
+  check: Check,
+  zap: Zap,
+  'x-circle': XCircle,
+  pause: Pause,
+  star: Star,
+  sparkles: Sparkles,
+  'user-plus': UserPlus,
+  wallet: Wallet,
 }
 
 export const StatsCard = ({

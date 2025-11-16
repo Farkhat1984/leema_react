@@ -32,13 +32,6 @@ import { Spinner } from '@/shared/components/feedback/Spinner';
 import { NotificationDropdown } from '@/shared/components/layout/NotificationDropdown';
 import { ROUTES } from '@/shared/constants/config';
 
-interface AdminStats {
-  totalUsers: number;
-  totalShops: number;
-  totalProducts: number;
-  pendingModeration: number;
-}
-
 function AdminDashboard() {
   const { user } = useAuthStore();
 
@@ -56,15 +49,6 @@ function AdminDashboard() {
     queryKey: ['admin', 'dashboard'],
     queryFn: adminService.getDashboard,
     staleTime: 1000 * 60 * 2, // 2 minutes
-  });
-
-  /**
-   * Fetch admin analytics
-   */
-  const { data: analytics } = useQuery({
-    queryKey: ['admin', 'analytics'],
-    queryFn: adminService.getAnalytics,
-    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   /**

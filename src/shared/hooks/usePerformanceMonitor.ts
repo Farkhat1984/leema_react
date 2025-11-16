@@ -6,10 +6,14 @@
 import { useEffect, useRef } from 'react';
 import { logger } from '@/shared/lib/utils/logger';
 
-interface PerformanceMetrics {
-  componentName: string;
-  renderTime: number;
-  timestamp: number;
+interface PerformanceEventTiming extends PerformanceEntry {
+  processingStart: number;
+  startTime: number;
+}
+
+interface LayoutShiftEntry extends PerformanceEntry {
+  value: number;
+  hadRecentInput: boolean;
 }
 
 /**
@@ -62,8 +66,9 @@ export function useWebVitals(): void {
       // First Input Delay (FID)
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        entries.forEach((entry: any) => {
-          const fid = entry.processingStart - entry.startTime;
+        entries.forEach((entry) => {
+          const fidEntry = entry as PerformanceEventTiming;
+          const fid = fidEntry.processingStart - fidEntry.startTime;
           logger.info('[Web Vitals] FID', { fid: fid.toFixed(2) + 'ms' });
         });
       });
@@ -72,8 +77,9 @@ export function useWebVitals(): void {
       let clsScore = 0;
       const clsObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          if (!(entry as any).hadRecentInput) {
-            clsScore += (entry as any).value;
+          const clsEntry = entry as LayoutShiftEntry;
+          if (!clsEntry.hadRecentInput) {
+            clsScore += clsEntry.value;
           }
         }
         logger.info('[Web Vitals] CLS', { cls: clsScore.toFixed(4) });
@@ -132,7 +138,7 @@ export function logBundleMetrics() {
   if (import.meta.env.PROD && 'performance' in window) {
     window.addEventListener('load', () => {
       setTimeout(() => {
-        const perfData = performance.getEntriesByType('navigation')[0] as any;
+        const perfData = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
         const paintData = performance.getEntriesByType('paint');
 
         logger.info('[Bundle Metrics]', {

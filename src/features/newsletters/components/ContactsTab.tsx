@@ -122,7 +122,7 @@ export function ContactsTab() {
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
       toast.success('Контакты экспортированы успешно')
-    } catch (error) {
+    } catch {
       toast.error('Ошибка при экспорте контактов')
     }
   }
@@ -140,7 +140,7 @@ export function ContactsTab() {
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
       toast.success('Шаблон загружен успешно')
-    } catch (error) {
+    } catch {
       toast.error('Ошибка при загрузке шаблона')
     }
   }

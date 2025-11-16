@@ -54,7 +54,7 @@ function PaymentSuccessPage() {
 
       setPaymentDetails(response);
       setIsProcessing(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Payment capture error', err);
       setError(err.message || 'Failed to process payment');
       setIsProcessing(false);

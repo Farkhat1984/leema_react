@@ -99,7 +99,7 @@ export class AuthOperations {
         message: 'Login successful'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[AuthOperations] Google login failed', error);
       handleError(error, {
         context: {
@@ -162,7 +162,7 @@ export class AuthOperations {
         message: 'Login successful'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[AuthOperations] Apple login failed', error);
       handleError(error, {
         context: {
@@ -203,7 +203,7 @@ export class AuthOperations {
         message: 'Logout successful'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[AuthOperations] Logout failed', error);
 
       // Don't show error to user - logout should always succeed on client
@@ -244,7 +244,7 @@ export class AuthOperations {
         message: 'Token refreshed'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[AuthOperations] Token refresh failed', error);
 
       // Don't show toast - this is handled by API client
@@ -275,7 +275,7 @@ export class AuthOperations {
         message: 'User fetched successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[AuthOperations] Failed to fetch user', error);
       handleError(error, {
         context: {
@@ -319,7 +319,7 @@ export class AuthOperations {
         message: 'Profile updated successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[AuthOperations] Failed to update profile', error);
       handleError(error, {
         context: {

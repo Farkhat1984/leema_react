@@ -33,7 +33,7 @@ export const newslettersService = {
     if (params.status) queryParams.append('status', params.status)
 
     const url = `${API_ENDPOINTS.SHOPS.NEWSLETTERS}?${queryParams.toString()}`
-    const response = await apiRequest<any>(url)
+    const response = await apiRequest<unknown>(url)
 
     // Transform backend response to match frontend expectations
     return {
@@ -70,7 +70,7 @@ export const newslettersService = {
             formData
           )
           imageUrls.push(response.image_url || response.url)
-        } catch (error) {
+        } catch {
           // Error already logged by API client
           throw new Error('Failed to upload newsletter image')
         }
@@ -122,7 +122,7 @@ export const newslettersService = {
     if (params.shop_id) queryParams.append('shop_id', params.shop_id.toString())
 
     const url = `${API_ENDPOINTS.ADMIN.NEWSLETTERS}?${queryParams.toString()}`
-    const response = await apiRequest<any>(url)
+    const response = await apiRequest<unknown>(url)
 
     // Backend returns { data, total, page, per_page, total_pages }
     return {

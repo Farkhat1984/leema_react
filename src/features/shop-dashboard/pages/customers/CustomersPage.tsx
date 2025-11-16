@@ -80,7 +80,7 @@ function CustomersPage() {
 
       setCustomers(response.data);
       setTotalPages(Math.ceil(response.total / limit));
-    } catch (error) {
+    } catch {
       logger.error('Failed to load customers', error);
       setCustomers([]);
     } finally {
@@ -94,7 +94,7 @@ function CustomersPage() {
         `${API_ENDPOINTS.SHOPS.ME}/customers/stats`
       );
       setStats(response);
-    } catch (error) {
+    } catch {
       logger.error('Failed to load customer stats', error);
     }
   };

@@ -27,7 +27,7 @@ export const useSecureStorage = <T>(
     try {
       const item = storage.getItem(key);
       return item ? deserialize(item) : initialValue;
-    } catch (error) {
+    } catch {
       logger.error(`Error reading from ${type}Storage`, error);
       return initialValue;
     }
@@ -49,7 +49,7 @@ export const useSecureStorage = <T>(
             detail: { key, value: valueToStore, type },
           })
         );
-      } catch (error) {
+      } catch {
         logger.error(`Error writing to ${type}Storage`, error);
       }
     },
@@ -67,7 +67,7 @@ export const useSecureStorage = <T>(
           detail: { key, value: null, type },
         })
       );
-    } catch (error) {
+    } catch {
       logger.error(`Error removing from ${type}Storage`, error);
     }
   }, [key, storage, initialValue, type]);
@@ -81,7 +81,7 @@ export const useSecureStorage = <T>(
           try {
             const newValue = e.newValue ? deserialize(e.newValue) : initialValue;
             setStoredValue(newValue);
-          } catch (error) {
+          } catch {
             logger.error('Error parsing storage event', error);
           }
         }

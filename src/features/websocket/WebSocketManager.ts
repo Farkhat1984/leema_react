@@ -136,7 +136,7 @@ export const useWebSocketStore = create<WSState>((set, get) => ({
             handlers.forEach((handler) => {
               try {
                 handler(validatedEvent);
-              } catch (error) {
+              } catch {
                 handleError(error, {
                   showToast: false, // Don't spam user with handler errors
                   logError: true,
@@ -145,7 +145,7 @@ export const useWebSocketStore = create<WSState>((set, get) => ({
               }
             });
           }
-        } catch (error) {
+        } catch {
           handleError(error, {
             showToast: false,
             logError: true,
@@ -208,7 +208,7 @@ export const useWebSocketStore = create<WSState>((set, get) => ({
       };
 
       set({ socket });
-    } catch (error) {
+    } catch {
       set({ isConnecting: false });
       handleError(createError.websocket.connectionError(), {
         showToast: true,

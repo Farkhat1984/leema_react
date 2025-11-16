@@ -164,7 +164,7 @@ export function initSentry(): void {
       release: import.meta.env.VITE_APP_VERSION,
     });
 
-  } catch (error) {
+  } catch {
     logger.error('[Sentry] Failed to initialize', error);
   }
 }

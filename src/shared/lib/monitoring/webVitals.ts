@@ -241,7 +241,7 @@ export async function initializeWebVitals(): Promise<void> {
     // Track Largest Contentful Paint (loading performance)
     try {
       onLCP(handleMetric, reportOpts);
-    } catch (error) {
+    } catch {
       if (CONFIG.IS_DEV) {
         logger.debug('LCP metric failed to initialize', { error });
       }
@@ -252,7 +252,7 @@ export async function initializeWebVitals(): Promise<void> {
       if (onINP && typeof onINP === 'function') {
         onINP(handleMetric, reportOpts);
       }
-    } catch (error) {
+    } catch {
       // INP metric might not be supported in all browsers
       if (CONFIG.IS_DEV) {
         logger.debug('INP metric not supported', { error });
@@ -262,7 +262,7 @@ export async function initializeWebVitals(): Promise<void> {
     // Track Cumulative Layout Shift (visual stability)
     try {
       onCLS(handleMetric, reportOpts);
-    } catch (error) {
+    } catch {
       if (CONFIG.IS_DEV) {
         logger.debug('CLS metric failed to initialize', { error });
       }
@@ -271,7 +271,7 @@ export async function initializeWebVitals(): Promise<void> {
     // Track First Contentful Paint (rendering)
     try {
       onFCP(handleMetric, reportOpts);
-    } catch (error) {
+    } catch {
       if (CONFIG.IS_DEV) {
         logger.debug('FCP metric failed to initialize', { error });
       }
@@ -280,7 +280,7 @@ export async function initializeWebVitals(): Promise<void> {
     // Track Time to First Byte (server response)
     try {
       onTTFB(handleMetric, reportOpts);
-    } catch (error) {
+    } catch {
       if (CONFIG.IS_DEV) {
         logger.debug('TTFB metric failed to initialize', { error });
       }
@@ -290,7 +290,7 @@ export async function initializeWebVitals(): Promise<void> {
       environment: CONFIG.ENV,
       reportAllChanges: reportOpts.reportAllChanges,
     });
-  } catch (error) {
+  } catch {
     logger.error('Failed to initialize Web Vitals', error);
   }
 }
@@ -305,7 +305,7 @@ export async function getWebVitalsSummary(): Promise<Record<string, EnrichedMetr
   const collectMetric = (metric: Metric) => {
     try {
       metrics[metric.name] = enrichMetric(metric);
-    } catch (error) {
+    } catch {
       // Silently skip metrics that fail to enrich
       if (CONFIG.IS_DEV) {
         logger.debug('Failed to enrich metric', { metric, error });
@@ -346,7 +346,7 @@ export async function getWebVitalsSummary(): Promise<Record<string, EnrichedMetr
     } catch (e) {
       // Skip TTFB if fails
     }
-  } catch (error) {
+  } catch {
     logger.error('Error collecting web vitals', error);
   }
 

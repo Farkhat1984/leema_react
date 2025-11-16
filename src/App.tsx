@@ -11,6 +11,7 @@ import { AuthInitializer } from './features/auth/components/AuthInitializer';
 import { useWebSocketStore } from './features/websocket';
 import { useAuthStore } from './features/auth/store/authStore';
 import { ROLES } from './constants/roles';
+import { logger } from './shared/lib/utils/logger';
 
 function App() {
   const { accessToken, user, shop } = useAuthStore();
@@ -20,7 +21,7 @@ function App() {
   // Memoize connect/disconnect to prevent unnecessary re-renders
   const handleConnect = useCallback(() => {
     if (!accessToken || !user) {
-      console.log('[WebSocket] Не подключаемся: нет токена или пользователя', { accessToken: !!accessToken, user: !!user });
+      logger.debug('[WebSocket] Не подключаемся: нет токена или пользователя', { accessToken: !!accessToken, user: !!user });
       return;
     }
 
@@ -30,18 +31,18 @@ function App() {
 
     if (user.role === ROLES.ADMIN) {
       clientType = 'admin';
-      console.log('[WebSocket] Подключаемся как ADMIN');
+      logger.debug('[WebSocket] Подключаемся как ADMIN');
     } else if (user.role === ROLES.SHOP_OWNER) {
       // Для shop_owner нужен магазин
       if (!shop) {
-        console.log('[WebSocket] Не подключаемся: shop_owner без магазина');
+        logger.debug('[WebSocket] Не подключаемся: shop_owner без магазина');
         return;
       }
 
       // Only connect WebSocket for approved and active shops
       // Unapproved shops should not have real-time access
       if (!shop.is_approved || !shop.is_active) {
-        console.log('[WebSocket] Не подключаемся: магазин не одобрен или неактивен', {
+        logger.debug('[WebSocket] Не подключаемся: магазин не одобрен или неактивен', {
           is_approved: shop.is_approved,
           is_active: shop.is_active
         });
@@ -49,10 +50,10 @@ function App() {
       }
 
       clientType = 'shop';
-      console.log('[WebSocket] Подключаемся как SHOP', { shop_id: shop.id });
+      logger.debug('[WebSocket] Подключаемся как SHOP', { shop_id: shop.id });
     } else {
       clientType = 'user';
-      console.log('[WebSocket] Подключаемся как USER');
+      logger.debug('[WebSocket] Подключаемся как USER');
     }
 
     connect(accessToken, clientType);

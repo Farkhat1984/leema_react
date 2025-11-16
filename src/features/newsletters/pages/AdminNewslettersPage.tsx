@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
-import { Eye, CheckCircle, XCircle, Store, Calendar, TrendingUp, Trash2 } from 'lucide-react'
+import { Eye, CheckCircle, XCircle, Store, Calendar, Trash2 } from 'lucide-react'
 import { DataTable } from '@/shared/components/ui/DataTable'
 import { Button } from '@/shared/components/ui/Button'
 import { BackButton } from '@/shared/components/ui/BackButton'

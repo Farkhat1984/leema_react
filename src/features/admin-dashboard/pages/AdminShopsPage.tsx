@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { CheckCircle, XCircle, Eye, Power, PowerOff, Search, X } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Power, PowerOff, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { moderationService, managementService } from '@/features/admin-dashboard/services';
 import { ROUTES } from '@/shared/constants/config';
@@ -19,13 +19,12 @@ import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { DataTable } from '@/shared/components/ui/DataTable';
 import { Pagination } from '@/shared/components/ui/Pagination';
 import { SkeletonTable } from '@/shared/components/feedback/SkeletonTable';
-import { logger } from '@/shared/lib/utils/logger';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { RejectModal } from '@/shared/components/ui/RejectModal';
 import { useDebounce } from '@/shared/hooks';
 import { BackButton } from '@/shared/components/ui/BackButton';
-import type { Shop, ShopsResponse, ShopStats, ShopStatus } from '../types/shop';
-import { type ColumnDef, type Row } from '@tanstack/react-table';
+import type { Shop, ShopsResponse, ShopStatus } from '../types/shop';
+import { type ColumnDef } from '@tanstack/react-table';
 
 function AdminShopsPage() {
   const navigate = useNavigate();
@@ -335,25 +334,27 @@ function AdminShopsPage() {
           case 'approve':
             await approveMutation.mutateAsync(shopId);
             break;
-          case 'reject':
+          case 'reject': {
             const reason = prompt('Введите причину отклонения:');
             if (!reason) continue;
             await rejectMutation.mutateAsync({ shopId, reason });
             break;
+          }
           case 'activate':
             await activateMutation.mutateAsync(shopId);
             break;
-          case 'deactivate':
+          case 'deactivate': {
             const deactivateReason = prompt('Введите причину деактивации:');
             if (!deactivateReason) continue;
             await deactivateMutation.mutateAsync({ shopId, reason: deactivateReason });
             break;
+          }
         }
       }
       const actionText = action === 'approve' ? 'одобрено' : action === 'reject' ? 'отклонено' : action === 'activate' ? 'активировано' : 'деактивировано';
       toast.success(`${shopIds.length} магазин(ов) ${actionText}`);
       setSelectedIds(new Set());
-    } catch (error) {
+    } catch {
       // Individual errors are already handled by mutation callbacks
     }
   };
@@ -543,7 +544,7 @@ function AdminShopsPage() {
             <h1 className="text-3xl font-bold text-gray-900">Управление магазинами</h1>
             <p className="text-gray-600 mt-1">Модерация и управление магазинами на платформе</p>
           </div>
-          <BackButton to="/admin" />
+          <BackButton to={ROUTES.ADMIN.DASHBOARD} />
         </div>
 
         {/* Stats Cards */}

@@ -9,7 +9,7 @@ import { formatNumber } from '@/shared/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
-import { Plus, Edit, Trash2, Eye, Search, Filter, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, X } from 'lucide-react';
 import { BackButton } from '@/shared/components/ui/BackButton';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
@@ -85,7 +85,7 @@ function ShopProductsPage() {
         logger.warn('Categories response has unexpected format:', response);
         setCategories([]);
       }
-    } catch (error) {
+    } catch {
       logger.error('Failed to load categories', error);
       setCategories([]); // Set empty array on error
     }
@@ -128,7 +128,7 @@ function ShopProductsPage() {
         setTotalPages(1);
         setTotalProducts(0);
       }
-    } catch (error) {
+    } catch {
       logger.error('Failed to load products', error);
       toast.error('Не удалось загрузить товары');
       setProducts([]); // Set empty array on error
@@ -293,7 +293,7 @@ function ShopProductsPage() {
       }
 
       loadProducts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Failed to save product', error);
       toast.error(error.message || 'Не удалось сохранить товар');
     } finally {
@@ -312,7 +312,7 @@ function ShopProductsPage() {
       toast.success('Товар успешно удален');
       setShowDeleteDialog(false);
       loadProducts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Failed to delete product', error);
       toast.error(error.message || 'Не удалось удалить товар');
     }

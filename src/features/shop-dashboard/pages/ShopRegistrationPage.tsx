@@ -80,20 +80,38 @@ function ShopRegistrationPage() {
   const loadShopData = async () => {
     try {
       if (shop) {
-        const response = await apiRequest<Shop>(API_ENDPOINTS.SHOPS.ME);
-        setShopData(response);
+        // Backend returns shop_name, phone, whatsapp_number, avatar_url
+        const response = await apiRequest<any>(API_ENDPOINTS.SHOPS.ME);
+
+        // Map backend response to frontend format
+        const mappedShop: Shop = {
+          id: response.id,
+          name: response.shop_name,
+          description: response.description,
+          contact_phone: response.phone || '',
+          whatsapp_phone: response.whatsapp_number || '',
+          address: response.address || '',
+          avatar: response.avatar_url,
+          status: response.status,
+          is_approved: response.is_approved,
+          is_active: response.is_active,
+          rejection_reason: response.rejection_reason,
+          deactivation_reason: response.deactivation_reason,
+        };
+
+        setShopData(mappedShop);
 
         // Pre-fill form with existing data
         reset({
-          name: response.name,
-          description: response.description,
-          contact_phone: response.contact_phone,
-          whatsapp_phone: response.whatsapp_phone || '',
-          address: response.address,
+          name: mappedShop.name,
+          description: mappedShop.description || '',
+          contact_phone: mappedShop.contact_phone,
+          whatsapp_phone: mappedShop.whatsapp_phone || '',
+          address: mappedShop.address,
         });
 
-        if (response.avatar) {
-          setAvatarPreview(response.avatar);
+        if (mappedShop.avatar) {
+          setAvatarPreview(mappedShop.avatar);
         }
       }
     } catch (error: any) {
@@ -152,21 +170,41 @@ function ShopRegistrationPage() {
         avatarUrl = uploadResponse.url;
       }
 
-      // Update or create shop
+      // Update or create shop - map frontend field names to backend field names
       const payload = {
-        ...data,
-        avatar: avatarUrl,
+        shop_name: data.name,
+        description: data.description,
+        phone: data.contact_phone,
+        whatsapp_number: data.whatsapp_phone,
+        address: data.address,
+        avatar_url: avatarUrl,
       };
 
-      const response = await apiRequest<Shop>(
+      const response = await apiRequest<any>(
         API_ENDPOINTS.SHOPS.UPDATE_ME,
         'PUT',
         payload
       );
 
+      // Map backend response to frontend format
+      const mappedShop: Shop = {
+        id: response.id,
+        name: response.shop_name,
+        description: response.description,
+        contact_phone: response.phone || '',
+        whatsapp_phone: response.whatsapp_number || '',
+        address: response.address || '',
+        avatar: response.avatar_url,
+        status: response.status,
+        is_approved: response.is_approved,
+        is_active: response.is_active,
+        rejection_reason: response.rejection_reason,
+        deactivation_reason: response.deactivation_reason,
+      };
+
       // Update shop in auth store
       updateShop(response as any);
-      setShopData(response);
+      setShopData(mappedShop);
 
       // Show appropriate success message
       toast.success('Информация о магазине сохранена');
@@ -187,18 +225,67 @@ function ShopRegistrationPage() {
 
   /**
    * Submit shop for moderation
+   * This function is called by the "Submit for Review" button
+   * It uses handleSubmit to validate and save the form first, then submits for review
    */
-  const onSubmitForReview = async () => {
+  const onSubmitForReview = handleSubmit(async (data: ShopFormData) => {
     setIsSaving(true);
     try {
-      const response = await apiRequest<Shop>(
+      // Step 1: Save the form data first (upload avatar if needed)
+      let avatarUrl = shopData?.avatar;
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append('file', avatarFile);
+
+        const uploadResponse = await apiRequest<{ url: string }>(
+          API_ENDPOINTS.SHOPS.UPLOAD_AVATAR,
+          'POST',
+          formData
+        );
+        avatarUrl = uploadResponse.url;
+      }
+
+      // Save shop data
+      const payload = {
+        shop_name: data.name,
+        description: data.description,
+        phone: data.contact_phone,
+        whatsapp_number: data.whatsapp_phone,
+        address: data.address,
+        avatar_url: avatarUrl,
+      };
+
+      await apiRequest<any>(
+        API_ENDPOINTS.SHOPS.UPDATE_ME,
+        'PUT',
+        payload
+      );
+
+      // Step 2: Now submit for review
+      const response = await apiRequest<any>(
         `${API_ENDPOINTS.SHOPS.ME}/submit`,
         'POST'
       );
 
+      // Map backend response to frontend format
+      const mappedShop: Shop = {
+        id: response.id,
+        name: response.shop_name,
+        description: response.description,
+        contact_phone: response.phone || '',
+        whatsapp_phone: response.whatsapp_number || '',
+        address: response.address || '',
+        avatar: response.avatar_url,
+        status: response.status,
+        is_approved: response.is_approved,
+        is_active: response.is_active,
+        rejection_reason: response.rejection_reason,
+        deactivation_reason: response.deactivation_reason,
+      };
+
       // Update shop in auth store
       updateShop(response as any);
-      setShopData(response);
+      setShopData(mappedShop);
 
       toast.success('Заявка отправлена на модерацию! Администратор рассмотрит её в течение 1-2 дней.');
     } catch (error: any) {
@@ -207,7 +294,7 @@ function ShopRegistrationPage() {
     } finally {
       setIsSaving(false);
     }
-  };
+  });
 
   /**
    * Get status badge variant

@@ -50,7 +50,7 @@ export function ContactsImportModal({
           handleReset()
         }, 2000)
       }
-    } catch (error) {
+    } catch {
       logger.error('Import error', error)
       setValidationErrors([error instanceof Error ? error.message : 'Import failed'])
     } finally {
@@ -101,8 +101,8 @@ export function ContactsImportModal({
         {/* File Upload */}
         <ExcelUpload
           onDataParsed={(data) => {
-            setFile(data.file as any);
-            setPreviewData(data.rows);
+            setFile(data.file || null);
+            setPreviewData(data.rows as Record<string, string>[]);
             setValidationErrors(data.errors || []);
           }}
           requiredColumns={REQUIRED_COLUMNS}

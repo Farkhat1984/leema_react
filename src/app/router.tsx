@@ -13,6 +13,7 @@ import { PageLoader } from '@/shared/components/feedback/PageLoader';
 import { ROUTES } from '@/shared/constants/config';
 
 // Error Fallback Component
+// eslint-disable-next-line react-refresh/only-export-components
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -212,9 +213,8 @@ export const router = createBrowserRouter([
     path: ROUTES.SHOP.REVIEWS,
     element: withErrorBoundary(<ShopReviews />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
-  // Kaspi routes
   {
-    path: '/shop/kaspi',
+    path: ROUTES.SHOP.KASPI,
     element: withErrorBoundary(<ShopKaspi />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
 
@@ -276,7 +276,7 @@ export const router = createBrowserRouter([
     element: withErrorBoundary(<AdminUserProfile />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
-    path: '/admin/kaspi',
+    path: ROUTES.ADMIN.KASPI,
     element: withErrorBoundary(<AdminKaspi />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {

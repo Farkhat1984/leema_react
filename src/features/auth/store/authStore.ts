@@ -6,12 +6,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { AuthStore, User, Shop } from '../types';
-import { setAccessToken as setStorageToken, removeAccessToken, clearAuthStorage } from '@/shared/lib/security/storage';
+import { setAccessToken as setStorageToken, clearAuthStorage } from '@/shared/lib/security/storage';
 import { logger } from '@/shared/lib/utils/logger';
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // State
       user: null,
       shop: null,

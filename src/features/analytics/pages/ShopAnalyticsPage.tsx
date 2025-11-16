@@ -51,7 +51,7 @@ export default function ShopAnalyticsPage() {
       analyticsService.downloadExport(blob, filename)
       toast.success(`Аналитика экспортирована как ${format.toUpperCase()}`)
       setShowExportMenu(false)
-    } catch (error) {
+    } catch {
       toast.error('Не удалось экспортировать аналитику')
     }
   }

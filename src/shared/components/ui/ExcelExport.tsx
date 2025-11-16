@@ -97,7 +97,7 @@ export function ExcelExport<T = Record<string, unknown>>({
       XLSX.writeFile(workbook, finalFileName);
 
       onExportComplete?.();
-    } catch (error) {
+    } catch {
       logger.error('Excel export error', error);
       onExportError?.(error as Error);
     }

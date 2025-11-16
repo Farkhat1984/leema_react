@@ -25,7 +25,7 @@ export interface GoogleAuthResponse {
   refresh_token?: string;
   refreshToken?: string;
   user?: User;
-  shop?: any;
+  shop?: unknown;
   account_type: AccountType;
   platform: ClientPlatform;
 }
@@ -36,7 +36,7 @@ export interface AppleAuthResponse {
   refresh_token?: string;
   refreshToken?: string;
   user?: User;
-  shop?: any;
+  shop?: unknown;
   account_type: AccountType;
 }
 

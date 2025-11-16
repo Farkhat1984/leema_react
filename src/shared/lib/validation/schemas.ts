@@ -57,7 +57,6 @@ export const productSchema = z.object({
     .max(200, 'Название товара должно быть не более 200 символов'),
   description: z
     .string()
-    .min(10, 'Описание должно быть не менее 10 символов')
     .max(2000, 'Описание должно быть не более 2000 символов'),
   price: z
     .number()
@@ -173,10 +172,10 @@ export const shopRegistrationSchema = z.object({
   contact_phone: z
     .string()
     .min(10, 'Введите корректный номер телефона')
-    .regex(/^[\d\s\-\+\(\)]+$/, 'Неверный формат номера телефона'),
+    .regex(/^[\d\s\-+()]+$/, 'Неверный формат номера телефона'),
   whatsapp_phone: z
     .string()
-    .regex(/^[\d\s\-\+\(\)]*$/, 'Неверный формат номера телефона')
+    .regex(/^[\d\s\-+()]*$/, 'Неверный формат номера телефона')
     .optional()
     .or(z.literal('')),
   address: z
@@ -207,16 +206,16 @@ export const shopProfileSchema = z.object({
   phone: z
     .string()
     .min(10, 'Введите корректный номер телефона')
-    .regex(/^[\d\s\-\+\(\)]+$/, 'Неверный формат номера телефона'),
+    .regex(/^[\d\s\-+()]+$/, 'Неверный формат номера телефона'),
   whatsapp_phone: z
     .string()
-    .regex(/^[\d\s\-\+\(\)]*$/, 'Неверный формат номера телефона')
+    .regex(/^[\d\s\-+()]*$/, 'Неверный формат номера телефона')
     .optional()
     .or(z.literal('')),
   email: z.string().email('Введите корректный email'),
   instagram: z
     .string()
-    .regex(/^@?[\w\._]+$/, 'Неверный формат Instagram (@username)')
+    .regex(/^@?[\w._]+$/, 'Неверный формат Instagram (@username)')
     .optional()
     .or(z.literal('')),
   website: z
@@ -275,7 +274,7 @@ export const contactSchema = z.object({
     .string()
     .min(10, 'Номер WhatsApp должен содержать не менее 10 цифр')
     .max(50, 'Номер WhatsApp слишком длинный')
-    .regex(/^[\d\s\-\+\(\)]+$/, 'Неверный формат номера телефона'),
+    .regex(/^[\d\s\-+()]+$/, 'Неверный формат номера телефона'),
   is_active: z.boolean().default(true).optional(),
 });
 
@@ -289,7 +288,7 @@ export const settingsSchema = z.object({
   support_email: z.string().email('Неверный формат email').optional(),
   support_phone: z
     .string()
-    .regex(/^[\d\s\-\+\(\)]+$/, 'Неверный формат номера телефона')
+    .regex(/^[\d\s\-+()]+$/, 'Неверный формат номера телефона')
     .optional(),
   commission_rate: z
     .number()
@@ -311,7 +310,7 @@ export type SettingsFormData = z.infer<typeof settingsSchema>;
  */
 export const commonValidators = {
   email: z.string().email('Неверный формат email'),
-  phone: z.string().regex(/^[\d\s\-\+\(\)]+$/, 'Неверный формат номера телефона'),
+  phone: z.string().regex(/^[\d\s\-+()]+$/, 'Неверный формат номера телефона'),
   url: z.string().url('Неверный формат URL'),
   positiveNumber: z.number().min(0, 'Значение должно быть неотрицательным'),
   requiredString: (fieldName: string) => z.string().min(1, `${fieldName} обязательно`),

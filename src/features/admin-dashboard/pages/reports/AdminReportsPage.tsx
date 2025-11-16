@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { type Row } from '@tanstack/react-table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
-import { FileText, Download, Calendar, DollarSign, TrendingUp } from 'lucide-react';
 import { apiRequest } from '@/shared/lib/api/client';
 import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
 import { DataTable } from '@/shared/components/ui/DataTable';
@@ -10,7 +9,7 @@ import { Button } from '@/shared/components/ui/Button';
 import { BackButton } from '@/shared/components/ui/BackButton';
 import { FormDateRangePicker } from '@/shared/components/forms/FormDateRangePicker';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
-import { formatDate, formatCurrency } from '@/shared/lib/utils';
+import { formatDate } from '@/shared/lib/utils';
 import type { DateRange } from '@/shared/types/common';
 
 type ReportType = 'financial' | 'sales' | 'users' | 'shops';
@@ -35,7 +34,7 @@ interface ReportsResponse {
 
 function AdminReportsPage() {
   const queryClient = useQueryClient();
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   // Fetch reports
@@ -97,7 +96,7 @@ function AdminReportsPage() {
   const handleDownload = async (report: Report) => {
     try {
       window.open(report.file_url, '_blank');
-    } catch (error) {
+    } catch {
       toast.error('Не удалось скачать отчет');
     }
   };

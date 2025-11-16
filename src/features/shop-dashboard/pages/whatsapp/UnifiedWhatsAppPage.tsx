@@ -149,7 +149,7 @@ export default function UnifiedWhatsAppPage() {
           setTimeout(loadWhatsAppStatus, 3000);
         }
       }
-    } catch (error) {
+    } catch {
       logger.error('Failed to load WhatsApp status/QR', error);
       toast.error('Не удалось загрузить статус WhatsApp');
       setStatus('error');
@@ -189,7 +189,7 @@ export default function UnifiedWhatsAppPage() {
     try {
       // TODO: API call to save settings
       toast.success('Настройки сохранены');
-    } catch (error) {
+    } catch {
       toast.error('Ошибка сохранения настроек');
     }
   };
@@ -262,7 +262,7 @@ export default function UnifiedWhatsAppPage() {
             </div>
             <div className="flex items-center gap-4">
               {getStatusBadge()}
-              <BackButton to="/shop" />
+              <BackButton to={ROUTES.SHOP.DASHBOARD} />
             </div>
           </div>
         </div>

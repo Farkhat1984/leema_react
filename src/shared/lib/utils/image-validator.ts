@@ -183,7 +183,7 @@ export async function validateImageFile(
   try {
     const dimensions = await getImageDimensions(file);
     return validateImageDimensions(dimensions, imageType);
-  } catch (error) {
+  } catch {
     return {
       valid: false,
       error: 'Не удалось загрузить изображение для проверки размеров'

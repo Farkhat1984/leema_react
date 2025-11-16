@@ -37,7 +37,7 @@ export interface SystemLog {
   shop_id?: number
   ip_address?: string
   user_agent?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   created_at: string
 }
 
@@ -80,7 +80,7 @@ export interface Report {
   type: 'financial' | 'sales' | 'users' | 'products'
   title: string
   period: string
-  data: Record<string, any>
+  data: Record<string, unknown>
   generated_at: string
 }
 
@@ -205,7 +205,7 @@ export const adminService = {
   getAnalytics: async (): Promise<Analytics> => {
     try {
       return await apiRequest<Analytics>(API_ENDPOINTS.ADMIN.ANALYTICS)
-    } catch (error) {
+    } catch {
       // Return default analytics if endpoint doesn't exist yet
       return {
         users_analytics: {

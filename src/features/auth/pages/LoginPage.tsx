@@ -60,11 +60,11 @@ function LoginPage() {
   /**
    * Get redirect path based on user role and shop status
    */
-  const getRedirectPath = (role: string, shop?: any) => {
+  const getRedirectPath = (role: string, shop?: Shop) => {
     switch (role) {
       case 'admin':
         return ROUTES.ADMIN.DASHBOARD;
-      case 'shop_owner':
+      case 'shop_owner': {
         // Check if shop is approved and active
         const isApproved = shop?.is_approved === true;
         const isActive = shop?.is_active === true;
@@ -75,6 +75,7 @@ function LoginPage() {
         }
 
         return ROUTES.SHOP.DASHBOARD;
+      }
       default:
         return ROUTES.ADMIN.DASHBOARD;
     }
@@ -101,7 +102,7 @@ function LoginPage() {
 
       // Redirect to Google OAuth
       window.location.href = authorization_url;
-    } catch (error) {
+    } catch {
       logger.error('[LoginPage] Failed to get Google auth URL', error);
       setIsLoading(false);
     }

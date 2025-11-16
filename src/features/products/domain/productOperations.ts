@@ -72,7 +72,7 @@ export class ProductOperations {
         message: 'Product created successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ProductOperations] Failed to create product', error);
       handleError(error, {
         context: {
@@ -144,7 +144,7 @@ export class ProductOperations {
         message: 'Product updated successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ProductOperations] Failed to update product', error);
       handleError(error, {
         context: {
@@ -195,7 +195,7 @@ export class ProductOperations {
         message: 'Product deleted successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ProductOperations] Failed to delete product', error);
       handleError(error, {
         context: {
@@ -237,7 +237,7 @@ export class ProductOperations {
         message: 'Products fetched successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ProductOperations] Failed to fetch products', error);
       handleError(error, {
         context: {
@@ -307,7 +307,7 @@ export class ProductOperations {
         message: 'Images uploaded successfully'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ProductOperations] Failed to upload images', error);
       handleError(error, {
         context: {
@@ -363,7 +363,7 @@ export class ProductOperations {
         message: 'Product status updated'
       };
 
-    } catch (error) {
+    } catch {
       logger.error('[ProductOperations] Failed to toggle product status', error);
       handleError(error, {
         context: {

@@ -14,7 +14,7 @@ export interface Notification {
   type: NotificationType
   title: string
   message: string
-  data?: Record<string, any>
+  data?: Record<string, unknown>
   is_read: boolean
   created_at: string
   read_at?: string | null
@@ -82,7 +82,7 @@ export const notificationService = {
   getUnreadCount: async (): Promise<UnreadCount> => {
     try {
       return await apiRequest<UnreadCount>(API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT)
-    } catch (error) {
+    } catch {
       // Return default value if endpoint doesn't exist yet
       return { count: 0 }
     }
