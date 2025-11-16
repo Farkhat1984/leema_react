@@ -22,7 +22,7 @@ export interface User {
   updatedAt?: string;
 }
 
-export type ShopStatus = 'pending' | 'approved' | 'rejected' | 'deactivated';
+export type ShopStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'deactivated';
 
 export interface Shop {
   id: string;
@@ -34,6 +34,7 @@ export interface Shop {
   ownerId: string;
   balance: number;
   status: ShopStatus; // Computed field from backend
+  is_submitted: boolean; // Form submitted for review
   is_approved: boolean;
   is_active: boolean;
   rejection_reason?: string;

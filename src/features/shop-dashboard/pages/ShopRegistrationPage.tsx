@@ -127,10 +127,10 @@ function ShopRegistrationPage() {
   };
 
   /**
-   * Submit registration form
+   * Submit registration form (save draft)
    */
   const onSubmit = async (data: ShopFormData) => {
-    // Block submission if status is pending
+    // Block submission if already submitted and pending
     if (shopData?.status === 'pending') {
       toast.error('Ваша заявка уже на рассмотрении. Дождитесь ответа от администратора.');
       return;
@@ -169,13 +169,7 @@ function ShopRegistrationPage() {
       setShopData(response);
 
       // Show appropriate success message
-      if (shopData?.status === 'rejected') {
-        toast.success('Заявка отправлена повторно на рассмотрение администратора');
-      } else if (!shopData) {
-        toast.success('Заявка на регистрацию магазина отправлена на утверждение');
-      } else {
-        toast.success('Информация о магазине успешно обновлена');
-      }
+      toast.success('Информация о магазине сохранена');
 
       // If was just approved, redirect to dashboard
       const wasJustApproved = !shopData?.is_approved && response.is_approved;
@@ -192,10 +186,36 @@ function ShopRegistrationPage() {
   };
 
   /**
+   * Submit shop for moderation
+   */
+  const onSubmitForReview = async () => {
+    setIsSaving(true);
+    try {
+      const response = await apiRequest<Shop>(
+        `${API_ENDPOINTS.SHOPS.ME}/submit`,
+        'POST'
+      );
+
+      // Update shop in auth store
+      updateShop(response as any);
+      setShopData(response);
+
+      toast.success('Заявка отправлена на модерацию! Администратор рассмотрит её в течение 1-2 дней.');
+    } catch (error: any) {
+      logger.error('Failed to submit shop', error);
+      toast.error(error.message || 'Не удалось отправить заявку на модерацию');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  /**
    * Get status badge variant
    */
   const getStatusVariant = (status: ShopStatus) => {
     switch (status) {
+      case 'draft':
+        return 'default';
       case 'approved':
         return 'success';
       case 'pending':
@@ -214,6 +234,8 @@ function ShopRegistrationPage() {
    */
   const getStatusMessage = (status: ShopStatus, shop?: Shop) => {
     switch (status) {
+      case 'draft':
+        return 'Заполните информацию о магазине и нажмите "Отправить на модерацию" для проверки администратором.';
       case 'pending':
         return 'Ваша заявка на рассмотрении у администратора. Редактирование заблокировано до получения ответа. Это может занять 1-2 дня.';
       case 'approved':
@@ -234,6 +256,8 @@ function ShopRegistrationPage() {
    */
   const getStatusIcon = (status: ShopStatus) => {
     switch (status) {
+      case 'draft':
+        return AlertCircle;
       case 'pending':
         return Clock;
       case 'approved':
@@ -365,7 +389,7 @@ function ShopRegistrationPage() {
                 onChange={handleAvatarChange}
                 maxSize={5 * 1024 * 1024}
                 shape="square"
-                disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
+                disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated' || shopData?.status === 'approved'}
               />
               <p className="mt-2 text-xs text-gray-500">
                 Рекомендуется: квадратное изображение, минимум 400x400px, максимум 5МБ
@@ -379,7 +403,7 @@ function ShopRegistrationPage() {
               error={errors.name?.message}
               placeholder="Введите название вашего магазина"
               required
-              disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
+              disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated' || shopData?.status === 'approved'}
             />
 
             {/* Description */}
@@ -390,7 +414,7 @@ function ShopRegistrationPage() {
               placeholder="Опишите ваш магазин, товары и что делает вас уникальными"
               rows={4}
               required
-              disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
+              disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated' || shopData?.status === 'approved'}
             />
 
             {/* Contact Phone */}
@@ -402,7 +426,7 @@ function ShopRegistrationPage() {
                 value={shopData?.contact_phone || ''}
                 onChange={(value) => setValue('contact_phone', value)}
                 error={errors.contact_phone?.message}
-                disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
+                disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated' || shopData?.status === 'approved'}
               />
             </div>
 
@@ -415,7 +439,7 @@ function ShopRegistrationPage() {
                 value={shopData?.whatsapp_phone || ''}
                 onChange={(value) => setValue('whatsapp_phone', value)}
                 error={errors.whatsapp_phone?.message}
-                disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
+                disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated' || shopData?.status === 'approved'}
               />
               <p className="mt-1 text-xs text-gray-500">
                 Если отличается от контактного телефона
@@ -430,10 +454,10 @@ function ShopRegistrationPage() {
               placeholder="Введите физический адрес вашего магазина"
               rows={2}
               required
-              disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated'}
+              disabled={shopData?.status === 'pending' || shopData?.status === 'deactivated' || shopData?.status === 'approved'}
             />
 
-            {/* Submit Button */}
+            {/* Submit Buttons */}
             <div className="flex items-center justify-between pt-4 border-t border-gray-200">
               <Button
                 type="button"
@@ -443,24 +467,44 @@ function ShopRegistrationPage() {
               >
                 Отмена
               </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                isLoading={isSaving}
-                disabled={
-                  isSaving ||
-                  shopData?.status === 'pending' ||
-                  shopData?.status === 'deactivated'
-                }
-              >
-                {shopData?.status === 'rejected'
-                  ? 'Отправить повторно'
-                  : shopData?.status === 'approved'
-                  ? 'Обновить информацию'
-                  : shopData
-                  ? 'Обновить магазин'
-                  : 'Отправить на утверждение'}
-              </Button>
+              <div className="flex gap-3">
+                {/* Save draft button (for draft and rejected statuses) */}
+                {(shopData?.status === 'draft' || shopData?.status === 'rejected') && (
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    isLoading={isSaving}
+                    disabled={isSaving}
+                  >
+                    Сохранить черновик
+                  </Button>
+                )}
+
+                {/* Submit for review button (for draft and rejected statuses) */}
+                {(shopData?.status === 'draft' || shopData?.status === 'rejected') && (
+                  <Button
+                    type="button"
+                    variant="primary"
+                    isLoading={isSaving}
+                    disabled={isSaving}
+                    onClick={onSubmitForReview}
+                  >
+                    {shopData?.status === 'rejected' ? 'Отправить повторно' : 'Отправить на модерацию'}
+                  </Button>
+                )}
+
+                {/* Update button for approved shops */}
+                {shopData?.status === 'approved' && (
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    isLoading={isSaving}
+                    disabled={isSaving}
+                  >
+                    Обновить информацию
+                  </Button>
+                )}
+              </div>
             </div>
           </form>
         </div>

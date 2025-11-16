@@ -2,7 +2,7 @@
  * Shop-related TypeScript types for Admin
  */
 
-export type ShopStatus = 'pending' | 'approved' | 'active' | 'rejected' | 'deactivated';
+export type ShopStatus = 'draft' | 'pending' | 'approved' | 'active' | 'rejected' | 'deactivated';
 
 export interface Shop {
   id: number;
