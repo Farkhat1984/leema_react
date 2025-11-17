@@ -207,4 +207,57 @@ export const API_ENDPOINTS = {
     GENERATE: '/api/ai-tryon/generate',
     HISTORY: '/api/ai-tryon/history',
   },
+
+  // ==================== AI AGENTS (SHOP OWNER) ====================
+  AI_AGENTS: {
+    // Agent CRUD
+    BASE: '/api/v1/shops/me/ai-agents',
+    BY_ID: (id: string | number) => `/api/v1/shops/me/ai-agents/${id}`,
+    ACTIVATE: (id: string | number) => `/api/v1/shops/me/ai-agents/${id}/activate`,
+
+    // Templates & Tools
+    TEMPLATES: '/api/v1/shops/me/ai-agents/templates/list',
+    TOOLS: '/api/v1/shops/me/ai-agents/tools/list',
+
+    // Testing
+    TEST: (id: string | number) => `/api/v1/shops/me/ai-agents/${id}/test`,
+
+    // Conversations
+    CONVERSATIONS: (id: string | number) => `/api/v1/shops/me/ai-agents/${id}/conversations`,
+    CONVERSATION_DETAILS: (agentId: string | number, conversationId: string | number) =>
+      `/api/v1/shops/me/ai-agents/${agentId}/conversations/${conversationId}`,
+
+    // Analytics
+    ANALYTICS: (id: string | number) => `/api/v1/shops/me/ai-agents/${id}/analytics`,
+  },
+
+  // ==================== AI AGENTS (ADMIN) ====================
+  ADMIN_AI_AGENTS: {
+    // Agent monitoring
+    BASE: '/api/v1/admin/ai-agents',
+    OVERVIEW: '/api/v1/admin/ai-agents/overview',
+    BY_ID: (id: string | number) => `/api/v1/admin/ai-agents/${id}`,
+    SUSPEND: (id: string | number) => `/api/v1/admin/ai-agents/${id}/suspend`,
+    RECENT_CONVERSATIONS: '/api/v1/admin/ai-agents/conversations/recent',
+    SYSTEM_LOGS: '/api/v1/admin/ai-agents/logs/system',
+  },
+
+  // Global AI Config
+  ADMIN_AI_CONFIG: {
+    BASE: '/api/v1/admin/ai-config',
+  },
+
+  // Templates (Admin)
+  ADMIN_TEMPLATES: {
+    BASE: '/api/v1/admin/ai-agents/templates',
+    BY_ID: (id: string | number) => `/api/v1/admin/ai-agents/templates/${id}`,
+    STATS: (id: string | number) => `/api/v1/admin/ai-agents/templates/${id}/stats`,
+  },
+
+  // Tools (Admin)
+  ADMIN_TOOLS: {
+    BASE: '/api/v1/admin/ai-agents/tools',
+    BY_ID: (id: string | number) => `/api/v1/admin/ai-agents/tools/${id}`,
+    STATS: (id: string | number) => `/api/v1/admin/ai-agents/tools/${id}/stats`,
+  },
 } as const;

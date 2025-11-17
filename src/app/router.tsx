@@ -111,6 +111,19 @@ const AdminKaspi = lazy(() => import('@/features/admin-dashboard/pages/kaspi/Adm
 const ShopBilling = lazy(() => import('@/features/billing/pages/BillingPage'));
 const ShopTopUp = lazy(() => import('@/features/billing/pages/TopUpPage'));
 
+// AI Agents pages (Shop Owner)
+const AgentListPage = lazy(() => import('@/features/ai-agents/pages/AgentListPage'));
+const CreateAgentPage = lazy(() => import('@/features/ai-agents/pages/CreateAgentPage'));
+const EditAgentPage = lazy(() => import('@/features/ai-agents/pages/EditAgentPage'));
+const AgentDetailsPage = lazy(() => import('@/features/ai-agents/pages/AgentDetailsPage'));
+
+// AI Agents pages (Admin)
+const AdminPlatformOverview = lazy(() => import('@/features/ai-agents/pages/admin/PlatformOverviewPage'));
+const AdminAllAgents = lazy(() => import('@/features/ai-agents/pages/admin/AllAgentsPage'));
+const AdminTemplates = lazy(() => import('@/features/ai-agents/pages/admin/TemplatesPage'));
+const AdminTools = lazy(() => import('@/features/ai-agents/pages/admin/ToolsPage'));
+const AdminGlobalConfig = lazy(() => import('@/features/ai-agents/pages/admin/GlobalConfigPage'));
+
 // Admin dashboard pages
 const AdminDashboard = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminDashboard })));
 const AdminShops = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminShopsPage })));
@@ -217,6 +230,22 @@ export const router = createBrowserRouter([
     path: ROUTES.SHOP.KASPI,
     element: withErrorBoundary(<ShopKaspi />, { allowedRoles: [ROLES.SHOP_OWNER] }),
   },
+  {
+    path: '/shop/ai-agents',
+    element: withErrorBoundary(<AgentListPage />, { allowedRoles: [ROLES.SHOP_OWNER] }),
+  },
+  {
+    path: '/shop/ai-agents/create',
+    element: withErrorBoundary(<CreateAgentPage />, { allowedRoles: [ROLES.SHOP_OWNER] }),
+  },
+  {
+    path: '/shop/ai-agents/:id',
+    element: withErrorBoundary(<AgentDetailsPage />, { allowedRoles: [ROLES.SHOP_OWNER] }),
+  },
+  {
+    path: '/shop/ai-agents/:id/edit',
+    element: withErrorBoundary(<EditAgentPage />, { allowedRoles: [ROLES.SHOP_OWNER] }),
+  },
 
   // Admin routes
   {
@@ -290,6 +319,26 @@ export const router = createBrowserRouter([
   {
     path: ROUTES.ADMIN.LOGS,
     element: withErrorBoundary(<AdminLogs />, { allowedRoles: [ROLES.ADMIN] }),
+  },
+  {
+    path: '/admin/ai-agents',
+    element: withErrorBoundary(<AdminPlatformOverview />, { allowedRoles: [ROLES.ADMIN] }),
+  },
+  {
+    path: '/admin/ai-agents/all',
+    element: withErrorBoundary(<AdminAllAgents />, { allowedRoles: [ROLES.ADMIN] }),
+  },
+  {
+    path: '/admin/ai-agents/templates',
+    element: withErrorBoundary(<AdminTemplates />, { allowedRoles: [ROLES.ADMIN] }),
+  },
+  {
+    path: '/admin/ai-agents/tools',
+    element: withErrorBoundary(<AdminTools />, { allowedRoles: [ROLES.ADMIN] }),
+  },
+  {
+    path: '/admin/ai-agents/config',
+    element: withErrorBoundary(<AdminGlobalConfig />, { allowedRoles: [ROLES.ADMIN] }),
   },
   {
     path: ROUTES.ADMIN.REPORTS,

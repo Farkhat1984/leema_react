@@ -23,7 +23,8 @@ import {
   QrCode,
   FileText,
   Bell,
-  ShoppingBag
+  ShoppingBag,
+  Bot
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/features/auth/store/authStore';
@@ -337,6 +338,20 @@ function ShopDashboard() {
               <div>
                 <h3 className="font-medium text-gray-900">WhatsApp Business</h3>
                 <p className="text-sm text-gray-500">Подключение и настройки</p>
+              </div>
+            </Link>
+
+            {/* AI Agents */}
+            <Link
+              to="/shop/ai-agents"
+              className="flex items-center p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+            >
+              <div className="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                <Bot className="text-violet-600 w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">AI Агенты</h3>
+                <p className="text-sm text-gray-500">Автоматизация общения</p>
               </div>
             </Link>
 

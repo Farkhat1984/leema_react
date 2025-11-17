@@ -2,358 +2,159 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
----
-
-## ⚠️ CRITICAL RULES - READ FIRST ⚠️
-
-### 🔥 HOT-RELOAD IS ENABLED - DO NOT REBUILD CONTAINERS 🔥
-
-**Frontend has Vite HMR (Hot Module Replacement) configured:**
-- All files in `src/` auto-reload via Vite dev server
-- Docker volume mount: `./src:/app/src` (and other key directories)
-
-**THIS MEANS:**
-- ❌ **NEVER** rebuild Docker containers after editing `src/` files
-- ❌ **NEVER** run `docker-compose build` for code changes
-- ❌ **NEVER** restart containers for TypeScript/React/CSS changes
-- ✅ Just edit files - Vite HMR reloads instantly (< 1 second)
-- ✅ Only rebuild if changing `package.json`, `Dockerfile`, `vite.config.ts`, or `.env`
-
-**If hot-reload appears broken:**
-1. Check logs: `docker-compose logs -f leema_frontend`
-2. Look for "VITE" messages and HMR status
-3. Verify Vite dev server is running on port 5173
-4. Check browser console for HMR connection errors
-5. Only then consider restart: `docker-compose restart leema_frontend` (NOT rebuild)
-
----
-
-### 🚫 STRICT FILE CREATION POLICY 🚫
-
-**ABSOLUTELY FORBIDDEN** to create the following files **UNLESS EXPLICITLY REQUESTED:**
-
-#### ❌ NEVER CREATE THESE FILES:
-- **Markdown files:** `*.md` (README.md, CONTRIBUTING.md, CHANGELOG.md, API.md, COMPONENTS.md, etc.)
-- **Text documentation:** `*.txt`, `*.doc`, `*.rtf`
-- **Notes/docs:** TODO.md, NOTES.md, GUIDE.md, INSTRUCTIONS.md, FEATURES.md
-- **Any documentation files** in any format
-
-**The ONLY exceptions are:**
-1. User explicitly says: "Create a README.md file" or "Write me a TODO.md"
-2. User asks: "Document this in a markdown file"
-3. User requests: "Make a .txt file with..."
-
-**Why this rule exists:**
-- Documentation clutter in codebase
-- Unnecessary git commits for non-code files
-- Project stays clean and focused on production code
-
-**What to do instead:**
-- Communicate documentation directly in chat responses
-- Update existing CLAUDE.md if needed (with permission)
-- Suggest documentation structure verbally
-- Wait for explicit user request before creating any docs
-
-**Examples of FORBIDDEN actions:**
-```bash
-# ❌ DON'T DO THIS:
-echo "# Components Guide" > COMPONENTS.md
-cat > TODO.md <<EOF
-touch FEATURES.md
-echo "Setup instructions" > SETUP.txt
-
-# ✅ DO THIS INSTEAD:
-# Just tell the user: "Here's how the components work: ..."
-# Or ask: "Would you like me to create a markdown file documenting this?"
-```
-
----
-
 ## Project Overview
 
-Leema React is a production e-commerce frontend built with React 18, TypeScript, and Vite. It provides separate dashboards for:
-- **Shop Owners** (shop_owner role): Manage products, orders, customers, WhatsApp integration, billing, newsletters
-- **Administrators** (admin role): Platform-wide management, user oversight, shop approvals, system settings
-- **Users**: Use mobile app only - no web dashboard
+**Leema React** - Frontend for AI-powered fashion e-commerce platform
+**Stack:** React 18 + TypeScript + Vite + TailwindCSS + Zustand + React Query
+**Working Directory:** `/var/www/leema_react/`
 
-The frontend communicates with a FastAPI backend at `https://api.leema.kz` via REST API and WebSocket.
+## Essential Commands
 
-## Development Environment
-
-### Docker Hot-Reload Setup (Currently Active)
-
-Both backend and frontend run in Docker containers with hot-reload enabled:
-
-**Frontend Container:**
-- Container: `leema_frontend`
-- Image: `leema_react-leema_frontend:latest`
-- Port: `3000:5173` (Vite dev server)
-- Target: `development` (in docker-compose.yml)
-- Vite HMR is active - changes to `src/` files auto-reload
-
-**Commands:**
+### Development
 ```bash
-cd /var/www/leema_react
-
-# Restart container
-docker-compose restart leema_frontend
-
-# View logs
-docker-compose logs -f leema_frontend
-
-# Rebuild (if Dockerfile or dependencies changed)
-docker-compose down
-docker-compose build
-docker-compose up -d
-
-# Full rebuild (if something broke)
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+npm run dev              # Start Vite dev server (:5173)
+npm run build            # TypeScript check + build
+npm run build:fast       # Build without typecheck (faster)
+npm run typecheck        # Run TypeScript checks only
+npm run preview          # Preview production build
 ```
 
-### Build Commands
-
+### Code Quality
 ```bash
-# Development server (with hot-reload)
-npm run dev
-
-# Production build (with TypeScript checking)
-npm run build
-
-# Fast build (skip typecheck - used in Docker)
-npm run build:fast
-
-# Build with bundle analysis
-npm run build:analyze
-
-# Type checking only
-npm run typecheck
-
-# Linting
-npm run lint
-npm run lint:fix
-
-# Code formatting
-npm run format
-npm run format:check
-
-# Testing
-npm run test              # Watch mode
-npm run test:run          # Single run
-npm run test:coverage     # With coverage
-npm run test:ui           # Vitest UI
-npm run test:e2e          # Playwright E2E tests
-
-# Bundle size analysis
-npm run size
-npm run size:why
+npm run lint             # Run ESLint
+npm run lint:fix         # Auto-fix ESLint issues
+npm run format           # Format with Prettier
+npm run format:check     # Check formatting
 ```
 
-### Switching Between Dev and Production Modes
-
-**To Production Mode (Nginx + static files):**
+### Testing
 ```bash
-# Edit docker-compose.yml: target: production
-docker-compose down
-docker-compose build
-docker-compose up -d
-# Port becomes 3000:80 (Nginx)
+npm test                 # Run tests in watch mode
+npm run test:run         # Run tests once
+npm run test:coverage    # Generate coverage report
+npm run test:ui          # Open Vitest UI
+npm run test:e2e         # Run Playwright E2E tests
 ```
 
-**Back to Dev Mode:**
+### Bundle Analysis
 ```bash
-# Edit docker-compose.yml: target: development
-docker-compose down
-docker-compose up -d
-# Port becomes 3000:5173 (Vite)
+npm run build:analyze    # Build and open bundle visualizer
+npm run size             # Check bundle sizes
+npm run size:why         # Analyze why bundle is large
+```
+
+### Docker (Hot-Reload Enabled)
+```bash
+docker-compose up -d          # Start container (dev mode)
+docker-compose logs -f        # View logs
+docker-compose restart        # Restart (NO rebuild needed)
+docker-compose down           # Stop container
+
+# NEVER run docker-compose build for code changes
+# Hot-reload is enabled - just edit files
 ```
 
 ## Architecture
 
-### Feature-Based Structure
-
-The codebase uses feature-based organization under `src/features/`:
+### Directory Structure
 
 ```
 src/
-├── features/
-│   ├── auth/                 # Authentication (Google OAuth, JWT)
-│   ├── admin-dashboard/      # Admin pages and components
-│   ├── shop-dashboard/       # Shop owner pages and components
-│   ├── user-dashboard/       # User pages (minimal - mobile app focus)
-│   ├── products/             # Product management (admin + shop)
-│   ├── orders/               # Order management (admin + shop)
-│   ├── newsletters/          # Newsletter system (admin + shop)
-│   ├── billing/              # Billing and top-up (shop only)
-│   ├── analytics/            # Analytics dashboard (shop)
-│   ├── payment/              # Payment success/cancel pages
-│   ├── websocket/            # WebSocket real-time events
-│   └── notifications/        # Notification system
-├── shared/
-│   ├── components/           # Reusable UI components
-│   │   ├── ui/              # Basic UI elements (Button, Modal, etc.)
-│   │   ├── forms/           # Form components (FormInput, FormSelect, etc.)
-│   │   ├── layout/          # Layout components (Header, Sidebar, etc.)
-│   │   ├── feedback/        # Feedback components (Alert, Badge, etc.)
-│   │   └── charts/          # Chart components (Recharts wrappers)
-│   ├── lib/
-│   │   ├── api/             # API client (axios with interceptors)
-│   │   ├── security/        # Security utilities (CSRF, sanitization, storage)
-│   │   ├── utils/           # Utilities (logger, error-handler, cn)
-│   │   ├── validation/      # Zod schemas
-│   │   └── monitoring/      # Web vitals monitoring
-│   ├── hooks/               # Custom React hooks
-│   ├── types/               # Shared TypeScript types
-│   └── constants/           # Constants and config
-├── app/
-│   └── router.tsx           # Route configuration (React Router v7)
-├── tests/                   # Test setup and mocks
-└── main.tsx                 # Entry point
+├── app/              # App configuration
+│   └── router.tsx    # Route definitions with lazy loading
+├── features/         # Feature modules (by domain)
+│   ├── auth/         # Authentication
+│   ├── shop-dashboard/
+│   ├── admin-dashboard/
+│   ├── products/
+│   ├── orders/
+│   ├── billing/
+│   ├── newsletters/
+│   ├── analytics/
+│   ├── notifications/
+│   ├── payment/
+│   ├── websocket/
+│   └── user-dashboard/ # Minimal (users use mobile app)
+└── shared/           # Shared resources
+    ├── components/   # Reusable UI components
+    │   ├── ui/       # Base components (Button, Modal, etc.)
+    │   ├── forms/    # Form components (FormInput, FormSelect, etc.)
+    │   ├── layout/   # Layout components
+    │   ├── feedback/ # Loading, errors, toasts
+    │   └── charts/   # Chart components
+    ├── lib/          # Core utilities
+    │   ├── api/      # API client with security
+    │   ├── security/ # CSRF, XSS protection, token storage
+    │   ├── validation/ # Zod schemas
+    │   ├── monitoring/ # Sentry, web vitals
+    │   └── utils/    # Error handling, logger, performance
+    ├── hooks/        # Reusable hooks
+    ├── types/        # TypeScript types
+    └── constants/    # Config, routes, API endpoints
 ```
 
-### Key Architectural Patterns
+### Feature Module Structure
 
-**1. Feature Structure:**
 Each feature follows this pattern:
 ```
-features/{feature-name}/
-├── pages/              # Page components (lazy-loaded)
-├── components/         # Feature-specific components
-├── services/           # API service layer
-├── types/              # TypeScript types
-├── hooks/              # Feature-specific hooks
-├── store/              # State management (Zustand)
-└── index.ts            # Public exports
-```
-
-**2. State Management:**
-- **Zustand** for global state (auth, websocket)
-- **React Query (@tanstack/react-query)** for server state
-- **React Hook Form** for form state
-- Session storage for auth tokens (security)
-
-**3. Routing:**
-- React Router v7 with lazy loading
-- Protected routes with role-based access (`<ProtectedRoute>`)
-- Error boundaries on all routes
-- Routes defined in `src/app/router.tsx`
-
-**4. API Communication:**
-- Centralized axios client: `src/shared/lib/api/client.ts`
-- Automatic token refresh (JWT + HttpOnly refresh cookie)
-- Request/response interceptors for auth, CSRF, sanitization
-- Retry logic with exponential backoff (3 retries for 5xx errors)
-- Error handling via `handleError` utility
-
-**5. WebSocket Integration:**
-- WebSocket manager: `src/features/websocket/WebSocketManager.ts`
-- Auto-reconnect (max 5 attempts, 5s delay)
-- Heartbeat every 30s
-- Event-based subscription system
-- Client types: `user`, `shop`, `admin`
-- Real-time events: orders, products, notifications, balance, WhatsApp, shops
-
-**6. Security:**
-- CSRF tokens on state-changing requests
-- XSS prevention via DOMPurify sanitization
-- JWT validation before adding to requests
-- CSP headers (configured in Nginx)
-- Secure storage (sessionStorage for tokens, HttpOnly cookies for refresh)
-- Input sanitization on all form submissions
-
-## Important Implementation Notes
-
-### Authentication Flow
-
-1. **Login:** Google OAuth → Backend → JWT access token + HttpOnly refresh cookie
-2. **Token Storage:** Access token in sessionStorage (via Zustand persist)
-3. **Token Refresh:** Automatic via interceptor when 401 received
-4. **Logout:** Clear sessionStorage + backend clears HttpOnly cookie
-
-**Auth Store:** `src/features/auth/store/authStore.ts`
-- `login(user, accessToken, shop?)` - Set auth state
-- `logout()` - Clear all auth state
-- `setAccessToken(token)` - Update token after refresh
-
-### WebSocket Connection Rules
-
-**Connection is established when:**
-- User is authenticated (`accessToken` exists)
-- For shop owners: Shop must be `is_approved && is_active`
-- Unapproved/inactive shops don't get WebSocket access
-
-**Client Type Determination:**
-```typescript
-if (user.role === 'admin') → clientType = 'admin'
-else if (shop && shop.is_approved && shop.is_active) → clientType = 'shop'
-else → clientType = 'user'
-```
-
-**Connection:** `src/App.tsx` (useEffect with user/shop dependencies)
-
-### API Request Pattern
-
-**Using React Query (preferred):**
-```typescript
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { ordersService } from '@/features/orders/services/orders.service';
-
-// Fetch data
-const { data, isLoading, error } = useQuery({
-  queryKey: ['orders', filters],
-  queryFn: () => ordersService.getOrders(filters),
-});
-
-// Mutate data
-const { mutate } = useMutation({
-  mutationFn: ordersService.updateOrder,
-  onSuccess: () => queryClient.invalidateQueries(['orders']),
-});
-```
-
-**Service Layer Pattern:**
-```typescript
-// features/orders/services/orders.service.ts
-import { apiRequest } from '@/shared/lib/api/client';
-import { API_ENDPOINTS } from '@/shared/constants/api-endpoints';
-
-export const ordersService = {
-  getOrders: (params) =>
-    apiRequest<OrdersResponse>(API_ENDPOINTS.ORDERS.LIST, 'GET', undefined, params),
-
-  updateOrder: (id, data) =>
-    apiRequest(API_ENDPOINTS.ORDERS.UPDATE(id), 'PUT', data),
-};
+features/{feature}/
+├── components/       # Feature-specific components
+├── domain/          # Business logic
+├── hooks/           # Feature-specific hooks
+├── pages/           # Page components (lazy loaded)
+├── services/        # API service functions
+├── store/           # Zustand state (if needed)
+├── types/           # TypeScript types
+└── index.ts         # Public exports
 ```
 
 ### Path Aliases
 
-Configured in `vite.config.ts` and `tsconfig.json`:
+TypeScript and Vite configured with:
 ```typescript
-@/                    → ./src/
-@/features/          → ./src/features/
-@/shared/            → ./src/shared/
-@/assets/            → ./src/assets/
-@/tests/             → ./src/tests/
+@/                   // src/
+@/features/         // src/features/
+@/shared/           // src/shared/
+@/assets/           // src/assets/
+@/tests/            // src/tests/
 ```
 
-### Bundle Optimization
+## Key Patterns
 
-Vite configured with manual chunking:
-- `react-vendor` - React, React DOM, React Router
-- `query-vendor` - TanStack React Query
-- `form-vendor` - React Hook Form, Zod
-- `charts-vendor` - Recharts
-- `ui-vendor` - Lucide icons, DOMPurify, CVA, clsx
-- `shop-features`, `admin-features`, `user-features`, `auth-features` - Feature chunks
-- `shared-components` - Shared UI components
+### 1. API Layer (`@/shared/lib/api/client.ts`)
 
-**Size Limits:** See `package.json` → `size-limit` array
+Centralized API client with:
+- Automatic token refresh on 401
+- CSRF token handling
+- Request/response sanitization
+- Retry logic with exponential backoff
+- Security headers
 
-### Form Handling
+```typescript
+import { apiRequest } from '@/shared/lib/api/client';
 
-**Stack:** React Hook Form + Zod + Custom form components
+// Usage in services
+export const productsService = {
+  getProducts: (params: ProductFilters) =>
+    apiRequest<ProductsResponse>('/api/v1/products', 'GET', undefined, params),
+
+  createProduct: (data: ProductCreate) =>
+    apiRequest<Product>('/api/v1/products', 'POST', data),
+};
+
+// Usage in components with React Query
+const { data, isLoading } = useQuery({
+  queryKey: ['products', filters],
+  queryFn: () => productsService.getProducts(filters),
+});
+```
+
+### 2. Forms (React Hook Form + Zod)
+
+All forms use:
+- `react-hook-form` for form state
+- `zod` for validation schemas
+- Shared form components from `@/shared/components/forms/`
 
 ```typescript
 import { useForm } from 'react-hook-form';
@@ -362,189 +163,314 @@ import { z } from 'zod';
 import { FormInput, FormSelect } from '@/shared/components/forms';
 
 const schema = z.object({
-  name: z.string().min(1, 'Required'),
-  email: z.string().email('Invalid email'),
+  name: z.string().min(1, 'Обязательное поле'),
+  email: z.string().email('Неверный email'),
 });
 
-const { control, handleSubmit } = useForm({
-  resolver: zodResolver(schema),
-});
+function MyForm() {
+  const { control, handleSubmit } = useForm({
+    resolver: zodResolver(schema),
+  });
 
-<FormInput control={control} name="name" label="Name" />
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FormInput control={control} name="name" label="Имя" />
+      <FormInput control={control} name="email" label="Email" />
+    </form>
+  );
+}
 ```
 
-### Russian UI Translation
+### 3. Authentication Flow
 
-**Status:** Frontend UI is ~100% translated to Russian
-- All user-facing text (labels, buttons, messages) in Russian
-- Technical elements remain in English (variable names, function names, API keys)
-- Comments can be in English or Russian
-- Error messages from backend may be in English
+State managed by Zustand store (`@/features/auth/store/authStore.ts`):
+```typescript
+import { useAuthStore } from '@/features/auth/store/authStore';
 
-### Testing
+const { user, shop, isAuthenticated, login, logout } = useAuthStore();
+```
 
-**Vitest** for unit/integration tests
-**Playwright** for E2E tests
-**Mock Service Worker (MSW)** for API mocking
+Token storage:
+- Access token: `sessionStorage` (cleared on tab close)
+- Refresh token: HttpOnly cookie (handled by backend)
+- Auto-refresh on 401 responses
 
-Test setup: `src/tests/setup.ts`
-API mocks: `src/tests/mocks/handlers.ts`
+### 4. WebSocket Events
 
-## Common Workflows
+Real-time updates via WebSocket (`@/features/websocket/`):
+
+```typescript
+import { useWebSocketEvent } from '@/features/websocket/hooks';
+
+// Listen for specific events
+useWebSocketEvent('order:created', (data) => {
+  queryClient.invalidateQueries(['orders']);
+  toast.success('Новый заказ!');
+});
+```
+
+Channels:
+- `/ws/user` - User notifications
+- `/ws/shop` - Shop owner events (requires `is_approved && is_active`)
+- `/ws/admin` - Admin events
+
+### 5. State Management
+
+- **Server state:** React Query (`@tanstack/react-query`)
+- **Client state:** Zustand (auth, UI state)
+- **Form state:** React Hook Form
+
+### 6. Protected Routes
+
+Routes protected by role in `router.tsx`:
+```typescript
+withErrorBoundary(<ShopDashboard />, {
+  allowedRoles: [ROLES.SHOP_OWNER]
+})
+```
+
+Roles: `admin`, `shop_owner`, `user`
+
+## Security Patterns
+
+### Input Sanitization
+```typescript
+import { sanitizeInput, sanitizeHtml } from '@/shared/lib/security/sanitize';
+
+// All user input sanitized before rendering
+const clean = sanitizeInput(userInput);
+const cleanHtml = sanitizeHtml(richTextInput);
+```
+
+### CSRF Protection
+Automatic CSRF token injection on state-changing requests (POST, PUT, DELETE, PATCH).
+
+### XSS Prevention
+- DOMPurify for HTML sanitization
+- Content Security Policy headers
+- React's built-in XSS protection
+
+## Build Configuration
+
+### Vite Code Splitting Strategy
+
+Manual chunks configured in `vite.config.ts`:
+- `react-vendor` - React, React DOM, React Router
+- `query-vendor` - React Query
+- `form-vendor` - React Hook Form, Zod
+- `charts-vendor` - Recharts
+- `ui-vendor` - Lucide icons, UI utilities
+- `shop-features`, `admin-features`, `auth-features` - Feature-based chunks
+- `shared-components` - Shared UI components
+
+### Bundle Size Limits
+
+Enforced by `size-limit` (see `package.json`):
+- Initial bundle: 200 KB (gzipped)
+- React vendor: 150 KB
+- Total bundle: 800 KB
+
+Check: `npm run size`
+
+## Testing Guidelines
+
+### Unit Tests (Vitest)
+```typescript
+// Example: src/shared/lib/utils/performance.test.ts
+import { describe, it, expect } from 'vitest';
+
+describe('formatBytes', () => {
+  it('should format bytes correctly', () => {
+    expect(formatBytes(1024)).toBe('1.00 KB');
+  });
+});
+```
+
+### Test Setup
+- Environment: jsdom
+- Setup file: `src/tests/setup.ts`
+- Mocks: `src/tests/mocks/`
+- Coverage targets: 80% (branches, functions, lines, statements)
+
+### Running Single Test
+```bash
+npm test -- performance.test.ts
+npm test -- --reporter=verbose
+```
+
+## Docker Hot-Reload
+
+**CRITICAL:** Hot-reload is ENABLED. Never rebuild for code changes.
+
+How it works:
+- `docker-compose.yml` target: `development`
+- Volumes mount source code into container
+- Vite dev server watches for changes
+- Changes apply in 1-2 seconds
+
+Mounted volumes:
+- `./src` → `/app/src`
+- `./public` → `/app/public`
+- `./index.html` → `/app/index.html`
+- Config files (vite.config.ts, tsconfig.*)
+
+If hot-reload breaks:
+1. Check logs: `docker-compose logs -f`
+2. Verify volumes in `docker-compose.yml`
+3. Restart only: `docker-compose restart` (NOT rebuild)
+
+## Environment Variables
+
+Required variables (validated at startup):
+```bash
+VITE_API_URL=https://api.leema.kz           # Backend API
+VITE_WS_URL=wss://api.leema.kz/ws           # WebSocket URL
+VITE_GOOGLE_CLIENT_ID=...                    # Google OAuth
+VITE_ENV=development|staging|production
+```
+
+See `.env.example` for full configuration.
+
+## UI/UX Standards
+
+- **Language:** 100% Russian for user-facing text
+- **Technical names:** English only (variable names, function names, API keys)
+- **Icons:** Lucide React (`lucide-react`)
+- **Styling:** TailwindCSS utility classes
+- **Responsiveness:** Mobile-first approach
+- **Accessibility:** ARIA labels, keyboard navigation
+
+## Common Development Tasks
 
 ### Adding a New Feature
 
-1. Create feature directory: `src/features/{feature-name}/`
-2. Add subdirectories: `pages/`, `components/`, `services/`, `types/`
-3. Create service layer for API calls
-4. Add React Query hooks in page/component
-5. Define routes in `src/app/router.tsx`
-6. Add to feature's `index.ts` for exports
-7. Use lazy loading for pages
+1. Create feature directory: `src/features/{feature}/`
+2. Structure:
+   ```
+   {feature}/
+   ├── components/
+   ├── pages/
+   ├── services/{feature}.service.ts
+   ├── types/
+   ├── hooks/ (if needed)
+   ├── store/ (if needed)
+   └── index.ts
+   ```
+3. Add route in `src/app/router.tsx`
+4. Create API service using `apiRequest`
+5. Use React Query for data fetching
+6. Add types to `types/` directory
 
 ### Adding a New API Endpoint
 
-1. Add endpoint constant to `src/shared/constants/api-endpoints.ts`
-2. Create/update service in feature's `services/` directory
-3. Use `apiRequest` helper from `@/shared/lib/api/client`
-4. Add TypeScript types for request/response
+1. Add endpoint constant to `@/shared/constants/api-endpoints.ts`
+2. Create service function using `apiRequest`
+3. Define TypeScript types
+4. Use with React Query in component
 
-### Handling Errors
+### Debugging Issues
 
-Use centralized error handler:
-```typescript
-import { handleError, createError } from '@/shared/lib/utils/error-handler';
-
-// In try-catch
-try {
-  await someApiCall();
-} catch (error) {
-  handleError(error, {
-    showToast: true,
-    logError: true,
-    context: { operation: 'someApiCall' },
-  });
-}
-
-// Creating custom errors
-throw createError.validation.required('Field name is required');
-throw createError.network.connectionError();
+**TypeScript errors:**
+```bash
+npm run typecheck          # Check all files
+npm run build             # Full build with checks
 ```
 
-### Adding WebSocket Event Handlers
-
-1. Define event type in `src/features/websocket/types/events.ts`
-2. Create hook in `src/features/websocket/hooks/use{Feature}Events.ts`:
-```typescript
-import { useWebSocketEvent } from './useWebSocketEvent';
-
-export function useOrderEvents() {
-  useWebSocketEvent('order:created', (data) => {
-    // Handle event
-    queryClient.invalidateQueries(['orders']);
-  });
-}
+**Linting errors:**
+```bash
+npm run lint:fix          # Auto-fix
 ```
-3. Call hook in page component
 
-## Backend Integration
+**Bundle too large:**
+```bash
+npm run build:analyze     # Open visualizer
+npm run size:why          # See why bundle is large
+```
 
-### API Base URL
-- **Production:** `https://api.leema.kz`
-- **Development (proxy):** `/api` → proxied to `https://api.leema.kz`
-- Configured in `.env` and `vite.config.ts`
+**API issues:**
+- Check browser DevTools Network tab
+- Check CSRF token in request headers
+- Verify authentication token in sessionStorage
+- Backend logs: `docker logs leema_backend`
 
-### Authentication
-- **Access Token:** Short-lived JWT in sessionStorage
-- **Refresh Token:** Long-lived HttpOnly cookie (not accessible to JS)
-- Backend handles refresh token rotation
+**Hot-reload not working:**
+```bash
+docker-compose logs -f    # Check for errors
+docker-compose restart    # Restart container
+```
 
-### CORS
-Backend must allow:
-- Origin: `https://www.leema.kz` or `http://localhost:3000`
-- Credentials: `true` (for HttpOnly cookies)
+## Important Notes
 
-## Performance Considerations
+### Code Style
+- ESLint errors on `console.log` (use `console.warn` or `console.error`, or remove)
+- No `any` types in production code (allowed in tests)
+- Exhaustive dependencies in `useEffect`
 
-1. **Lazy Loading:** All route pages are lazy-loaded
-2. **Code Splitting:** Manual chunks for vendors and features
-3. **Image Optimization:** vite-plugin-imagemin (WebP, PNG, JPG)
-4. **Compression:** Gzip + Brotli via vite-plugin-compression
-5. **Virtual Scrolling:** @tanstack/react-virtual for long lists
-6. **Debouncing:** Use `useDebounce` hook for search inputs
+### Performance
+- All pages lazy loaded via `React.lazy()`
+- Images optimized automatically in production builds
+- Gzip + Brotli compression enabled
+- Manual chunk splitting for optimal loading
 
-## Deployment
+### Production Build
+```bash
+# Current mode: DEVELOPMENT (hot-reload)
+# Switch to production: See docker-compose.yml comments
 
-### Production Build Process
+# Production build in Docker:
+# 1. Change target: production in docker-compose.yml
+# 2. docker-compose down && docker-compose up -d --build
+# 3. Update Nginx config to serve /dist instead of proxy
+```
 
-1. Docker builds using `builder` stage (multi-stage Dockerfile)
-2. Runs `npm run build:fast` (skips typecheck for speed)
-3. Vite generates optimized bundle in `dist/`
-4. Nginx serves static files from `dist/`
-5. Nginx proxies `/api` requests to backend
+### Git Workflow
+- Branch: `main`
+- Before commit: `npm run lint:fix && npm run typecheck`
+- Hot-reload enabled: Test changes before committing
 
-### Environment Variables (Production)
+### Integration with Backend
 
-Set in `.env` and Docker build args:
-- `VITE_API_URL=https://api.leema.kz`
-- `VITE_WS_URL=wss://api.leema.kz/ws`
-- `VITE_GOOGLE_CLIENT_ID={your-client-id}`
-- `VITE_ENV=production`
+Backend: `/var/www/backend/` (FastAPI + PostgreSQL)
+- API Docs: `http://localhost:8000/docs` (dev only)
+- Backend hot-reload also enabled
+- CORS configured for frontend origins
+
+### File Uploads
+```typescript
+// 1. Get presigned URL
+const { url } = await apiRequest('/api/v1/products/upload-url', 'POST', {
+  filename: file.name,
+});
+
+// 2. Upload file
+const formData = new FormData();
+formData.append('file', file);
+await apiRequest(`/api/v1/products/upload/${filename}`, 'PUT', formData);
+```
+
+Supported: JPG, PNG, WEBP (validated on backend)
 
 ## Troubleshooting
 
-### Hot-Reload Not Working
+**"Cannot find module '@/...'"**
+- Restart TypeScript server in IDE
+- Check `tsconfig.json` paths
 
-```bash
-# Check volumes are mounted
-docker exec leema_frontend ls -la /app/src
+**"VITE_API_URL is required"**
+- Copy `.env.example` to `.env`
+- Fill required variables
 
-# Check Vite is running
-docker-compose logs leema_frontend | grep "VITE"
+**Build fails with type errors**
+- Use `npm run build:fast` to skip typecheck
+- Fix types separately with `npm run typecheck`
 
-# Restart container
-docker-compose restart leema_frontend
-```
+**WebSocket won't connect**
+- Check user is authenticated
+- Shop owners need `is_approved && is_active`
+- Check browser console for errors
+- Verify backend WebSocket is running
 
-### Build Fails with Type Errors
-
-Use fast build (skips typecheck):
-```bash
-npm run build:fast
-# or
-VITE_SKIP_TYPE_CHECK=true npm run build
-```
-
-Run typecheck separately:
-```bash
-npm run typecheck
-```
-
-### WebSocket Connection Issues
-
-1. Check user is authenticated and has valid token
-2. For shops: Verify `is_approved && is_active`
-3. Check backend WebSocket endpoint is accessible
-4. Review logs: `docker-compose logs -f leema_frontend`
-
-### API Request Failures
-
-1. Check network tab for request details
-2. Verify token is present in Authorization header
-3. Check backend logs for errors
-4. Verify CORS settings on backend
-
-## Git Workflow
-
-Current branch: `main`
-
-Recent work includes:
-- Disabling caching for bug fixing
-- Nginx configuration and optimization
-- Russian UI translation (100% complete)
-- Production deployment setup
-
-When committing changes, ensure:
-- Run `npm run lint:fix` before commit
-- Run `npm run typecheck` to catch type errors
-- Test locally in Docker container before pushing
+**Tests failing**
+- Check test setup: `src/tests/setup.ts`
+- Verify mocks: `src/tests/mocks/`
+- Run with verbose: `npm test -- --reporter=verbose`

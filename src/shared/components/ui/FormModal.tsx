@@ -5,7 +5,8 @@ import { X } from 'lucide-react';
 import { Button } from './Button';
 
 interface FormModalProps {
-  isOpen: boolean;
+  open?: boolean; // Accept 'open' prop
+  isOpen?: boolean; // Keep backward compatibility
   onClose: () => void;
   title: string;
   description?: string;
@@ -13,7 +14,8 @@ interface FormModalProps {
   onSubmit?: () => void;
   submitText?: string;
   cancelText?: string;
-  isSubmitting?: boolean;
+  isLoading?: boolean; // Accept 'isLoading' prop
+  isSubmitting?: boolean; // Keep backward compatibility
   submitDisabled?: boolean;
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
   showFooter?: boolean;
@@ -24,6 +26,7 @@ interface FormModalProps {
 }
 
 export const FormModal: React.FC<FormModalProps> = ({
+  open,
   isOpen,
   onClose,
   title,
@@ -32,7 +35,8 @@ export const FormModal: React.FC<FormModalProps> = ({
   onSubmit,
   submitText = 'Save',
   cancelText = 'Cancel',
-  isSubmitting = false,
+  isLoading,
+  isSubmitting,
   submitDisabled = false,
   size = 'md',
   showFooter = true,
@@ -41,6 +45,10 @@ export const FormModal: React.FC<FormModalProps> = ({
   closeOnEscape = true,
   className = '',
 }) => {
+  // Support both 'open' and 'isOpen' props
+  const modalOpen = open ?? isOpen ?? false;
+  // Support both 'isLoading' and 'isSubmitting' props
+  const modalSubmitting = isLoading ?? isSubmitting ?? false;
   const sizeClasses = {
     sm: 'max-w-md',
     md: 'max-w-lg',
@@ -51,18 +59,18 @@ export const FormModal: React.FC<FormModalProps> = ({
   };
 
   const handleClose = () => {
-    if (isSubmitting) return;
+    if (modalSubmitting) return;
     onClose();
   };
 
   const handleOverlayClick = () => {
-    if (closeOnOverlayClick && !isSubmitting) {
+    if (closeOnOverlayClick && !modalSubmitting) {
       handleClose();
     }
   };
 
   return (
-    <Transition appear show={isOpen} as={Fragment}>
+    <Transition appear show={modalOpen} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-50"
@@ -122,7 +130,7 @@ export const FormModal: React.FC<FormModalProps> = ({
                   <button
                     type="button"
                     onClick={handleClose}
-                    disabled={isSubmitting}
+                    disabled={modalSubmitting}
                     className="absolute right-4 top-4 rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Close modal"
                   >
@@ -144,15 +152,15 @@ export const FormModal: React.FC<FormModalProps> = ({
                           type="button"
                           variant="outline"
                           onClick={handleClose}
-                          disabled={isSubmitting}
+                          disabled={modalSubmitting}
                         >
                           {cancelText}
                         </Button>
                         <Button
                           type="button"
                           variant="primary"
-                          isLoading={isSubmitting}
-                          disabled={submitDisabled || isSubmitting}
+                          isLoading={modalSubmitting}
+                          disabled={submitDisabled || modalSubmitting}
                           onClick={(e) => {
                             e.preventDefault();
                             onSubmit();
