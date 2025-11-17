@@ -14,6 +14,7 @@ import type { Newsletter, NewsletterStatus } from '../types/newsletter.types'
 import toast from 'react-hot-toast'
 
 const STATUS_CONFIG = {
+  draft: { label: 'Черновик', color: 'gray' as const },
   pending: { label: 'Ожидание одобрения', color: 'yellow' as const },
   approved: { label: 'Одобрено', color: 'green' as const },
   rejected: { label: 'Отклонено', color: 'red' as const },

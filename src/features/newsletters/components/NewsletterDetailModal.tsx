@@ -15,8 +15,10 @@ const STATUS_CONFIG = {
   approved: { label: 'Одобрено', color: 'green' as const },
   rejected: { label: 'Отклонено', color: 'red' as const },
   sending: { label: 'Отправляется', color: 'blue' as const },
+  in_progress: { label: 'В процессе', color: 'blue' as const },
   completed: { label: 'Завершено', color: 'green' as const },
   failed: { label: 'Ошибка', color: 'red' as const },
+  cancelled: { label: 'Отменено', color: 'gray' as const },
 }
 
 export function NewsletterDetailModal({
@@ -26,7 +28,7 @@ export function NewsletterDetailModal({
 }: NewsletterDetailModalProps) {
   if (!newsletter) return
 
-  const statusConfig = STATUS_CONFIG[newsletter.status]
+  const statusConfig = STATUS_CONFIG[newsletter.status] || STATUS_CONFIG.draft
 
   // Convert relative image paths to full URLs
   const API_URL = import.meta.env.VITE_API_URL || 'https://api.leema.kz'

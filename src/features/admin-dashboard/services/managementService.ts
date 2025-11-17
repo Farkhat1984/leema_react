@@ -167,12 +167,14 @@ export const managementService = {
   // ==================== USERS ====================
 
   /**
-   * Get all users
+   * Get all users (mobile app users only by default)
    * @param filters - User filters
    * @returns List of users
    */
   getUsers: async (filters?: UserFilters): Promise<User[]> => {
-    const response = await apiRequest<unknown>(`${API_ENDPOINTS.ADMIN.USERS}-all`, 'GET', null, filters);
+    // By default, fetch only mobile app users (Google/Apple ID)
+    const params = { mobile_only: true, ...filters };
+    const response = await apiRequest<unknown>(`${API_ENDPOINTS.ADMIN.USERS}-all`, 'GET', null, params);
     return response.users || response;
   },
 

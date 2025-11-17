@@ -149,7 +149,7 @@ export default function UnifiedWhatsAppPage() {
           setTimeout(loadWhatsAppStatus, 3000);
         }
       }
-    } catch {
+    } catch (error: any) {
       logger.error('Failed to load WhatsApp status/QR', error);
       toast.error('Не удалось загрузить статус WhatsApp');
       setStatus('error');
