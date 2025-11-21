@@ -14,7 +14,6 @@ import { BackButton } from '@/shared/components/ui/BackButton';
 import { FormInput } from '@/shared/components/forms/FormInput';
 import { FormTextarea } from '@/shared/components/forms/FormTextarea';
 import { FormSelect } from '@/shared/components/forms/FormSelect';
-import { FormCheckbox } from '@/shared/components/forms/FormCheckbox';
 import { agentCreateSchema, type AgentCreateFormData } from '../schemas/agent-form.schema';
 import { useTemplates, useTools, useCreateAgent } from '../hooks/useAgents';
 import type { AgentTemplateResponse } from '../types/ai-agents.types';
@@ -29,7 +28,7 @@ export default function CreateAgentPage() {
   const { data: tools, isLoading: toolsLoading } = useTools();
   const { mutate: createAgent, isPending } = useCreateAgent();
 
-  const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm<AgentCreateFormData>({
+  const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<AgentCreateFormData>({
     resolver: zodResolver(agentCreateSchema),
     defaultValues: {
       template_id: null,
@@ -276,8 +275,7 @@ export default function CreateAgentPage() {
               <h3 className="text-lg font-semibold">Основная информация</h3>
 
               <FormInput
-                control={control}
-                name="name"
+                register={register('name')}
                 label="Название агента"
                 placeholder="Мой AI помощник"
                 required
@@ -285,8 +283,7 @@ export default function CreateAgentPage() {
               />
 
               <FormTextarea
-                control={control}
-                name="description"
+                register={register('description')}
                 label="Описание"
                 placeholder="Краткое описание назначения агента"
                 rows={3}
@@ -295,8 +292,7 @@ export default function CreateAgentPage() {
 
               {!templateId && (
                 <FormTextarea
-                  control={control}
-                  name="system_prompt"
+                  register={register('system_prompt')}
                   label="Системный промпт"
                   placeholder="Ты — полезный AI-ассистент, который помогает клиентам интернет-магазина модной одежды..."
                   rows={6}
@@ -306,8 +302,7 @@ export default function CreateAgentPage() {
               )}
 
               <FormTextarea
-                control={control}
-                name="custom_instructions"
+                register={register('custom_instructions')}
                 label="Дополнительные инструкции"
                 placeholder="Дополнительные указания для агента (до 2000 символов)"
                 rows={4}
@@ -322,8 +317,7 @@ export default function CreateAgentPage() {
               <h3 className="text-lg font-semibold">Настройки</h3>
 
               <FormSelect
-                control={control}
-                name="config.model"
+                register={register('config.model')}
                 label="Модель AI"
                 options={[
                   { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash (быстрая)' },
@@ -367,8 +361,7 @@ export default function CreateAgentPage() {
               </div>
 
               <FormSelect
-                control={control}
-                name="config.language"
+                register={register('config.language')}
                 label="Язык"
                 options={[
                   { value: 'ru', label: 'Русский' },
@@ -378,15 +371,13 @@ export default function CreateAgentPage() {
               />
 
               <FormInput
-                control={control}
-                name="config.tone"
+                register={register('config.tone')}
                 label="Тон общения"
                 placeholder="friendly"
               />
 
               <FormSelect
-                control={control}
-                name="config.response_style"
+                register={register('config.response_style')}
                 label="Стиль ответов"
                 options={[
                   { value: 'concise', label: 'Краткий' },
