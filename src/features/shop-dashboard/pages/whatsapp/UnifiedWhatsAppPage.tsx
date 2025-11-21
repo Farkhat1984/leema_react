@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { CheckCircle, XCircle, Loader, RefreshCw, Smartphone } from 'lucide-react';
+import { CheckCircle, XCircle, Loader, RefreshCw, Smartphone, Clock } from 'lucide-react';
 import { BackButton } from '@/shared/components/ui/BackButton';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { apiRequest } from '@/shared/lib/api/client';
@@ -31,6 +31,29 @@ interface WhatsAppStatusResponse {
   status: string;
 }
 
+// ===== Countdown Timer Component =====
+const CountdownTimer = ({ seconds }: { seconds: number }) => {
+  // Цветовая индикация: зеленый > желтый > красный
+  const getColorClasses = () => {
+    if (seconds > 40) {
+      return 'bg-green-500 text-white';
+    } else if (seconds > 20) {
+      return 'bg-yellow-500 text-white';
+    } else if (seconds > 10) {
+      return 'bg-orange-500 text-white';
+    } else {
+      return 'bg-red-500 text-white animate-pulse';
+    }
+  };
+
+  return (
+    <div className={`${getColorClasses()} text-xs px-2.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-md transition-colors duration-300`}>
+      <Clock className="w-3.5 h-3.5" />
+      <span className="font-medium tabular-nums">{seconds}с</span>
+    </div>
+  );
+};
+
 // ===== Main Component =====
 export default function UnifiedWhatsAppPage() {
   const { shop } = useAuthStore();
@@ -38,20 +61,64 @@ export default function UnifiedWhatsAppPage() {
   const [qrImageUrl, setQrImageUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<string>('checking');
   const [isLoading, setIsLoading] = useState(true);
+  const [countdown, setCountdown] = useState<number>(60); // QR код действует 60 секунд
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const statusCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check status on mount
   useEffect(() => {
     checkStatus();
 
-    // Cleanup interval on unmount
+    // Cleanup intervals on unmount
     return () => {
       if (statusCheckIntervalRef.current) {
         clearInterval(statusCheckIntervalRef.current);
       }
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
     };
   }, []);
+
+  // Countdown timer for QR code expiration
+  useEffect(() => {
+    // Clear any existing countdown
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+
+    // Start countdown only when QR is displayed
+    if (status === 'qr_received' && qrCode) {
+      setCountdown(60); // Reset to 60 seconds
+
+      countdownIntervalRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            // QR expired, stop countdown
+            if (countdownIntervalRef.current) {
+              clearInterval(countdownIntervalRef.current);
+              countdownIntervalRef.current = null;
+            }
+            toast('QR код истек. Нажмите "Обновить QR код"', { icon: '⏰' });
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000); // Update every second
+    } else {
+      setCountdown(60); // Reset when not showing QR
+    }
+
+    // Cleanup
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+      }
+    };
+  }, [status, qrCode]);
 
   // Listen for WebSocket status updates
   useWebSocketEvent('whatsapp_status_changed', (data: any) => {
@@ -374,20 +441,12 @@ export default function UnifiedWhatsAppPage() {
                   </h2>
                   <canvas ref={canvasRef} style={{ display: 'none' }} />
                   {qrImageUrl ? (
-                    <div className="inline-block p-4 bg-white border-4 border-green-500 rounded-lg mb-4 relative">
+                    <div className="inline-block p-4 bg-white border-4 border-green-500 rounded-lg mb-4">
                       <img
                         src={qrImageUrl}
                         alt="WhatsApp QR Code"
                         className="w-64 h-64 mx-auto"
                       />
-                      {statusCheckIntervalRef.current && (
-                        <div className="absolute top-2 right-2">
-                          <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                            <Loader className="w-3 h-3 animate-spin" />
-                            Ожидание...
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ) : (
                     <div className="inline-block p-4 mb-4">
@@ -403,9 +462,22 @@ export default function UnifiedWhatsAppPage() {
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Обновить QR код
                     </Button>
-                    <p className="text-xs text-gray-500">
-                      QR код действует 60 секунд
-                    </p>
+                    <div className="flex items-center justify-center gap-2">
+                      {countdown > 0 ? (
+                        <>
+                          <Clock className="w-4 h-4 text-gray-500" />
+                          <span className="text-xs text-gray-500">
+                            QR код действует еще
+                          </span>
+                          <CountdownTimer seconds={countdown} />
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2 text-red-600">
+                          <Clock className="w-4 h-4" />
+                          <span className="text-xs font-medium">QR код истек</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ) : (
