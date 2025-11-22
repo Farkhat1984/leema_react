@@ -244,20 +244,20 @@ export const API_ENDPOINTS = {
 
   // Global AI Config
   ADMIN_AI_CONFIG: {
-    BASE: '/api/v1/admin/ai-config',
+    BASE: '/api/v1/admin/ai-config/',
   },
 
   // Templates (Admin)
   ADMIN_TEMPLATES: {
-    BASE: '/api/v1/admin/ai-agents/templates',
-    BY_ID: (id: string | number) => `/api/v1/admin/ai-agents/templates/${id}`,
-    STATS: (id: string | number) => `/api/v1/admin/ai-agents/templates/${id}/stats`,
+    BASE: '/api/v1/admin/ai-templates/',
+    BY_ID: (id: string | number) => `/api/v1/admin/ai-templates/${id}`,
+    STATS: (id: string | number) => `/api/v1/admin/ai-templates/${id}/stats`,
   },
 
   // Tools (Admin)
   ADMIN_TOOLS: {
-    BASE: '/api/v1/admin/ai-agents/tools',
-    BY_ID: (id: string | number) => `/api/v1/admin/ai-agents/tools/${id}`,
-    STATS: (id: string | number) => `/api/v1/admin/ai-agents/tools/${id}/stats`,
+    BASE: '/api/v1/admin/ai-tools/',
+    BY_ID: (id: string | number) => `/api/v1/admin/ai-tools/${id}`,
+    STATS: (id: string | number) => `/api/v1/admin/ai-tools/${id}/stats`,
   },
 } as const;

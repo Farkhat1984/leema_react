@@ -274,7 +274,7 @@ export default function AllAgentsPage() {
         </>
       ) : (
         <EmptyState
-          icon={Bot}
+          icon={<Bot className="w-6 h-6" />}
           title="Агенты не найдены"
           description="Попробуйте изменить фильтры поиска"
         />

@@ -187,23 +187,23 @@ export default function AgentDetailsPage() {
                 <StatsCard
                   title="Всего разговоров"
                   value={formatNumber(analytics.total_conversations)}
-                  icon={MessageSquare}
+                  icon={<MessageSquare className="w-5 h-5" />}
                 />
                 <StatsCard
                   title="Активных"
                   value={formatNumber(analytics.active_conversations)}
-                  icon={TrendingUp}
+                  icon={<TrendingUp className="w-5 h-5" />}
                   trend="up"
                 />
                 <StatsCard
                   title="Всего сообщений"
                   value={formatNumber(analytics.total_messages)}
-                  icon={MessageSquare}
+                  icon={<MessageSquare className="w-5 h-5" />}
                 />
                 <StatsCard
                   title="Средн. время ответа"
                   value={`${Math.round(analytics.avg_response_time_ms)}мс`}
-                  icon={BarChart3}
+                  icon={<BarChart3 className="w-5 h-5" />}
                 />
               </div>
             )}
@@ -290,7 +290,7 @@ export default function AgentDetailsPage() {
                 </div>
               ) : (
                 <EmptyState
-                  icon={MessageSquare}
+                  icon={<MessageSquare className="w-6 h-6" />}
                   title="Нет разговоров"
                   description="Разговоры появятся после начала общения с клиентами"
                 />
@@ -379,7 +379,7 @@ export default function AgentDetailsPage() {
               </>
             ) : (
               <EmptyState
-                icon={MessageSquare}
+                icon={<MessageSquare className="w-6 h-6" />}
                 title="Нет разговоров"
                 description="Разговоры появятся после начала общения с клиентами"
               />

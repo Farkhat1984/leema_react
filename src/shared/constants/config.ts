@@ -80,6 +80,7 @@ export const ROUTES = {
     AUTH_CALLBACK: '/auth/callback',
     PAYMENT_SUCCESS: '/payment/success',
     PAYMENT_CANCEL: '/payment/cancel',
+    AI_CREDITS_PURCHASE: '/credits/purchase',
   },
   SHOP: {
     DASHBOARD: '/shop',

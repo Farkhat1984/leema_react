@@ -66,12 +66,23 @@ export default function UnifiedWhatsAppPage() {
   const statusCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Check status on mount
+  // Check status on mount and when page becomes visible
   useEffect(() => {
     checkStatus();
 
+    // Re-check status when page becomes visible again
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        logger.info('Page became visible, re-checking WhatsApp status...');
+        checkStatus();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     // Cleanup intervals on unmount
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (statusCheckIntervalRef.current) {
         clearInterval(statusCheckIntervalRef.current);
       }
@@ -89,26 +100,30 @@ export default function UnifiedWhatsAppPage() {
       countdownIntervalRef.current = null;
     }
 
-    // Start countdown only when QR is displayed
+    // Start countdown only when QR is displayed AND status is qr_received
     if (status === 'qr_received' && qrCode) {
       setCountdown(60); // Reset to 60 seconds
 
       countdownIntervalRef.current = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
-            // QR expired, stop countdown
+            // QR expired, stop countdown and clear QR
             if (countdownIntervalRef.current) {
               clearInterval(countdownIntervalRef.current);
               countdownIntervalRef.current = null;
             }
-            toast('QR код истек. Нажмите "Обновить QR код"', { icon: '⏰' });
+            setQrCode(null);
+            setQrImageUrl(null);
+            setStatus('disconnected');
+            toast('QR код истек. Нажмите "Получить QR код" для новой попытки', { icon: '⏰' });
             return 0;
           }
           return prev - 1;
         });
       }, 1000); // Update every second
     } else {
-      setCountdown(60); // Reset when not showing QR
+      // Stop countdown and reset when status changes (connected, disconnected, etc.)
+      setCountdown(60);
     }
 
     // Cleanup
@@ -130,18 +145,26 @@ export default function UnifiedWhatsAppPage() {
       statusCheckIntervalRef.current = null;
     }
 
+    // Stop countdown timer on any status change
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+
     // Handle successful connection
     if (data.connected === true || data.status === 'connected') {
       setStatus('connected');
       setQrCode(null);
       setQrImageUrl(null);
+      setCountdown(60);
       toast.success('✅ WhatsApp успешно подключен!');
     }
-    // Handle disconnection
-    else if (data.status === 'disconnected' || data.connected === false) {
+    // Handle disconnection or logged_out
+    else if (data.status === 'disconnected' || data.status === 'logged_out' || data.connected === false) {
       setStatus('disconnected');
       setQrCode(null);
       setQrImageUrl(null);
+      setCountdown(60);
       toast.info('WhatsApp отключен');
     }
     // Handle phone mismatch error

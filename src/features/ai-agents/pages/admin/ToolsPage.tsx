@@ -276,7 +276,7 @@ export default function ToolsPage() {
         </div>
       ) : (
         <EmptyState
-          icon={Wrench}
+          icon={<Wrench className="w-6 h-6" />}
           title="Нет инструментов"
           description="Создайте первый инструмент для расширения возможностей агентов"
           action={{

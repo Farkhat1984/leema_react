@@ -141,6 +141,9 @@ const AdminNotifications = lazy(() => import('@/features/admin-dashboard').then(
 const AdminShopsPending = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminShopsPendingPage })));
 const AdminShopProfile = lazy(() => import('@/features/admin-dashboard').then(m => ({ default: m.AdminShopProfilePage })));
 
+// AI Credits pages
+const PurchaseCreditsPage = lazy(() => import('@/features/ai-credits').then(m => ({ default: m.PurchaseCreditsPage })));
+
 // User dashboard pages - REMOVED (users use mobile app only)
 
 /**
@@ -163,6 +166,10 @@ export const router = createBrowserRouter([
   {
     path: ROUTES.PUBLIC.PAYMENT_CANCEL,
     element: withErrorBoundary(<PaymentCancelPage />),
+  },
+  {
+    path: ROUTES.PUBLIC.AI_CREDITS_PURCHASE,
+    element: withErrorBoundary(<PurchaseCreditsPage />, { allowedRoles: [ROLES.USER, ROLES.ADMIN, ROLES.SHOP_OWNER] }),
   },
 
   // Shop routes
